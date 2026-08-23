@@ -14,9 +14,9 @@ Use the managed project preview to review each change. The project includes the 
 
 ## GitHub handoff
 
-When you are ready to create or update a GitHub repository, open the project’s **Settings → GitHub** panel and authorize GitHub if prompted. You can then export the current project to a repository under the selected GitHub account or organization.
+The connected repository is **[Maximummcody/VIRASQUARE](https://github.com/Maximummcody/VIRASQUARE)**. The verified managed-workspace checkpoint has been pushed to its `main` branch.
 
-Use that repository as the external history and collaboration copy for ViraSquare. Before each planned external handoff, confirm the preview, test suite, type check, and build are green, then export the latest project revision. Do not publish the website merely to create a GitHub copy.
+For each future requested build step, first confirm the preview, test suite, type check, and production build. After saving a managed checkpoint, push that same verified `main` revision to the repository. This preserves a matching history in both the managed workspace and GitHub without publishing the website.
 
 ## Preserved product foundation
 

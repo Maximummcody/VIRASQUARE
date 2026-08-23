@@ -48,9 +48,9 @@
 - [x] Diagnose why ViraSquare content generation is not completing and identify whether the failure is application-side or a platform account limitation.
 - [x] Restore reliable planned-post and alternative-idea generation with clear recovery feedback when generation is unavailable.
 - [x] Surface a clear starter-content notice when Today’s planned post was prepared through the exhausted-usage fallback.
-- [ ] Test, checkpoint, and synchronize the generation fix after user confirmation.
+- [x] Test, checkpoint, and synchronize the generation fix after user confirmation.
 - [x] Remove the unapproved deterministic starter-content behavior and user-visible fallback provenance from the live ViraSquare generation workflow, while retaining only inert schema compatibility metadata to avoid a destructive data change.
 - [x] Show a clear support-directed unavailable message only when the AI service explicitly returns an exhausted-usage response.
 - [x] Record the agreed workflow-preservation safeguard in durable project workflow documentation: explain and obtain approval before a correction to one feature materially changes an existing workflow elsewhere.
-- [ ] Re-test, checkpoint, and synchronize the approved generation-availability correction.
+- [x] Re-test, checkpoint, and synchronize the approved generation-availability correction.
 - [ ] Revisit ViraSquare-owned support channels when the product is approaching real-user operations and support demand warrants it.

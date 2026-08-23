@@ -8,3 +8,36 @@
 - [x] Defer public publication until the core product and requested features are complete.
 - [x] Authorize GitHub and export the managed ViraSquare project to the chosen repository when repository access is ready.
 - [x] Verify the connected repository handoff and document the exact export workflow for this checkpoint and future checkpoints.
+- [x] Analyze the uploaded correction brief against the current product to validate the first audience, product direction, and intended visual outputs.
+- [x] Analyze the uploaded visual test pack to capture the agreed first-audience preset and visual pass/fail criteria without implementing product changes.
+- [x] Analyze the uploaded long-term vision document to preserve an inclusive future market path while keeping the MVP preset focused.
+- [x] Analyze the likely causes of the previous visual-output failure and document the corrective system principles without implementing changes.
+- [x] Consolidate all discussed product corrections, adjustments, and updates into a prioritized no-build change register.
+- [x] Receive explicit user authorization before implementing changes derived from the correction brief.
+- [x] Define the focused first implementation slice for the approved visual-output MVP and keep future-only features deferred.
+- [x] Extend the data model for product records, product media, visual deliverables, and per-slide visual assets.
+- [x] Add a first-class product-media model for multiple uploaded images, media roles, and ordering.
+- [x] Refine onboarding with guided initial-category choices, plain language, and an inclusive “Other” path.
+- [x] Build real-product inputs and verified product-detail handling for trustworthy product posts.
+- [x] Implement complete visual generation and review for product posts and multi-slide carousels.
+- [x] Add full visual-set download/export and clearer recovery UI alongside slide-level regeneration.
+- [ ] Manually verify the authenticated visual-output MVP on desktop and mobile: onboarding, product upload, generation, slide refresh, per-slide download, and full-set ZIP export.
+- [ ] Save a verified checkpoint and push the completed implementation slice to Maximummcody/VIRASQUARE.
+- [x] Restore the stopped development preview and confirm the ViraSquare app responds again.
+- [x] Restore the repeated development-preview outage and confirm stable access to the ViraSquare preview through two successful post-restart checks.
+- [x] Conduct a discussion-only audit of visual delivery, performance, launch operating-cost exposure, catalogue management, navigation, and unimplemented agreed requirements.
+- [x] Define rich structured-card content requirements and measurable lifecycle stages for planned, generated, reviewed, downloaded, posted, and feedback activity.
+- [x] Define the rich ViraSquare Card Engine, full-card content contract, and measurable lifecycle stages before implementation.
+- [x] Extend the database and routes for rich card content, lifecycle events, product management, and library activity.
+- [x] Replace default external AI-scene carousel generation with fast, deterministic, rich branded Card Engine layouts.
+- [x] Build dedicated Today, Calendar, My Products, Library, and Brand navigation experiences.
+- [x] Add lifecycle status controls, product-usage visibility, export feedback, and useful activity insights.
+- [x] Surface per-product visual and posted counts in My Products without inferring off-platform results.
+- [x] Add automated coverage and verify the Card Engine workspace on desktop and mobile.
+- [ ] Save the verified Card Engine checkpoint and synchronize it to Maximummcody/VIRASQUARE.
+- [x] Make product selection and product-input prompts appear only for explicitly product-dependent content.
+- [x] Add a calendar preparation reminder one day before a product-dependent post requires a product image or verified details.
+- [x] Restore a prominent user-directed new-post flow with content-goal and output-format choices.
+- [x] Enrich the Calendar with planning summaries, content status, preparation requirements, and useful next actions.
+- [x] Redesign the responsive workspace shell so the navigation uses application-scale space and clearer hierarchy on desktop and mobile.
+- [ ] Test, checkpoint, and synchronize the post-creation and workspace-layout upgrade to GitHub.

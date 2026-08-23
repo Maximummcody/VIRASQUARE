@@ -22,7 +22,7 @@
 - [x] Implement complete visual generation and review for product posts and multi-slide carousels.
 - [x] Add full visual-set download/export and clearer recovery UI alongside slide-level regeneration.
 - [ ] Manually verify the authenticated visual-output MVP on desktop and mobile: onboarding, product upload, generation, slide refresh, per-slide download, and full-set ZIP export.
-- [ ] Save a verified checkpoint and push the completed implementation slice to Maximummcody/VIRASQUARE.
+- [x] Save a verified checkpoint and push the completed implementation slice to Maximummcody/VIRASQUARE.
 - [x] Restore the stopped development preview and confirm the ViraSquare app responds again.
 - [x] Restore the repeated development-preview outage and confirm stable access to the ViraSquare preview through two successful post-restart checks.
 - [x] Conduct a discussion-only audit of visual delivery, performance, launch operating-cost exposure, catalogue management, navigation, and unimplemented agreed requirements.
@@ -34,10 +34,14 @@
 - [x] Add lifecycle status controls, product-usage visibility, export feedback, and useful activity insights.
 - [x] Surface per-product visual and posted counts in My Products without inferring off-platform results.
 - [x] Add automated coverage and verify the Card Engine workspace on desktop and mobile.
-- [ ] Save the verified Card Engine checkpoint and synchronize it to Maximummcody/VIRASQUARE.
+- [x] Save the verified Card Engine checkpoint and synchronize it to Maximummcody/VIRASQUARE.
 - [x] Make product selection and product-input prompts appear only for explicitly product-dependent content.
 - [x] Add a calendar preparation reminder one day before a product-dependent post requires a product image or verified details.
 - [x] Restore a prominent user-directed new-post flow with content-goal and output-format choices.
 - [x] Enrich the Calendar with planning summaries, content status, preparation requirements, and useful next actions.
 - [x] Redesign the responsive workspace shell so the navigation uses application-scale space and clearer hierarchy on desktop and mobile.
-- [ ] Test, checkpoint, and synchronize the post-creation and workspace-layout upgrade to GitHub.
+- [x] Test, checkpoint, and synchronize the post-creation and workspace-layout upgrade to GitHub.
+- [x] Restore the compact top navigation instead of the desktop sidebar workspace shell.
+- [x] Reframe Calendar as a ViraSquare-led content schedule without post-generation prompts in the calendar grid.
+- [x] Restore an optional user-directed idea generator beneath Today’s recommended content, with intent selection and post-choice actions.
+- [ ] Test and synchronize the corrected planning and generation flow after user validation.

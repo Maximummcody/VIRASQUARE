@@ -105,14 +105,14 @@ describe("ViraSquare protected procedures", () => {
     expect(result.lifecycleStatus).toBe("posted");
   });
 
-  it("passes an owner's requested goal, format, and topic into the new-post idea generator", async () => {
+  it("passes an owner's requested goal, format, and topic into the Today-page idea generator", async () => {
     database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, userId: 72, businessName: "Clarity Studio", businessType: "Brand strategist", targetAudience: "Small business founders", contentPillars: JSON.stringify(["Educate", "Build trust"]), postingGoal: "Build authority", weeklyPostGoal: 4, brandVoice: "Clear and kind", isOnboarded: true });
     database.getRecentContentItems.mockResolvedValue([]);
     ai.generateIdeas.mockResolvedValue([{ title: "A helpful carousel", objective: "Build trust", format: "carousel", brief: "Share a useful, specific approach." }]);
 
-    const ideas = await viraSquareRouter.createCaller(context(72)).generateIdeas({ format: "carousel", objective: "Build trust", topic: "Choosing a confident brand voice" });
+    const ideas = await viraSquareRouter.createCaller(context(72)).generateIdeas({ format: "carousel", objective: "Engagement", topic: "Choosing a confident brand voice" });
 
-    expect(ai.generateIdeas).toHaveBeenCalledWith(expect.objectContaining({ businessName: "Clarity Studio" }), "carousel", [], { objective: "Build trust", topic: "Choosing a confident brand voice" });
+    expect(ai.generateIdeas).toHaveBeenCalledWith(expect.objectContaining({ businessName: "Clarity Studio" }), "carousel", [], { objective: "Engagement", topic: "Choosing a confident brand voice" });
     expect(ideas[0]?.title).toBe("A helpful carousel");
   });
 });

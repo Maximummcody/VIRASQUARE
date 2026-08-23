@@ -148,7 +148,7 @@ export async function createContentItem(item: Omit<InsertContentItem, "id" | "cr
   return saved;
 }
 
-export async function updateGeneratedContent(userId: number, itemId: number, updates: Pick<InsertContentItem, "title" | "objective" | "format" | "brief" | "caption" | "hashtags" | "carouselSlides" | "requiresProduct" | "preparationNote" | "generationSource">) {
+export async function updateGeneratedContent(userId: number, itemId: number, updates: Pick<InsertContentItem, "title" | "objective" | "format" | "brief" | "caption" | "hashtags" | "carouselSlides" | "requiresProduct" | "preparationNote">) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
   await db.update(contentItems).set({ ...updates, lifecycleStatus: "generated", generatedAt: new Date(), updatedAt: new Date() }).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
@@ -194,7 +194,7 @@ export async function replaceContentForDate(item: Omit<InsertContentItem, "id" |
   if (!db) throw new Error("Database is unavailable.");
   const existing = await getContentItemForDate(item.userId, item.plannedFor);
   if (!existing) return createContentItem(item);
-  await db.update(contentItems).set({ title: item.title, objective: item.objective, format: item.format, brief: item.brief, caption: null, hashtags: null, carouselSlides: null, requiresProduct: item.requiresProduct ?? false, preparationNote: item.preparationNote ?? null, generationSource: item.generationSource ?? "ai", status: "planned", lifecycleStatus: "planned", generatedAt: null, reviewedAt: null, downloadedAt: null, postedAt: null, completedAt: null, updatedAt: new Date() }).where(and(eq(contentItems.id, existing.id), eq(contentItems.userId, item.userId)));
+  await db.update(contentItems).set({ title: item.title, objective: item.objective, format: item.format, brief: item.brief, caption: null, hashtags: null, carouselSlides: null, requiresProduct: item.requiresProduct ?? false, preparationNote: item.preparationNote ?? null, status: "planned", lifecycleStatus: "planned", generatedAt: null, reviewedAt: null, downloadedAt: null, postedAt: null, completedAt: null, updatedAt: new Date() }).where(and(eq(contentItems.id, existing.id), eq(contentItems.userId, item.userId)));
   const saved = await getContentItemById(item.userId, existing.id);
   if (!saved) throw new Error("Content item could not be replaced.");
   return saved;

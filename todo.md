@@ -45,3 +45,7 @@
 - [x] Reframe Calendar as a ViraSquare-led content schedule without post-generation prompts in the calendar grid.
 - [x] Restore an optional user-directed idea generator beneath Today’s recommended content, with intent selection and post-choice actions.
 - [ ] Test and synchronize the corrected planning and generation flow after user validation.
+- [x] Diagnose why ViraSquare content generation is not completing and identify whether the failure is application-side or a platform account limitation.
+- [x] Restore reliable planned-post and alternative-idea generation with clear recovery feedback when generation is unavailable.
+- [x] Surface a clear starter-content notice when Today’s planned post was prepared through the exhausted-usage fallback.
+- [ ] Test, checkpoint, and synchronize the generation fix after user confirmation.

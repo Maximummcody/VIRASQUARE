@@ -1,0 +1,1 @@
+ALTER TABLE `content_items` ADD `generationSource` enum('ai','starter') DEFAULT 'ai' NOT NULL;

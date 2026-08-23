@@ -20,6 +20,7 @@ export const lifecycleStatusValues = ["planned", "generated", "reviewed", "downl
 export const activityTypeValues = ["generated", "reviewed", "downloaded", "posted", "feedback", "archived"] as const;
 export const feedbackOutcomeValues = ["not_set", "conversations", "orders", "engagement", "saved_for_later"] as const;
 export const cardTypeValues = ["cover", "guide", "checklist", "comparison", "faq", "product", "closing"] as const;
+export const generationSourceValues = ["ai", "starter"] as const;
 
 export const businessProfiles = mysqlTable("business_profiles", {
   id: int("id").autoincrement().primaryKey(),
@@ -71,6 +72,7 @@ export const contentItems = mysqlTable("content_items", {
   postedAt: timestamp("postedAt"),
   feedbackOutcome: mysqlEnum("feedbackOutcome", feedbackOutcomeValues).notNull().default("not_set"),
   feedbackNote: text("feedbackNote"),
+  generationSource: mysqlEnum("generationSource", generationSourceValues).notNull().default("ai"),
   completedAt: timestamp("completedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

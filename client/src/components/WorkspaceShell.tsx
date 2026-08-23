@@ -38,6 +38,7 @@ type Item = {
   requiresProduct: boolean;
   preparationNote: string | null;
   lifecycleStatus: string;
+  generationSource?: "ai" | "starter";
 };
 
 const views: Array<{ id: View; label: string; mobileLabel: string; icon: typeof Target }> = [
@@ -92,9 +93,12 @@ function AlternativeIdeaGenerator({ date, onSelected }: { date: string; onSelect
   const [objective, setObjective] = useState("Education");
   const [format, setFormat] = useState<IdeaFormat>("carousel");
   const [topic, setTopic] = useState("");
-  const [ideas, setIdeas] = useState<Array<{ title: string; objective: string; format: IdeaFormat; brief: string }>>([]);
+  const [ideas, setIdeas] = useState<Array<{ title: string; objective: string; format: IdeaFormat; brief: string; generationSource?: "ai" | "starter" }>>([]);
   const suggest = trpc.virasquare.generateIdeas.useMutation({
-    onSuccess: value => setIdeas(value),
+    onSuccess: value => {
+      setIdeas(value);
+      if (value.every(idea => idea.generationSource === "starter")) toast.message("AI generation is temporarily unavailable, so ViraSquare prepared starter directions you can use now.");
+    },
     onError: error => toast.error(error.message),
   });
   const useIdea = trpc.virasquare.saveIdea.useMutation({
@@ -160,7 +164,7 @@ function AlternativeIdeaGenerator({ date, onSelected }: { date: string; onSelect
                     <p className="text-[10px] font-bold uppercase tracking-wide text-[#75965f]">{idea.objective} · {idea.format}</p>
                     <h4 className="mt-3 font-serif text-xl leading-tight text-[#263327]">{idea.title}</h4>
                     <p className="mt-3 flex-1 text-sm leading-6 text-[#6a7568]">{idea.brief}</p>
-                    <Button disabled={useIdea.isPending} onClick={() => useIdea.mutate({ date, title: idea.title, objective: idea.objective, format: idea.format, brief: idea.brief })} variant="outline" className="mt-5 w-full rounded-xl">Choose this idea <ChevronRight className="ml-1 h-4 w-4" /></Button>
+                    <Button disabled={useIdea.isPending} onClick={() => useIdea.mutate({ date, title: idea.title, objective: idea.objective, format: idea.format, brief: idea.brief, generationSource: idea.generationSource })} variant="outline" className="mt-5 w-full rounded-xl">Choose this idea <ChevronRight className="ml-1 h-4 w-4" /></Button>
                   </article>
                 ))}
               </div>
@@ -181,7 +185,7 @@ function ContentDetail({ item, close }: { item: Item; close: () => void }) {
       setContent(result as Item);
       utils.virasquare.workspace.invalidate();
       utils.virasquare.library.invalidate();
-      toast.success("Your rich content is ready.");
+      toast.success(result.generationSource === "starter" ? "AI generation is unavailable, so ViraSquare prepared a starter post you can refine now." : "Your rich content is ready.");
     },
     onError: error => toast.error(error.message),
   });
@@ -271,6 +275,7 @@ function CalendarPanel({ plan, dates, select, makePlan, planning }: { plan: Item
 export function WorkspaceShell({ onEditProfile }: { onEditProfile: () => void }) {
   const [view, setView] = useState<View>("today");
   const [selected, setSelected] = useState<Item | null>(null);
+  const [starterNoticeFor, setStarterNoticeFor] = useState<number | null>(null);
   const today = useMemo(() => iso(), []);
   const dates = useMemo(() => weekDates(), []);
   const workspace = trpc.virasquare.workspace.useQuery({ today, weekStart: dates[0], weekEnd: dates[6] });
@@ -279,7 +284,14 @@ export function WorkspaceShell({ onEditProfile }: { onEditProfile: () => void })
   const visuals = trpc.virasquare.visuals.useQuery(undefined, { enabled: view === "library" });
   const activity = trpc.virasquare.activity.useQuery(undefined, { enabled: view === "library" });
   const profile = trpc.virasquare.profile.useQuery();
-  const makePlan = trpc.virasquare.generateWeeklyPlan.useMutation({ onSuccess: () => { workspace.refetch(); toast.success("Your week is planned."); }, onError: error => toast.error(error.message) });
+  const makePlan = trpc.virasquare.generateWeeklyPlan.useMutation({ onSuccess: result => { workspace.refetch(); toast.success(result.generationSource === "starter" ? "AI generation is unavailable, so ViraSquare prepared a starter week for you." : "Your week is planned."); }, onError: error => toast.error(error.message) });
+  useEffect(() => {
+    const item = workspace.data?.todayContent as Item | null | undefined;
+    if (item?.generationSource === "starter" && item.id !== starterNoticeFor) {
+      toast.message("ViraSquare prepared today’s starter post because live AI generation is temporarily unavailable. You can still use or refine it now.");
+      setStarterNoticeFor(item.id);
+    }
+  }, [starterNoticeFor, workspace.data?.todayContent]);
   if (workspace.isLoading) return <div className="grid min-h-screen place-items-center bg-[#f7f7f2]"><Loader2 className="h-6 w-6 animate-spin text-[#75965f]" /></div>;
   if (!workspace.data?.profile) return null;
 

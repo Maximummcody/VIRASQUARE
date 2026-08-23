@@ -43,6 +43,13 @@
       "when": 1787507879759,
       "tag": "0005_hard_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1787511972691,
+      "tag": "0006_shocking_mesmero",
+      "breakpoints": true
     }
   ]
 }

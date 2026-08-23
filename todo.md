@@ -56,3 +56,6 @@
 - [ ] Revisit ViraSquare-owned support channels when the product is approaching real-user operations and support demand warrants it.
 - [x] Verify whether the current displayed planned content was created by the removed starter fallback, without changing any user content.
 - [ ] Keep the verified current starter post unchanged; replace it only after live AI text generation is available and the user explicitly approves a quality replacement.
+- [x] Distinguish intentional Rest days in an active weekly plan from a week that has not yet been prepared, without implying a missed post.
+- [x] Strengthen the Today-page “Open today’s post” action and add a small user-confirmed daily completion cue outside Calendar.
+- [x] Implement Rest day only for intentionally clear days within an active weekly plan, with a distinct no-plan state for weeks not yet prepared.

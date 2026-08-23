@@ -54,3 +54,5 @@
 - [x] Record the agreed workflow-preservation safeguard in durable project workflow documentation: explain and obtain approval before a correction to one feature materially changes an existing workflow elsewhere.
 - [x] Re-test, checkpoint, and synchronize the approved generation-availability correction.
 - [ ] Revisit ViraSquare-owned support channels when the product is approaching real-user operations and support demand warrants it.
+- [x] Verify whether the current displayed planned content was created by the removed starter fallback, without changing any user content.
+- [ ] Keep the verified current starter post unchanged; replace it only after live AI text generation is available and the user explicitly approves a quality replacement.

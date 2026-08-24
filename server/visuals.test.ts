@@ -20,4 +20,15 @@ describe("ViraSquare Card Engine", () => {
     expect(svg).toContain("✓");
     expect(svg).toContain("KEEP IT SIMPLE");
   });
+
+  it("retains complete practical card copy and varies the output by approved template family", () => {
+    const body = "Start with the small action your customer can repeat today. Keep the routine simple, use what is already available, and explain the next decision clearly so the advice feels useful rather than premium or distant.";
+    const editorial = buildRichCardSvg(brand, { cardType: "guide", eyebrow: "PRACTICAL CARE", heading: "Give customers a useful starting point", body, footer: "Save this practical guide", templateFamily: "editorial", graphicCue: "care" }, 2, 5);
+    const comparison = buildRichCardSvg(brand, { cardType: "comparison", eyebrow: "PRACTICAL CARE", heading: "Give customers a useful starting point", body, footer: "Save this practical guide", templateFamily: "comparison", graphicCue: "choice" }, 2, 5);
+
+    expect(editorial).toContain("rather than premium or distant.");
+    expect(comparison).toContain("rather than premium or distant.");
+    expect(editorial).not.toEqual(comparison);
+    expect(comparison).toContain('width="12"');
+  });
 });

@@ -29,6 +29,7 @@ export const businessProfiles = mysqlTable("business_profiles", {
   businessType: varchar("businessType", { length: 160 }).notNull(),
   businessCategory: mysqlEnum("businessCategory", businessCategoryValues).notNull().default("other"),
   targetAudience: text("targetAudience").notNull(),
+  customerMarket: varchar("customerMarket", { length: 160 }).notNull().default("Nigeria"),
   contentPillars: text("contentPillars").notNull(),
   postingGoal: text("postingGoal").notNull(),
   weeklyPostGoal: int("weeklyPostGoal").notNull().default(5),

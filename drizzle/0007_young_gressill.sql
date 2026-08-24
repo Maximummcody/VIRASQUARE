@@ -1,0 +1,1 @@
+ALTER TABLE `business_profiles` ADD `customerMarket` varchar(160) DEFAULT 'Nigeria' NOT NULL;

@@ -77,4 +77,13 @@
 - [x] Keep future AI image generation separate from the deterministic Card Engine decision and obtain explicit approval before adding it.
 - [x] Evaluate a content-relevant graphic visual layer for rich cards without returning to slow or misleading AI scene generation.
 - [x] Archive the approved low-quality starter post and replace it with a real Luna-generated post for user testing, without changing other planned content.
-- [ ] After Luna text output is user-validated, build the approved branded graphic layer so each graphic reinforces the card’s specific pain point or main point.
+- [x] After Luna text output is user-validated, build the approved branded graphic layer so each graphic reinforces the card’s specific pain point or main point.
+- [x] Audit and correct rich-card content that overflows or omits practical points before it reaches the visual output.
+- [x] Add locally grounded content rules so educational posts are useful and realistic for the intended Nigerian small-business and customer context.
+- [x] Design multiple differentiated branded template families so ViraSquare outputs do not look identical across users or posts.
+- [x] Add editable customer-market context and locally practical content rules without hardcoding Nigeria for future users.
+- [x] Preserve rich card depth with a complete point, explanation, and organised supporting detail while preventing silent text cut-off or sparse underfilled cards.
+- [x] Add content-resonant graphic cues that reinforce each card’s pain point or main message instead of generic decoration.
+- [x] Add a render-time rich-card fit validator that safely rejects overlong heading, body, or footer blocks before visual rendering.
+- [x] Add generated-carousel content-shape validation so non-cover cards contain a substantive main point and supporting detail before acceptance.
+- [x] Add automated overflow and sparse-card edge-case tests proving rich cards neither clip nor underfill.

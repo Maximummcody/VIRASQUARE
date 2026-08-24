@@ -6,9 +6,9 @@ export function emptyDayCopy(hasActivePlan: boolean) {
         detail: "Your plan left this day clear.",
       }
     : {
-        eyebrow: "WEEK NOT PREPARED",
-        title: "Your plan will appear here.",
-        detail: "Prepare your week to see which days need a post.",
+        eyebrow: "NO PLAN YET",
+        title: "Plan when you are ready.",
+        detail: "",
       };
 }
 

@@ -128,3 +128,4 @@
 - [x] Add optional brand-logo, brand-name, Instagram-footer, and closing-signature configuration to Card Engine outputs.
 - [ ] Test and synchronize the complete progressive personalization foundation after user validation.
 - [x] Simplify product strengthening inputs to the two approved optional but strongly recommended questions, preserving existing saved product data.
+- [x] Refine workspace visual hierarchy and density: tighten Today, navigation, Calendar, reminder placement, and product-form rhythm without changing existing workflows.

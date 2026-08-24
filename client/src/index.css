@@ -68,6 +68,10 @@
   .soft-orb { position: absolute; border-radius: 9999px; filter: blur(10px); pointer-events: none; }
 }
 
+@media (max-width: 639px) {
+  main > div > section.pt-5 > section > div[class*="xl:grid-cols-7"] > article:nth-child(n + 3) { display: none; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   button, a { transition: transform 160ms cubic-bezier(.23,1,.32,1), background-color 160ms cubic-bezier(.23,1,.32,1), border-color 160ms cubic-bezier(.23,1,.32,1), color 160ms cubic-bezier(.23,1,.32,1), box-shadow 160ms cubic-bezier(.23,1,.32,1); }
   button:active { transform: scale(.975); }

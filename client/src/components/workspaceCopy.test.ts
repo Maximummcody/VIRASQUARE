@@ -12,9 +12,9 @@ describe("ViraSquare workspace feedback copy", () => {
 
   it("does not present a not-yet-prepared week as a missed or rest day", () => {
     expect(emptyDayCopy(false)).toEqual({
-      eyebrow: "WEEK NOT PREPARED",
-      title: "Your plan will appear here.",
-      detail: "Prepare your week to see which days need a post.",
+      eyebrow: "NO PLAN YET",
+      title: "Plan when you are ready.",
+      detail: "",
     });
   });
 

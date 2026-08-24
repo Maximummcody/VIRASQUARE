@@ -152,7 +152,17 @@ export async function createContentItem(item: Omit<InsertContentItem, "id" | "cr
 export async function updateGeneratedContent(userId: number, itemId: number, updates: Pick<InsertContentItem, "title" | "objective" | "format" | "brief" | "caption" | "hashtags" | "carouselSlides" | "requiresProduct" | "preparationNote">) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  await db.update(contentItems).set({ ...updates, lifecycleStatus: "generated", generatedAt: new Date(), updatedAt: new Date() }).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
+  const values = { ...updates, lifecycleStatus: "generated" as const, generatedAt: new Date(), updatedAt: new Date() };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await db.update(contentItems).set(values).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
+      return getContentItemById(userId, itemId);
+    } catch (error) {
+      if (attempt === 1) throw error;
+      console.warn("[ViraSquare generation] generated content save failed once; retrying", error);
+      await new Promise(resolve => setTimeout(resolve, 350));
+    }
+  }
   return getContentItemById(userId, itemId);
 }
 

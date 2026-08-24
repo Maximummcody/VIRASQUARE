@@ -87,3 +87,24 @@
 - [x] Add a render-time rich-card fit validator that safely rejects overlong heading, body, or footer blocks before visual rendering.
 - [x] Add generated-carousel content-shape validation so non-cover cards contain a substantive main point and supporting detail before acceptance.
 - [x] Add automated overflow and sparse-card edge-case tests proving rich cards neither clip nor underfill.
+- [x] Move carousel template selection from individual cards to the post level so one carousel remains a coherent visual set.
+- [x] Keep point-specific graphic cues and card-role differences within the selected post-level visual system.
+- [x] Test and synchronize the carousel visual-system coherence correction after user validation.
+- [x] Ask the user to verify that a regenerated carousel keeps one consistent visual system across all cards while retaining point-specific graphics.
+- [ ] After user confirmation, checkpoint and synchronize the carousel-coherence correction to GitHub main.
+- [x] Diagnose the reported OpenAI-backed ViraSquare generation stoppage without changing user content.
+- [x] Remove em dashes and other recognisable long-dash patterns from generated ViraSquare copy through prompt and output validation.
+- [x] Verify generation recovery, punctuation quality, and the user-approved coherent graphic workflow before checkpointing.
+- [ ] Identify and repair the database persistence constraint that blocks a successfully generated Luna carousel from being saved.
+- [ ] Resume public publication only after the user resolves the external Manus publishing-funds block.
+- [x] Replace fixed-space rich-card layouts with content-responsive composition that avoids unexplained empty space and compressed text blocks.
+- [x] Restrict each visual family to the content job it actually supports, including real comparisons only for genuine two-sided messages.
+- [x] Verify representative guide, checklist, comparison, and closing cards for balanced professional composition before checkpointing.
+- [x] Replace current fixed action and generic comparison layouts with responsive content-first composition while preserving post-level visual-system coherence.
+- [x] Add template-semantic validation so the comparison visual system is accepted only for genuinely contrast-based carousel content.
+- [x] Visually inspect and record the redesigned closing card alongside the guide, checklist, and comparison layouts.
+- [x] Run a live non-persistent Luna carousel sample to confirm the selected post-level visual system matches the content job after semantic validation.
+- [x] Reduce unexplained lower-page whitespace by rebalancing rich-card content panels and footer placement before using any graphic accent.
+- [x] Expand the main rich-card text area downward with responsive type scale and line spacing while keeping the footer position stable.
+- [x] Visually inspect the post-refinement comparison card and record stable-footer lower-page balance.
+- [x] Complete one final cross-family visual review of every layout changed by the stable-footer text-panel refinement.

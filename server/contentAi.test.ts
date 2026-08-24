@@ -58,4 +58,30 @@ describe("ViraSquare live AI availability", () => {
 
     await expect(generateDailyDraft(profile, "2026-08-24")).rejects.toThrow("could not prepare a complete card set");
   });
+
+  it("normalizes one template family across a carousel even when a provider returns mixed per-card templates", async () => {
+    const body = "Start with the ordinary action people can repeat today. Explain why it helps, then add useful details so the advice works in real life.";
+    const slide = (cardType: "cover" | "guide" | "checklist" | "closing", templateFamily: "editorial" | "action" | "comparison" | "conversation") => ({ cardType, eyebrow: "PRACTICAL STYLE", heading: "A clear point customers can use", body, footer: "Save this useful guide", templateFamily, graphicCue: "style" as const });
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "One coherent carousel", objective: "Education", format: "carousel", brief: "A useful local style guide.", caption: "A caption.", hashtags: [], requiresProduct: false, preparationNote: "", carouselSlides: [slide("cover", "comparison"), slide("guide", "action"), slide("checklist", "editorial"), slide("closing", "conversation")] }));
+
+    const draft = await generateDailyDraft(profile, "2026-08-24");
+    expect(new Set(draft.carouselSlides.map(item => item.templateFamily))).toEqual(new Set(["action"]));
+  });
+
+  it("retains the comparison visual system only when carousel content contains a genuine contrast", async () => {
+    const body = "Do this instead of guessing when you are choosing between two options.\n\n• Compare the two choices clearly\n• Choose the option that supports your goal\n• Keep the final decision practical for everyday life";
+    const slide = (cardType: "cover" | "guide" | "checklist" | "closing") => ({ cardType, eyebrow: "STYLE CHOICE", heading: "Do this versus that", body, footer: "Save this comparison", templateFamily: "comparison" as const, graphicCue: "choice" as const });
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "A real comparison", objective: "Education", format: "carousel", brief: "A useful contrast.", caption: "A caption.", hashtags: [], requiresProduct: false, preparationNote: "", carouselSlides: [slide("cover"), slide("guide"), slide("checklist"), slide("closing")] }));
+
+    const draft = await generateDailyDraft(profile, "2026-08-24");
+    expect(new Set(draft.carouselSlides.map(item => item.templateFamily))).toEqual(new Set(["comparison"]));
+  });
+
+  it("removes long dashes from generated copy before it reaches the ViraSquare workspace", async () => {
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ ideas: [{ title: "Wear it well — without overthinking", objective: "Education", format: "carousel", brief: "A useful guide — for everyday dressing." }] }));
+
+    const ideas = await generateIdeas(profile, "carousel");
+    expect(ideas[0]?.title).toBe("Wear it well, without overthinking");
+    expect(ideas[0]?.brief).toBe("A useful guide, for everyday dressing.");
+  });
 });

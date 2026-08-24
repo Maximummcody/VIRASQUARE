@@ -27,8 +27,21 @@ describe("ViraSquare Card Engine", () => {
     const comparison = buildRichCardSvg(brand, { cardType: "comparison", eyebrow: "PRACTICAL CARE", heading: "Give customers a useful starting point", body, footer: "Save this practical guide", templateFamily: "comparison", graphicCue: "choice" }, 2, 5);
 
     expect(editorial).toContain("rather than premium or distant.");
-    expect(comparison).toContain("rather than premium or distant.");
+    expect(comparison).toContain("TRY THIS");
+    expect(comparison).toContain("THINK ABOUT");
+    expect(comparison).toContain("premium or");
+    expect(comparison).toContain("distant.");
     expect(editorial).not.toEqual(comparison);
-    expect(comparison).toContain('width="12"');
+    expect(comparison).not.toContain('width="12"');
+  });
+
+  it("uses one post-level visual system across card roles when the carousel family is selected once", () => {
+    const body = "Start with one practical choice, explain why it helps, and give enough detail for the customer to use the idea today.";
+    const coverSystem = buildRichCardSvg(brand, { cardType: "guide", eyebrow: "STYLE GUIDE", heading: "Choose a clear visual system", body, footer: "Save this guide", templateFamily: "editorial", graphicCue: "style" }, 1, 4, "editorial");
+    const comparisonRoleInSameSystem = buildRichCardSvg(brand, { cardType: "comparison", eyebrow: "STYLE GUIDE", heading: "Keep the set visually connected", body, footer: "Save this guide", templateFamily: "comparison", graphicCue: "choice" }, 3, 4, "editorial");
+
+    expect(coverSystem).toContain('width="840" height="470"');
+    expect(comparisonRoleInSameSystem).toContain('width="840" height="470"');
+    expect(comparisonRoleInSameSystem).not.toContain("TRY THIS");
   });
 });

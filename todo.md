@@ -75,7 +75,7 @@
 - [x] After OpenAI API quota is available, compare Luna and Terra with the same ViraSquare content prompts before selecting the production text model.
 - [x] Await OpenAI API billing activation before running a real Luna generation check and the approved Luna-versus-Terra comparison.
 - [x] Run the controlled live Luna text-generation validation now that the user reports OpenAI API billing is complete.
-- [ ] Keep OpenAI model-feedback, evaluation, and input/output sharing disabled for ViraSquare while preserving customer privacy.
+- [x] Keep OpenAI model-feedback, evaluation, and input/output sharing disabled for ViraSquare while preserving customer privacy.
 - [x] Benchmark equivalent non-persistent ViraSquare text-generation requests before claiming that OpenAI Luna is faster than the previous built-in provider.
 - [x] Keep future AI image generation separate from the deterministic Card Engine decision and obtain explicit approval before adding it.
 - [x] Evaluate a content-relevant graphic visual layer for rich cards without returning to slow or misleading AI scene generation.
@@ -111,3 +111,5 @@
 - [x] Expand the main rich-card text area downward with responsive type scale and line spacing while keeping the footer position stable.
 - [x] Visually inspect the post-refinement comparison card and record stable-footer lower-page balance.
 - [x] Complete one final cross-family visual review of every layout changed by the stable-footer text-panel refinement.
+- [x] Receive simple user confirmation that OpenAI sharing remains disabled and that one new ViraSquare post plus visual can be created normally.
+- [x] Add protected title and graphic-badge lanes to prevent header collisions in long-title rich cards without changing other templates.

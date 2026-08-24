@@ -44,4 +44,23 @@ describe("ViraSquare Card Engine", () => {
     expect(comparisonRoleInSameSystem).toContain('width="840" height="470"');
     expect(comparisonRoleInSameSystem).not.toContain("TRY THIS");
   });
+
+  it("keeps a long explainer heading inside its protected title lane beside the graphic badge", () => {
+    const svg = buildRichCardSvg(brand, {
+      cardType: "faq",
+      eyebrow: "STYLE CHECK",
+      heading: "Create balance from top to bottom",
+      body: "Use one clear shape, then choose details that support it.\n\n• Check the fit\n• Keep the proportions comfortable\n• Finish with one useful detail",
+      footer: "Save this style check",
+      templateFamily: "explainer",
+      graphicCue: "fit",
+    }, 1, 4, "explainer");
+
+    expect(svg).toContain('x="160" y="300"');
+    expect(svg).toContain('font-size="54"');
+    expect(svg).toContain('cx="842" cy="330" r="96"');
+    expect(svg).toContain("Create balance");
+    expect(svg).toContain("from top to");
+    expect(svg).toContain(">bottom</text>");
+  });
 });

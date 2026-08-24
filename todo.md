@@ -96,7 +96,7 @@
 - [x] Remove em dashes and other recognisable long-dash patterns from generated ViraSquare copy through prompt and output validation.
 - [x] Verify generation recovery, punctuation quality, and the user-approved coherent graphic workflow before checkpointing.
 - [ ] Identify and repair the database persistence constraint that blocks a successfully generated Luna carousel from being saved.
-- [ ] Resume public publication only after the user resolves the external Manus publishing-funds block.
+- [x] Resume public publication after the external publishing-funds block was resolved and deployment completed successfully.
 - [x] Replace fixed-space rich-card layouts with content-responsive composition that avoids unexplained empty space and compressed text blocks.
 - [x] Restrict each visual family to the content job it actually supports, including real comparisons only for genuine two-sided messages.
 - [x] Verify representative guide, checklist, comparison, and closing cards for balanced professional composition before checkpointing.

@@ -91,7 +91,7 @@
 - [x] Keep point-specific graphic cues and card-role differences within the selected post-level visual system.
 - [x] Test and synchronize the carousel visual-system coherence correction after user validation.
 - [x] Ask the user to verify that a regenerated carousel keeps one consistent visual system across all cards while retaining point-specific graphics.
-- [ ] After user confirmation, checkpoint and synchronize the carousel-coherence correction to GitHub main.
+- [x] After user confirmation, checkpoint and synchronize the carousel-coherence correction to GitHub main.
 - [x] Diagnose the reported OpenAI-backed ViraSquare generation stoppage without changing user content.
 - [x] Remove em dashes and other recognisable long-dash patterns from generated ViraSquare copy through prompt and output validation.
 - [x] Verify generation recovery, punctuation quality, and the user-approved coherent graphic workflow before checkpointing.

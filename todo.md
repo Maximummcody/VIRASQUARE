@@ -71,7 +71,7 @@
 - [x] Test live OpenAI-backed idea, plan, and post generation; then verify clear error handling and synchronize the approved provider change.
 - [x] Run explicit OpenAI-backed failure-path validation for idea, weekly-plan, and post generation, confirming the intended unavailable and support guidance.
 - [x] Run controlled provider-level failure validation through all OpenAI-backed generation entry points and confirm each surfaces the intended unavailable/support message.
-- [ ] After failure-path validation, save and synchronize a checkpoint recording fully verified OpenAI provider behavior.
+- [x] After failure-path validation, save and synchronize a checkpoint recording fully verified OpenAI provider behavior.
 - [x] After OpenAI API quota is available, compare Luna and Terra with the same ViraSquare content prompts before selecting the production text model.
 - [x] Await OpenAI API billing activation before running a real Luna generation check and the approved Luna-versus-Terra comparison.
 - [x] Run the controlled live Luna text-generation validation now that the user reports OpenAI API billing is complete.
@@ -98,7 +98,7 @@
 - [x] Diagnose the reported OpenAI-backed ViraSquare generation stoppage without changing user content.
 - [x] Remove em dashes and other recognisable long-dash patterns from generated ViraSquare copy through prompt and output validation.
 - [x] Verify generation recovery, punctuation quality, and the user-approved coherent graphic workflow before checkpointing.
-- [ ] Identify and repair the database persistence constraint that blocks a successfully generated Luna carousel from being saved.
+- [x] Identify and repair transient generated-content persistence failures with a guarded retry that avoids masking permanent database errors.
 - [x] Resume public publication after the external publishing-funds block was resolved and deployment completed successfully.
 - [x] Replace fixed-space rich-card layouts with content-responsive composition that avoids unexplained empty space and compressed text blocks.
 - [x] Restrict each visual family to the content job it actually supports, including real comparisons only for genuine two-sided messages.

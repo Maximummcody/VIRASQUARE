@@ -149,6 +149,14 @@ export async function createContentItem(item: Omit<InsertContentItem, "id" | "cr
   return saved;
 }
 
+export function isTransientDatabaseError(error: unknown) {
+  const candidate = error as { code?: unknown; message?: unknown } | undefined;
+  const code = typeof candidate?.code === "string" ? candidate.code : "";
+  const message = typeof candidate?.message === "string" ? candidate.message : "";
+  return ["ECONNRESET", "ETIMEDOUT", "PROTOCOL_CONNECTION_LOST", "ER_LOCK_DEADLOCK", "ER_LOCK_WAIT_TIMEOUT"].includes(code)
+    || /connection (?:lost|reset)|socket hang up|deadlock|lock wait timeout/i.test(message);
+}
+
 export async function updateGeneratedContent(userId: number, itemId: number, updates: Pick<InsertContentItem, "title" | "objective" | "format" | "brief" | "caption" | "hashtags" | "carouselSlides" | "requiresProduct" | "preparationNote">) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
@@ -158,7 +166,10 @@ export async function updateGeneratedContent(userId: number, itemId: number, upd
       await db.update(contentItems).set(values).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
       return getContentItemById(userId, itemId);
     } catch (error) {
-      if (attempt === 1) throw error;
+      if (attempt === 1 || !isTransientDatabaseError(error)) {
+        console.error("[ViraSquare generation] generated content save failed", error);
+        throw error;
+      }
       console.warn("[ViraSquare generation] generated content save failed once; retrying", error);
       await new Promise(resolve => setTimeout(resolve, 350));
     }

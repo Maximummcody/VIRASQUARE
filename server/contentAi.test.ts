@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-const llm = vi.hoisted(() => ({ invokeLLM: vi.fn() }));
+const openAi = vi.hoisted(() => ({ requestOpenAiStructuredText: vi.fn() }));
 
-vi.mock("./_core/llm", () => llm);
+vi.mock("./openaiProvider", () => openAi);
 
 import { generateDailyDraft, generateIdeas, generateWeeklyPlan } from "./contentAi";
 
@@ -18,16 +19,23 @@ const profile = {
 
 describe("ViraSquare live AI availability", () => {
   it("reports a support-directed unavailable message instead of returning lower-quality starter content when usage is exhausted", async () => {
-    llm.invokeLLM.mockRejectedValueOnce(new Error('LLM invoke failed: 412 Precondition Failed – {"message":"your account has hit a usage exhausted"}'));
+    openAi.requestOpenAiStructuredText.mockRejectedValueOnce(new Error('OpenAI request failed (429): {"message":"your account has hit a usage exhausted"}'));
 
-    await expect(generateDailyDraft(profile, "2026-08-23")).rejects.toThrow("Please contact support at help.manus.im");
+    await expect(generateDailyDraft(profile, "2026-08-23")).rejects.toThrow("Please try again later or contact support");
   });
 
   it("keeps the same unavailable message across owner-directed ideas and weekly planning", async () => {
-    llm.invokeLLM.mockRejectedValueOnce(new Error("usage exhausted"));
+    openAi.requestOpenAiStructuredText.mockRejectedValueOnce(new Error("usage exhausted"));
     await expect(generateIdeas(profile, "carousel", [], { objective: "Engagement" })).rejects.toThrow("Live AI generation is currently unavailable");
 
-    llm.invokeLLM.mockRejectedValueOnce(new Error("usage exhausted"));
-    await expect(generateWeeklyPlan(profile, ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23"])).rejects.toThrow("Please contact support at help.manus.im");
+    openAi.requestOpenAiStructuredText.mockRejectedValueOnce(new Error("usage exhausted"));
+    await expect(generateWeeklyPlan(profile, ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23"])).rejects.toThrow("Please try again later or contact support");
+  });
+
+  it("sends owner-directed ideas through the OpenAI structured-text provider without changing the idea contract", async () => {
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ ideas: [{ title: "A thoughtful care guide", objective: "Education", format: "carousel", brief: "Help customers choose and care for a meaningful everyday piece." }] }));
+
+    await expect(generateIdeas(profile, "carousel", [], { objective: "Education", topic: "Jewellery care" })).resolves.toEqual([{ title: "A thoughtful care guide", objective: "Education", format: "carousel", brief: "Help customers choose and care for a meaningful everyday piece." }]);
+    expect(openAi.requestOpenAiStructuredText).toHaveBeenCalledWith(expect.objectContaining({ schemaName: "content_ideas", messages: expect.arrayContaining([expect.objectContaining({ role: "system" }), expect.objectContaining({ role: "user", content: expect.stringContaining("Jewellery care") })]) }));
   });
 });

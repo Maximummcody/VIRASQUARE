@@ -55,8 +55,26 @@
 - [x] Re-test, checkpoint, and synchronize the approved generation-availability correction.
 - [ ] Revisit ViraSquare-owned support channels when the product is approaching real-user operations and support demand warrants it.
 - [x] Verify whether the current displayed planned content was created by the removed starter fallback, without changing any user content.
-- [ ] Keep the verified current starter post unchanged; replace it only after live AI text generation is available and the user explicitly approves a quality replacement.
+- [x] Keep the verified current starter post unchanged; replace it only after live AI text generation is available and the user explicitly approves a quality replacement.
 - [x] Distinguish intentional Rest days in an active weekly plan from a week that has not yet been prepared, without implying a missed post.
 - [x] Strengthen the Today-page “Open today’s post” action and add a small user-confirmed daily completion cue outside Calendar.
 - [x] Implement Rest day only for intentionally clear days within an active weekly plan, with a distinct no-plan state for weeks not yet prepared.
 - [ ] Maintain and review the product-prioritized roadmap as live AI availability and user validation change the immediate next steps.
+- [x] Perform a read-only live AI text-generation availability check before resuming any content replacement work.
+- [x] Run a fresh read-only live AI availability recheck on the user’s request before making any content changes.
+- [x] Run the latest requested non-persistent live AI text-generation recheck and report the observed response.
+- [x] Run the newest user-requested read-only live AI availability check without changing ViraSquare content.
+- [x] Run a read-only live AI text-generation recheck after the user’s subscription change, without modifying ViraSquare content.
+- [x] Evaluate an optional OpenAI API integration for ViraSquare text generation, including security, cost ownership, reliability, and migration impact, before any implementation.
+- [x] Configure the approved OpenAI API key as a server-only ViraSquare secret without exposing it to the client or repository.
+- [x] Replace the unavailable built-in text-generation provider with the approved OpenAI server-side provider while preserving existing prompts and user workflow.
+- [ ] Test live OpenAI-backed idea, plan, and post generation; then verify clear error handling and synchronize the approved provider change.
+- [x] After OpenAI API quota is available, compare Luna and Terra with the same ViraSquare content prompts before selecting the production text model.
+- [x] Await OpenAI API billing activation before running a real Luna generation check and the approved Luna-versus-Terra comparison.
+- [x] Run the controlled live Luna text-generation validation now that the user reports OpenAI API billing is complete.
+- [ ] Keep OpenAI model-feedback, evaluation, and input/output sharing disabled for ViraSquare while preserving customer privacy.
+- [x] Benchmark equivalent non-persistent ViraSquare text-generation requests before claiming that OpenAI Luna is faster than the previous built-in provider.
+- [x] Keep future AI image generation separate from the deterministic Card Engine decision and obtain explicit approval before adding it.
+- [x] Evaluate a content-relevant graphic visual layer for rich cards without returning to slow or misleading AI scene generation.
+- [x] Archive the approved low-quality starter post and replace it with a real Luna-generated post for user testing, without changing other planned content.
+- [ ] After Luna text output is user-validated, build the approved branded graphic layer so each graphic reinforces the card’s specific pain point or main point.

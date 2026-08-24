@@ -14,6 +14,6 @@ export function emptyDayCopy(hasActivePlan: boolean) {
 
 export function todayProgressCopy(lifecycleStatus: string | undefined) {
   return lifecycleStatus === "posted"
-    ? { label: "Today complete", detail: "1 planned post marked as posted" }
-    : { label: "Today’s progress", detail: "0 of 1 planned posts complete" };
+    ? { label: "Today complete · 1 of 1", detail: "You showed up today. Your post is marked as posted." }
+    : { label: "Today’s progress · 0 of 1", detail: "Open today’s post, then mark it as posted when you have used it." };
 }

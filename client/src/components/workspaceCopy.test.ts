@@ -19,7 +19,7 @@ describe("ViraSquare workspace feedback copy", () => {
   });
 
   it("uses only the user-confirmed posted lifecycle state for Today completion", () => {
-    expect(todayProgressCopy("posted")).toEqual({ label: "Today complete", detail: "1 planned post marked as posted" });
-    expect(todayProgressCopy("generated")).toEqual({ label: "Today’s progress", detail: "0 of 1 planned posts complete" });
+    expect(todayProgressCopy("posted")).toEqual({ label: "Today complete · 1 of 1", detail: "You showed up today. Your post is marked as posted." });
+    expect(todayProgressCopy("generated")).toEqual({ label: "Today’s progress · 0 of 1", detail: "Open today’s post, then mark it as posted when you have used it." });
   });
 });

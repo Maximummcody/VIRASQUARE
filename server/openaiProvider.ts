@@ -19,6 +19,9 @@ function readProviderError(payload: unknown, fallback: string) {
 }
 
 export async function requestOpenAiStructuredText({ messages, schemaName, schema, model }: StructuredRequest): Promise<string> {
+  if (process.env.VIRASQUARE_TEST_OPENAI_FAILURE === "usage_exhausted") {
+    throw new Error("OpenAI request failed (429): usage exhausted");
+  }
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OpenAI text generation is not configured.");
 

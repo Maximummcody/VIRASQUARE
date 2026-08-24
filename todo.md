@@ -68,7 +68,10 @@
 - [x] Evaluate an optional OpenAI API integration for ViraSquare text generation, including security, cost ownership, reliability, and migration impact, before any implementation.
 - [x] Configure the approved OpenAI API key as a server-only ViraSquare secret without exposing it to the client or repository.
 - [x] Replace the unavailable built-in text-generation provider with the approved OpenAI server-side provider while preserving existing prompts and user workflow.
-- [ ] Test live OpenAI-backed idea, plan, and post generation; then verify clear error handling and synchronize the approved provider change.
+- [x] Test live OpenAI-backed idea, plan, and post generation; then verify clear error handling and synchronize the approved provider change.
+- [x] Run explicit OpenAI-backed failure-path validation for idea, weekly-plan, and post generation, confirming the intended unavailable and support guidance.
+- [x] Run controlled provider-level failure validation through all OpenAI-backed generation entry points and confirm each surfaces the intended unavailable/support message.
+- [ ] After failure-path validation, save and synchronize a checkpoint recording fully verified OpenAI provider behavior.
 - [x] After OpenAI API quota is available, compare Luna and Terra with the same ViraSquare content prompts before selecting the production text model.
 - [x] Await OpenAI API billing activation before running a real Luna generation check and the approved Luna-versus-Terra comparison.
 - [x] Run the controlled live Luna text-generation validation now that the user reports OpenAI API billing is complete.

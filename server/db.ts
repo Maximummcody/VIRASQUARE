@@ -276,7 +276,9 @@ export async function createProduct(product: Omit<InsertProduct, "id" | "created
 export async function updateProduct(userId: number, productId: number, updates: Pick<InsertProduct, "name" | "price" | "currency" | "details" | "productCategory" | "bestFor" | "choiceReasons" | "buyerNote" | "categoryDetails">) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  await db.update(products).set({ ...updates, updatedAt: new Date() }).where(and(eq(products.id, productId), eq(products.userId, userId)));
+  const existing = await getProductById(userId, productId);
+  if (!existing) return undefined;
+  await db.update(products).set({ ...updates, buyerNote: updates.buyerNote ?? existing.buyerNote, categoryDetails: updates.categoryDetails ?? existing.categoryDetails, updatedAt: new Date() }).where(and(eq(products.id, productId), eq(products.userId, userId)));
   return getProductById(userId, productId);
 }
 

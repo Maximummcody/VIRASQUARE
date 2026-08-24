@@ -127,3 +127,4 @@
 - [x] Require selected product facts only for product-led generation and offer gentle no-product reminders outside that path.
 - [x] Add optional brand-logo, brand-name, Instagram-footer, and closing-signature configuration to Card Engine outputs.
 - [ ] Test and synchronize the complete progressive personalization foundation after user validation.
+- [x] Simplify product strengthening inputs to the two approved optional but strongly recommended questions, preserving existing saved product data.

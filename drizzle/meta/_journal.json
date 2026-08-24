@@ -57,6 +57,13 @@
       "when": 1787570517150,
       "tag": "0007_young_gressill",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1787582760569,
+      "tag": "0008_mysterious_jocasta",
+      "breakpoints": true
     }
   ]
 }

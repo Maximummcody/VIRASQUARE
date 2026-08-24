@@ -107,6 +107,28 @@ export async function upsertBusinessProfile(profile: Omit<InsertBusinessProfile,
   return saved;
 }
 
+export async function updateBusinessContext(userId: number, context: string, status: "dismissed" | "completed") {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(businessProfiles).set({ businessContext: context, businessContextStatus: status, updatedAt: new Date() }).where(eq(businessProfiles.userId, userId));
+  return getBusinessProfileByUserId(userId);
+}
+
+export async function updateProductInviteStatus(userId: number, status: "dismissed" | "completed") {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(businessProfiles).set({ productInviteStatus: status, updatedAt: new Date() }).where(eq(businessProfiles.userId, userId));
+  return getBusinessProfileByUserId(userId);
+}
+
+export async function updateBrandIdentity(userId: number, identity: { instagramHandle?: string | null; closingSignature?: string | null; brandLogoKey?: string | null; brandLogoUrl?: string | null }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const updates = Object.fromEntries(Object.entries(identity).filter(([, value]) => value !== undefined));
+  await db.update(businessProfiles).set({ ...updates, updatedAt: new Date() }).where(eq(businessProfiles.userId, userId));
+  return getBusinessProfileByUserId(userId);
+}
+
 export async function getContentItemForDate(userId: number, date: string) {
   const db = await getDb();
   if (!db) return undefined;
@@ -216,7 +238,7 @@ export async function replaceContentForDate(item: Omit<InsertContentItem, "id" |
   if (!db) throw new Error("Database is unavailable.");
   const existing = await getContentItemForDate(item.userId, item.plannedFor);
   if (!existing) return createContentItem(item);
-  await db.update(contentItems).set({ title: item.title, objective: item.objective, format: item.format, brief: item.brief, caption: null, hashtags: null, carouselSlides: null, requiresProduct: item.requiresProduct ?? false, preparationNote: item.preparationNote ?? null, status: "planned", lifecycleStatus: "planned", generatedAt: null, reviewedAt: null, downloadedAt: null, postedAt: null, completedAt: null, updatedAt: new Date() }).where(and(eq(contentItems.id, existing.id), eq(contentItems.userId, item.userId)));
+  await db.update(contentItems).set({ title: item.title, objective: item.objective, format: item.format, brief: item.brief, caption: null, hashtags: null, carouselSlides: null, productId: item.productId ?? null, requiresProduct: item.requiresProduct ?? false, preparationNote: item.preparationNote ?? null, status: "planned", lifecycleStatus: "planned", generatedAt: null, reviewedAt: null, downloadedAt: null, postedAt: null, completedAt: null, updatedAt: new Date() }).where(and(eq(contentItems.id, existing.id), eq(contentItems.userId, item.userId)));
   const saved = await getContentItemById(item.userId, existing.id);
   if (!saved) throw new Error("Content item could not be replaced.");
   return saved;
@@ -226,6 +248,13 @@ export async function listProductsByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(products).where(eq(products.userId, userId)).orderBy(desc(products.createdAt));
+}
+
+export async function countProductsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select({ id: products.id }).from(products).where(eq(products.userId, userId));
+  return rows.length;
 }
 
 export async function getProductById(userId: number, productId: number) {
@@ -244,7 +273,7 @@ export async function createProduct(product: Omit<InsertProduct, "id" | "created
   return saved;
 }
 
-export async function updateProduct(userId: number, productId: number, updates: Pick<InsertProduct, "name" | "price" | "currency" | "details">) {
+export async function updateProduct(userId: number, productId: number, updates: Pick<InsertProduct, "name" | "price" | "currency" | "details" | "productCategory" | "bestFor" | "choiceReasons" | "buyerNote" | "categoryDetails">) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
   await db.update(products).set({ ...updates, updatedAt: new Date() }).where(and(eq(products.id, productId), eq(products.userId, userId)));

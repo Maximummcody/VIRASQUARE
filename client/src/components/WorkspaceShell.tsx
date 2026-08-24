@@ -1,4 +1,3 @@
-import { VisualMaker } from "@/components/VisualMaker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,11 +5,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { emptyDayCopy, todayProgressCopy } from "./workspaceCopy";
+import { VisualMaker } from "./VisualMaker";
 import {
   Archive,
   CalendarDays,
   CheckCircle2,
   ChevronRight,
+  Instagram,
   Library,
   Loader2,
   Package,
@@ -19,6 +20,7 @@ import {
   Sparkles,
   Target,
   Trash2,
+  Upload,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -39,6 +41,15 @@ type Item = {
   requiresProduct: boolean;
   preparationNote: string | null;
   lifecycleStatus: string;
+  productId?: number | null;
+};
+
+type BusinessContext = {
+  differentiator: string;
+  buyerHesitations: string;
+  firstTimeUnderstanding: string;
+  currentPriority: string;
+  neverSay: string;
 };
 
 const views: Array<{ id: View; label: string; mobileLabel: string; icon: typeof Target }> = [
@@ -58,8 +69,16 @@ const formats: Array<{ value: IdeaFormat; label: string; description: string }> 
   { value: "story", label: "Story", description: "A short conversational update." },
 ];
 
+const categories = [
+  { value: "fashion", label: "Fashion" },
+  { value: "accessories", label: "Accessories" },
+  { value: "beauty", label: "Beauty" },
+  { value: "personal_care", label: "Personal care" },
+  { value: "other", label: "Other" },
+];
+
 function iso(date = new Date()) {
-  const offset = date.getTimezoneOffset() * 60000;
+  const offset = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10);
 }
 
@@ -87,17 +106,132 @@ function readFile(file: File) {
   });
 }
 
-function AlternativeIdeaGenerator({ date, onSelected }: { date: string; onSelected: (item: Item) => void }) {
+function emptyBusinessContext(initial?: Partial<BusinessContext>): BusinessContext {
+  return {
+    differentiator: initial?.differentiator || "",
+    buyerHesitations: initial?.buyerHesitations || "",
+    firstTimeUnderstanding: initial?.firstTimeUnderstanding || "",
+    currentPriority: initial?.currentPriority || "",
+    neverSay: initial?.neverSay || "",
+  };
+}
+
+function BusinessContextFields({ value, onChange, compact = false }: { value: BusinessContext; onChange: (next: BusinessContext) => void; compact?: boolean }) {
+  const field = (key: keyof BusinessContext, label: string, helper: string, placeholder: string) => (
+    <div className="grid gap-2" key={key}>
+      <Label className="text-sm font-semibold text-[#334b32]">{label}</Label>
+      <p className="-mt-1 text-xs leading-5 text-[#718071]">{helper}</p>
+      <Textarea
+        value={value[key]}
+        onChange={event => onChange({ ...value, [key]: event.target.value })}
+        placeholder={placeholder}
+        className={cn("resize-none", compact ? "min-h-20" : "min-h-24")}
+      />
+    </div>
+  );
+
+  return <div className="grid gap-5">
+    {field("differentiator", "What makes you different?", "Why do customers choose you, return to you, or recommend you?", "For example: careful styling help, made-to-order options, or clear honest guidance.")}
+    {field("buyerHesitations", "What do customers usually ask or worry about before buying?", "For example: price, fit, authenticity, how to use it, delivery, or whether it is right for them.", "Share the questions you hear most often.")}
+    {field("firstTimeUnderstanding", "What should a first-time customer understand before choosing from you?", "This helps ViraSquare guide people without creating the wrong expectation.", "What would help a new customer choose well?")}
+    {field("currentPriority", "What are you focusing on right now?", "A product, service, offer, season, goal, or customer type.", "For example: everyday jewellery for gifting, or a back-to-school offer.")}
+    {field("neverSay", "What must we never say or promise?", "Include claims, prices, availability, results, or wording you cannot stand behind.", "For example: do not promise delivery times or results.")}
+  </div>;
+}
+
+function BusinessContextModal({ initial, onFinished }: { initial?: Partial<BusinessContext>; onFinished: () => void }) {
+  const utils = trpc.useUtils();
+  const [context, setContext] = useState(() => emptyBusinessContext(initial));
+  const save = trpc.virasquare.saveBusinessContext.useMutation({
+    onSuccess: () => {
+      utils.virasquare.workspace.invalidate();
+      utils.virasquare.profile.invalidate();
+      toast.success("Your business context is saved.");
+      onFinished();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const dismiss = trpc.virasquare.dismissBusinessContext.useMutation({
+    onSuccess: () => {
+      utils.virasquare.workspace.invalidate();
+      utils.virasquare.profile.invalidate();
+      onFinished();
+    },
+    onError: error => toast.error(error.message),
+  });
+
+  return <div className="fixed inset-0 z-50 flex items-end bg-[#172017]/45 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
+    <section role="dialog" aria-modal="true" aria-label="Add business context" className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-t-[2rem] bg-[#fffefa] p-5 shadow-2xl sm:rounded-[2rem] sm:p-8">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">MAKE VIRASQUARE MORE USEFUL</p>
+          <h2 className="mt-2 font-serif text-3xl leading-tight text-[#263327]">A little context helps every idea feel more like your business.</h2>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-[#647063]">These are optional, but the answers give ViraSquare real direction instead of letting it make assumptions. You can edit them later in Brand.</p>
+        </div>
+        <button onClick={() => dismiss.mutate()} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#eef4ea] text-[#4f674f]" aria-label="Not now"><X className="h-4 w-4" /></button>
+      </div>
+      <div className="mt-7"><BusinessContextFields value={context} onChange={setContext} /></div>
+      <div className="mt-7 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button variant="ghost" onClick={() => dismiss.mutate()} disabled={dismiss.isPending || save.isPending} className="rounded-xl">Not now</Button>
+        <Button onClick={() => save.mutate(context)} disabled={dismiss.isPending || save.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save this context</Button>
+      </div>
+    </section>
+  </div>;
+}
+
+function ProductInvite({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: () => void }) {
+  return <div className="fixed inset-0 z-50 flex items-end bg-[#172017]/45 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
+    <section role="dialog" aria-modal="true" aria-label="Add your first product" className="w-full max-w-lg rounded-t-[2rem] bg-[#fffefa] p-6 shadow-2xl sm:rounded-[2rem] sm:p-8">
+      <Package className="h-8 w-8 text-[#719761]" />
+      <p className="mt-5 text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">WHEN YOU ARE READY</p>
+      <h2 className="mt-2 font-serif text-3xl leading-tight text-[#263327]">Add your first product.</h2>
+      <p className="mt-3 text-sm leading-6 text-[#647063]">Products are only needed when you choose product-led content. Saving one now means ViraSquare can use your real image and facts, rather than guess.</p>
+      <div className="mt-7 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button variant="ghost" onClick={onDismiss} className="rounded-xl">Not now</Button>
+        <Button onClick={onAdd} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]"><Plus className="mr-2 h-4 w-4" />Add a product</Button>
+      </div>
+    </section>
+  </div>;
+}
+
+function ProgressivePrompts({ profile, current, productCount, onOpenProducts }: { profile: any; current: Item | null; productCount: number; onOpenProducts: () => void }) {
+  const utils = trpc.useUtils();
+  const [showInvite, setShowInvite] = useState(false);
+  const [hideSoftReminder, setHideSoftReminder] = useState(false);
+  const hasReceivedValue = Boolean(current?.caption);
+  const shouldAskContext = hasReceivedValue && profile.businessContextStatus === "not_started";
+  const canInvite = hasReceivedValue && productCount === 0 && profile.productInviteStatus === "not_started";
+  const setInvite = trpc.virasquare.setProductInviteStatus.useMutation({
+    onSuccess: () => {
+      utils.virasquare.workspace.invalidate();
+      utils.virasquare.profile.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+
+  useEffect(() => {
+    if (!shouldAskContext && canInvite) setShowInvite(true);
+  }, [shouldAskContext, canInvite]);
+
+  if (shouldAskContext) return <BusinessContextModal initial={profile.businessContext} onFinished={() => setShowInvite(true)} />;
+  if (!showInvite || !canInvite) {
+    if (productCount === 0 && profile.productInviteStatus === "dismissed" && !hideSoftReminder) return <aside className="fixed bottom-5 right-4 z-40 w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-[#d5e4cf] bg-[#fffefa] p-4 shadow-lg sm:right-6"><button onClick={() => setHideSoftReminder(true)} className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full text-[#758171] hover:bg-[#eef4ea]" aria-label="Hide product reminder"><X className="h-4 w-4"/></button><Package className="h-5 w-5 text-[#719761]"/><p className="mt-2 pr-6 text-sm font-semibold text-[#334b32]">Save a product when you want product-led content.</p><p className="mt-1 text-xs leading-5 text-[#687568]">Educational ideas never need one. A saved product lets ViraSquare use your real image and facts when it does.</p><Button onClick={onOpenProducts} variant="outline" className="mt-3 h-8 rounded-lg text-xs">Open My Products</Button></aside>;
+    return null;
+  }
+  return <ProductInvite onAdd={() => { setInvite.mutate({ status: "dismissed" }); setShowInvite(false); onOpenProducts(); }} onDismiss={() => { setInvite.mutate({ status: "dismissed" }); setShowInvite(false); }} />;
+}
+
+function AlternativeIdeaGenerator({ date, onSelected, onNeedProduct }: { date: string; onSelected: (item: Item) => void; onNeedProduct: () => void }) {
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [objective, setObjective] = useState("Education");
   const [format, setFormat] = useState<IdeaFormat>("carousel");
   const [topic, setTopic] = useState("");
+  const [productId, setProductId] = useState<number | undefined>();
   const [ideas, setIdeas] = useState<Array<{ title: string; objective: string; format: IdeaFormat; brief: string }>>([]);
-  const suggest = trpc.virasquare.generateIdeas.useMutation({
-    onSuccess: value => setIdeas(value),
-    onError: error => toast.error(error.message),
-  });
+  const products = trpc.virasquare.products.useQuery(undefined, { enabled: open });
+  const isProductLed = objective === "Feature a product" || format === "promo";
+  const suggest = trpc.virasquare.generateIdeas.useMutation({ onSuccess: value => setIdeas(value), onError: error => toast.error(error.message) });
   const useIdea = trpc.virasquare.saveIdea.useMutation({
     onSuccess: value => {
       utils.virasquare.workspace.invalidate();
@@ -107,135 +241,49 @@ function AlternativeIdeaGenerator({ date, onSelected }: { date: string; onSelect
     },
     onError: error => toast.error(error.message),
   });
+  const showIdeas = () => {
+    if (isProductLed && !productId) {
+      if (!products.data?.length) onNeedProduct();
+      else toast.error("Choose the product this post is about first.");
+      return;
+    }
+    suggest.mutate({ objective, format, topic: topic.trim() || undefined, productId: isProductLed ? productId : undefined });
+  };
 
-  return (
-    <section className="mt-8 rounded-[1.75rem] border border-[#dfe8d9] bg-[#fffefa] p-5 shadow-sm sm:p-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR ALTERNATIVE</p>
-          <h2 className="mt-1 font-serif text-2xl text-[#263327] sm:text-3xl">Need a different direction?</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#697568]">
-            If today’s planned post is not right, choose what you want to make instead. ViraSquare will suggest a few directions for you to choose from.
-          </p>
-        </div>
-        <Button onClick={() => setOpen(value => !value)} variant={open ? "outline" : "default"} className={cn("rounded-xl", open ? "" : "bg-[#263327] hover:bg-[#3b4b3b]")}>{open ? "Close options" : "Choose what to make"}</Button>
+  return <section className="mt-8 rounded-[1.75rem] border border-[#dfe8d9] bg-[#fffefa] p-5 shadow-sm sm:p-6">
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR ALTERNATIVE</p><h2 className="mt-1 font-serif text-2xl text-[#263327] sm:text-3xl">Need a different direction?</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#697568]">If today’s planned post is not right, choose what you want to make instead. ViraSquare will suggest a few directions for you to choose from.</p></div>
+      <Button onClick={() => setOpen(value => !value)} variant={open ? "outline" : "default"} className={cn("rounded-xl", open ? "" : "bg-[#263327] hover:bg-[#3b4b3b]")}>{open ? "Close options" : "Choose what to make"}</Button>
+    </div>
+    {open && <div className="mt-6 border-t border-[#e5ebe0] pt-6">
+      <p className="text-xs leading-5 text-[#738071]">Your current recommendation stays above until you choose one of these alternatives.</p>
+      <div className="mt-5 grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
+        <section><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">WHAT SHOULD THIS POST DO?</p><div className="mt-3 grid gap-2 sm:grid-cols-2">{objectives.map(value => <button key={value} onClick={() => { setObjective(value); if (value !== "Feature a product" && format !== "promo") setProductId(undefined); }} className={cn("rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition", objective === value ? "border-[#263327] bg-[#edf4e9] text-[#263327]" : "border-[#dde5d8] bg-white text-[#667265] hover:border-[#aebfa5]")}>{value}</button>)}</div><Label className="mt-5 block">Anything specific?</Label><Textarea value={topic} onChange={event => setTopic(event.target.value)} className="mt-2 min-h-24" placeholder="Optional: describe the question, offer, or topic you want to talk about." /></section>
+        <section><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">WHAT DO YOU WANT TO MAKE?</p><div className="mt-3 grid gap-2 sm:grid-cols-2">{formats.map(option => <button key={option.value} onClick={() => { setFormat(option.value); if (option.value !== "promo" && objective !== "Feature a product") setProductId(undefined); }} className={cn("rounded-2xl border p-3 text-left transition", format === option.value ? "border-[#263327] bg-[#edf4e9] shadow-sm" : "border-[#dde5d8] bg-white hover:border-[#aebfa5]")}><p className="text-sm font-semibold text-[#263327]">{option.label}</p><p className="mt-1 text-xs leading-5 text-[#6e796c]">{option.description}</p></button>)}</div>
+          {isProductLed && <div className="mt-5 rounded-2xl border border-[#d8e6d1] bg-[#f6faf2] p-4"><Label>Which product is this about?</Label>{products.data?.length ? <select value={productId || ""} onChange={event => setProductId(event.target.value ? Number(event.target.value) : undefined)} className="mt-2 h-10 w-full rounded-lg border border-[#d5e1d0] bg-white px-3 text-sm text-[#334b32]"><option value="">Choose a saved product</option>{products.data.map(product => <option key={product.id} value={product.id}>{product.name}</option>)}</select> : <div className="mt-2"><p className="text-sm leading-6 text-[#5f6f5c]">Add a product first so ViraSquare can use facts you have confirmed, not guess.</p><Button onClick={onNeedProduct} variant="outline" className="mt-3 rounded-xl">Add your first product</Button></div>}<p className="mt-2 text-xs leading-5 text-[#738071]">ViraSquare will use only the details saved for this product.</p></div>}
+          <Button disabled={suggest.isPending} onClick={showIdeas} className="mt-5 w-full rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{suggest.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Show me content ideas</Button>
+        </section>
       </div>
-
-      {open && (
-        <div className="mt-6 border-t border-[#e5ebe0] pt-6">
-          <p className="text-xs leading-5 text-[#738071]">Your current recommendation stays above until you choose one of these alternatives.</p>
-          <div className="mt-5 grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
-            <section>
-              <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">WHAT SHOULD THIS POST DO?</p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {objectives.map(value => (
-                  <button key={value} onClick={() => setObjective(value)} className={cn("rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition", objective === value ? "border-[#263327] bg-[#edf4e9] text-[#263327]" : "border-[#dde5d8] bg-white text-[#667265] hover:border-[#aebfa5]")}>{value}</button>
-                ))}
-              </div>
-              <Label className="mt-5 block">Anything specific?</Label>
-              <Textarea value={topic} onChange={event => setTopic(event.target.value)} className="mt-2 min-h-24" placeholder="Optional: describe the product, question, offer, or topic you want to talk about." />
-            </section>
-            <section>
-              <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">WHAT DO YOU WANT TO MAKE?</p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {formats.map(option => (
-                  <button key={option.value} onClick={() => setFormat(option.value)} className={cn("rounded-2xl border p-3 text-left transition", format === option.value ? "border-[#263327] bg-[#edf4e9] shadow-sm" : "border-[#dde5d8] bg-white hover:border-[#aebfa5]")}> 
-                    <p className="text-sm font-semibold text-[#263327]">{option.label}</p>
-                    <p className="mt-1 text-xs leading-5 text-[#6e796c]">{option.description}</p>
-                  </button>
-                ))}
-              </div>
-              <Button disabled={suggest.isPending} onClick={() => suggest.mutate({ objective, format, topic: topic.trim() || undefined })} className="mt-5 w-full rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">
-                {suggest.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Show me content ideas
-              </Button>
-            </section>
-          </div>
-
-          {ideas.length > 0 && (
-            <section className="mt-7">
-              <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">CHOOSE A DIRECTION</p>
-              <h3 className="mt-1 font-serif text-2xl text-[#263327]">Which one feels right today?</h3>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {ideas.map((idea, index) => (
-                  <article key={`${idea.title}-${index}`} className="flex flex-col rounded-2xl border border-[#e1e8dc] bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#75965f]">{idea.objective} · {idea.format}</p>
-                    <h4 className="mt-3 font-serif text-xl leading-tight text-[#263327]">{idea.title}</h4>
-                    <p className="mt-3 flex-1 text-sm leading-6 text-[#6a7568]">{idea.brief}</p>
-                    <Button disabled={useIdea.isPending} onClick={() => useIdea.mutate({ date, title: idea.title, objective: idea.objective, format: idea.format, brief: idea.brief })} variant="outline" className="mt-5 w-full rounded-xl">Choose this idea <ChevronRight className="ml-1 h-4 w-4" /></Button>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
-    </section>
-  );
+      {ideas.length > 0 && <section className="mt-7"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">CHOOSE A DIRECTION</p><h3 className="mt-1 font-serif text-2xl text-[#263327]">Which one feels right today?</h3><div className="mt-4 grid gap-3 md:grid-cols-2">{ideas.map((idea, index) => <article key={`${idea.title}-${index}`} className="flex flex-col rounded-2xl border border-[#e1e8dc] bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#75965f]">{idea.objective} · {idea.format}</p><h4 className="mt-3 font-serif text-xl leading-tight text-[#263327]">{idea.title}</h4><p className="mt-3 flex-1 text-sm leading-6 text-[#6a7568]">{idea.brief}</p><Button disabled={useIdea.isPending} onClick={() => useIdea.mutate({ date, title: idea.title, objective: idea.objective, format: idea.format, brief: idea.brief, productId: isProductLed ? productId : undefined })} variant="outline" className="mt-5 w-full rounded-xl">Choose this idea <ChevronRight className="ml-1 h-4 w-4" /></Button></article>)}</div></section>}
+    </div>}
+  </section>;
 }
 
 function ContentDetail({ item, close }: { item: Item; close: () => void }) {
   const utils = trpc.useUtils();
   const [content, setContent] = useState(item);
+  const linkedProduct = trpc.virasquare.product.useQuery({ productId: content.productId || 0 }, { enabled: Boolean(content.productId) });
   useEffect(() => setContent(item), [item]);
-  const generate = trpc.virasquare.generateContent.useMutation({
-    onSuccess: result => {
-      setContent(result as Item);
-      utils.virasquare.workspace.invalidate();
-      utils.virasquare.library.invalidate();
-      toast.success("Your rich content is ready.");
-    },
-    onError: error => toast.error(error.message),
-  });
-  const lifecycle = trpc.virasquare.setLifecycle.useMutation({
-    onSuccess: result => {
-      setContent(result as Item);
-      utils.virasquare.workspace.invalidate();
-      utils.virasquare.library.invalidate();
-      toast.success("Content status updated.");
-    },
-    onError: error => toast.error(error.message),
-  });
+  const generate = trpc.virasquare.generateContent.useMutation({ onSuccess: result => { setContent(result as Item); utils.virasquare.workspace.invalidate(); utils.virasquare.library.invalidate(); toast.success("Your rich content is ready."); }, onError: error => toast.error(error.message) });
+  const lifecycle = trpc.virasquare.setLifecycle.useMutation({ onSuccess: result => { setContent(result as Item); utils.virasquare.workspace.invalidate(); utils.virasquare.library.invalidate(); toast.success("Content status updated."); }, onError: error => toast.error(error.message) });
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#172017]/35 backdrop-blur-sm sm:items-center sm:p-6">
-      <div role="dialog" aria-modal="true" aria-label="Content options" className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-[2rem] bg-[#fffefa] shadow-2xl sm:rounded-[2rem]">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e8ece5] bg-[#fffefa]/95 px-5 py-4">
-          <div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">{content.format} · {content.lifecycleStatus}</p><h2 className="mt-1 font-serif text-2xl text-[#263327]">Your selected post</h2></div>
-          <button onClick={close} className="grid h-9 w-9 place-items-center rounded-full bg-[#f0f4ed]" aria-label="Close content options"><X className="h-4 w-4" /></button>
-        </header>
-        <div className="p-5 pb-8">
-          <h3 className="font-serif text-3xl leading-tight text-[#263327]">{content.title}</h3>
-          <p className="mt-3 leading-6 text-[#667165]">{content.brief}</p>
-          {content.requiresProduct && <div className="mt-5 rounded-2xl border border-[#cfe0c7] bg-[#f1f8ed] p-4 text-sm leading-6 text-[#496643]"><strong>Prepare this first.</strong> {content.preparationNote || "This post needs a real product image and verified details."}</div>}
-
-          {!content.caption && content.lifecycleStatus !== "posted" && (
-            <section className="mt-7 rounded-2xl border border-dashed border-[#c9d9c1] bg-[#f6faf2] p-5">
-              <Sparkles className="h-6 w-6 text-[#719761]" />
-              <h4 className="mt-3 font-serif text-2xl text-[#263327]">What do you want to do with this idea?</h4>
-              <p className="mt-2 text-sm leading-6 text-[#748073]">Make the rich writing and card plan, or simply mark it as a post you used outside ViraSquare.</p>
-              <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-                <Button disabled={generate.isPending} onClick={() => generate.mutate({ itemId: content.id })} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{generate.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Make rich cards</Button>
-                <Button disabled={lifecycle.isPending} onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted" })} variant="outline" className="rounded-xl"><CheckCircle2 className="mr-2 h-4 w-4" />Mark as posted</Button>
-              </div>
-            </section>
-          )}
-
-          {!content.caption && content.lifecycleStatus === "posted" && (
-            <section className="mt-7 rounded-2xl border border-[#cfe0c7] bg-[#f1f8ed] p-5"><CheckCircle2 className="h-6 w-6 text-[#547a48]" /><h4 className="mt-3 font-serif text-2xl text-[#263327]">Marked as posted</h4><p className="mt-2 text-sm leading-6 text-[#667165]">ViraSquare has recorded this as a post you chose to use. You can return to it from Library whenever you need it.</p></section>
-          )}
-
-          {content.caption && (
-            <>
-              <section className="mt-7 rounded-2xl border border-[#e4e9e0] bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">CAPTION</p><p className="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-[#39453a]">{content.caption}</p></section>
-              {content.carouselSlides.length > 0 && <section className="mt-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">RICH CARD SET</p><div className="mt-3 grid gap-3 sm:grid-cols-2">{content.carouselSlides.map((slide, index) => <article key={`${slide.heading}-${index}`} className="min-h-44 rounded-2xl bg-[#263327] p-4 text-[#f7f9ee]"><p className="text-[10px] font-bold uppercase tracking-wider text-[#c9dfb4]">{slide.cardType || "guide"} · {slide.eyebrow || `Card ${index + 1}`}</p><h4 className="mt-4 font-serif text-xl leading-tight">{slide.heading}</h4><p className="mt-3 text-xs leading-5 text-[#d5e0ce]">{slide.body}</p><p className="mt-4 text-[10px] font-bold uppercase tracking-wider text-[#eaf2ca]">{slide.footer}</p></article>)}</div></section>}
-              <VisualMaker item={content} />
-              <section className="mt-6 rounded-2xl border border-[#e2e8de] bg-[#fbfcf8] p-4"><p className="text-sm font-semibold text-[#405142]">What happened after you posted?</p><p className="mt-1 text-xs leading-5 text-[#738072]">This is your own feedback—not assumed social data—and helps ViraSquare learn what you return to.</p><div className="mt-3 flex flex-wrap gap-2"><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted" })} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]"><CheckCircle2 className="mr-2 h-4 w-4" />Mark as posted</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted", outcome: "conversations" })} variant="outline" className="rounded-xl">Started conversations</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted", outcome: "orders" })} variant="outline" className="rounded-xl">Helped an order</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted", outcome: "engagement" })} variant="outline" className="rounded-xl">Useful engagement</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "archived" })} variant="ghost" className="rounded-xl text-[#8b514a]"><Archive className="mr-2 h-4 w-4" />Archive</Button></div></section>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#172017]/35 backdrop-blur-sm sm:items-center sm:p-6"><div role="dialog" aria-modal="true" aria-label="Content options" className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-[2rem] bg-[#fffefa] shadow-2xl sm:rounded-[2rem]"><header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e8ece5] bg-[#fffefa]/95 px-5 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">{content.format} · {content.lifecycleStatus}</p><h2 className="mt-1 font-serif text-2xl text-[#263327]">Your selected post</h2></div><button onClick={close} className="grid h-9 w-9 place-items-center rounded-full bg-[#f0f4ed]" aria-label="Close content options"><X className="h-4 w-4" /></button></header><div className="p-5 pb-8"><h3 className="font-serif text-3xl leading-tight text-[#263327]">{content.title}</h3><p className="mt-3 leading-6 text-[#667165]">{content.brief}</p>
+    {linkedProduct.data && <div className="mt-5 flex gap-3 rounded-2xl border border-[#dce8d5] bg-[#f6faf2] p-3"><img src={linkedProduct.data.imageUrl} alt="" className="h-16 w-16 rounded-xl object-cover"/><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#5d8054]">SELECTED PRODUCT</p><p className="mt-1 text-sm font-semibold text-[#334b32]">{linkedProduct.data.name}</p><p className="mt-1 text-xs leading-5 text-[#667565]">ViraSquare will use its saved facts only.</p></div></div>}
+    {content.requiresProduct && !content.productId && <div className="mt-5 rounded-2xl border border-[#cfe0c7] bg-[#f1f8ed] p-4 text-sm leading-6 text-[#496643]"><strong>Prepare this first.</strong> {content.preparationNote || "This post needs a real product image and confirmed details."}</div>}
+    {!content.caption && content.lifecycleStatus !== "posted" && <section className="mt-7 rounded-2xl border border-dashed border-[#c9d9c1] bg-[#f6faf2] p-5"><Sparkles className="h-6 w-6 text-[#719761]"/><h4 className="mt-3 font-serif text-2xl text-[#263327]">What do you want to do with this idea?</h4><p className="mt-2 text-sm leading-6 text-[#748073]">Make the rich writing and card plan, or simply mark it as a post you used outside ViraSquare.</p><div className="mt-5 flex flex-col gap-2 sm:flex-row"><Button disabled={generate.isPending} onClick={() => generate.mutate({ itemId: content.id })} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{generate.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Make rich cards</Button><Button disabled={lifecycle.isPending} onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted" })} variant="outline" className="rounded-xl"><CheckCircle2 className="mr-2 h-4 w-4"/>Mark as posted</Button></div></section>}
+    {!content.caption && content.lifecycleStatus === "posted" && <section className="mt-7 rounded-2xl border border-[#cfe0c7] bg-[#f1f8ed] p-5"><CheckCircle2 className="h-6 w-6 text-[#547a48]"/><h4 className="mt-3 font-serif text-2xl text-[#263327]">Marked as posted</h4><p className="mt-2 text-sm leading-6 text-[#667165]">ViraSquare has recorded this as a post you chose to use. You can return to it from Library whenever you need it.</p></section>}
+    {content.caption && <><section className="mt-7 rounded-2xl border border-[#e4e9e0] bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">CAPTION</p><p className="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-[#39453a]">{content.caption}</p></section>{content.carouselSlides.length > 0 && <section className="mt-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">RICH CARD SET</p><div className="mt-3 grid gap-3 sm:grid-cols-2">{content.carouselSlides.map((slide, index) => <article key={`${slide.heading}-${index}`} className="min-h-44 rounded-2xl bg-[#263327] p-4 text-[#f7f9ee]"><p className="text-[10px] font-bold uppercase tracking-wider text-[#c9dfb4]">{slide.cardType || "guide"} · {slide.eyebrow || `Card ${index + 1}`}</p><h4 className="mt-4 font-serif text-xl leading-tight">{slide.heading}</h4><p className="mt-3 text-xs leading-5 text-[#d5e0ce]">{slide.body}</p><p className="mt-4 text-[10px] font-bold uppercase tracking-wider text-[#eaf2ca]">{slide.footer}</p></article>)}</div></section>}<VisualMaker item={content}/><section className="mt-6 rounded-2xl border border-[#e2e8de] bg-[#fbfcf8] p-4"><p className="text-sm font-semibold text-[#405142]">What happened after you posted?</p><p className="mt-1 text-xs leading-5 text-[#738072]">This is your own feedback, not assumed social data, and helps ViraSquare learn what you return to.</p><div className="mt-3 flex flex-wrap gap-2"><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted" })} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]"><CheckCircle2 className="mr-2 h-4 w-4"/>Mark as posted</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted", outcome: "conversations" })} variant="outline" className="rounded-xl">Started conversations</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted", outcome: "orders" })} variant="outline" className="rounded-xl">Helped an order</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "posted", outcome: "engagement" })} variant="outline" className="rounded-xl">Useful engagement</Button><Button onClick={() => lifecycle.mutate({ itemId: content.id, lifecycleStatus: "archived" })} variant="ghost" className="rounded-xl text-[#8b514a]"><Archive className="mr-2 h-4 w-4"/>Archive</Button></div></section></>}
+  </div></div></div>;
 }
 
 function ProductManager() {
@@ -243,14 +291,43 @@ function ProductManager() {
   const products = trpc.virasquare.products.useQuery();
   const usage = trpc.virasquare.productUsage.useQuery();
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("fashion");
   const [price, setPrice] = useState("");
+  const [askPrice, setAskPrice] = useState(true);
   const [details, setDetails] = useState("");
+  const [bestFor, setBestFor] = useState("");
+  const [choiceReasons, setChoiceReasons] = useState("");
+  const [buyerNote, setBuyerNote] = useState("");
+  const [categoryDetails, setCategoryDetails] = useState("");
+  const [showHelpful, setShowHelpful] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const create = trpc.virasquare.createProduct.useMutation({ onSuccess: () => { setOpen(false); setName(""); setPrice(""); setDetails(""); setFile(null); utils.virasquare.products.invalidate(); toast.success("Product saved to My Products."); }, onError: error => toast.error(error.message) });
-  const remove = trpc.virasquare.deleteProduct.useMutation({ onSuccess: () => { utils.virasquare.products.invalidate(); toast.success("Product removed."); }, onError: error => toast.error(error.message) });
-  const add = async () => { if (!file || name.trim().length < 2) return toast.error("Add a product name and image first."); try { create.mutate({ name: name.trim(), price: price.trim() || undefined, details: details.trim() || undefined, image: { dataUrl: await readFile(file), fileName: file.name } }); } catch { toast.error("The image could not be read."); } };
-  return <section><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR CATALOGUE</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">My Products</h1><p className="mt-2 max-w-xl text-sm leading-6 text-[#6c776b]">Keep verified product information ready for the content that actually needs it.</p></div><Button onClick={() => setOpen(value => !value)} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]"><Plus className="mr-2 h-4 w-4" />Add product</Button></div>{open && <div className="mt-5 grid gap-4 rounded-2xl border border-[#dce8d5] bg-[#f8fbf5] p-4 sm:grid-cols-2"><div className="grid gap-2"><Label>Product name</Label><Input value={name} onChange={event => setName(event.target.value)} /></div><div className="grid gap-2"><Label>Verified price</Label><Input value={price} onChange={event => setPrice(event.target.value)} /></div><div className="grid gap-2 sm:col-span-2"><Label>Product image</Label><Input type="file" accept="image/png,image/jpeg,image/webp" onChange={event => setFile(event.target.files?.[0] ?? null)} /></div><div className="grid gap-2 sm:col-span-2"><Label>Verified details</Label><Textarea value={details} onChange={event => setDetails(event.target.value)} /></div><div className="sm:col-span-2"><Button onClick={add} disabled={create.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save product</Button></div></div>}<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{products.data?.map(product => { const insight = usage.data?.find(entry => entry.productId === product.id); return <article key={product.id} className="overflow-hidden rounded-2xl border border-[#e1e8dc] bg-white"><img src={product.imageUrl} alt={product.name} className="aspect-square w-full object-cover" /><div className="p-4"><div className="flex justify-between gap-2"><div><h2 className="font-serif text-xl text-[#263327]">{product.name}</h2><p className="mt-1 text-sm text-[#6f7c6e]">{product.price ? `₦${product.price}` : "Price on request"}</p></div><Button onClick={() => remove.mutate({ productId: product.id })} size="icon" variant="ghost" className="h-8 w-8 text-[#a25f55]"><Trash2 className="h-4 w-4" /></Button></div><p className="mt-3 line-clamp-2 text-sm leading-5 text-[#738072]">{product.details || "No verified details yet."}</p><div className="mt-4 flex gap-2 text-[10px] font-bold uppercase tracking-wide"><span className="rounded-full bg-[#eef6e9] px-2 py-1 text-[#557445]">{insight?.visualCount || 0} visuals</span><span className="rounded-full bg-[#eef0ff] px-2 py-1 text-[#506099]">{insight?.postedCount || 0} posted</span></div></div></article>; })}{!products.data?.length && <div className="rounded-2xl border border-dashed border-[#cbd9c4] bg-[#fbfcf8] p-7 text-sm text-[#6f7b6f]">Your product catalogue is empty. Add products here before a product-led post needs one.</div>}</div></section>;
+  const reset = () => { setOpen(false); setEditing(null); setName(""); setCategory("fashion"); setPrice(""); setAskPrice(true); setDetails(""); setBestFor(""); setChoiceReasons(""); setBuyerNote(""); setCategoryDetails(""); setShowHelpful(false); setFile(null); };
+  const invalidateProducts = () => { utils.virasquare.products.invalidate(); utils.virasquare.productUsage.invalidate(); utils.virasquare.workspace.invalidate(); };
+  const create = trpc.virasquare.createProduct.useMutation({ onSuccess: () => { reset(); invalidateProducts(); toast.success("Product saved to My Products."); }, onError: error => toast.error(error.message) });
+  const update = trpc.virasquare.updateProduct.useMutation({ onSuccess: () => { reset(); invalidateProducts(); toast.success("Product details updated."); }, onError: error => toast.error(error.message) });
+  const remove = trpc.virasquare.deleteProduct.useMutation({ onSuccess: () => { invalidateProducts(); toast.success("Product removed."); }, onError: error => toast.error(error.message) });
+  const categoryQuestion = category === "fashion" || category === "accessories" ? "Fit, material, colour, size, occasion, care or order timing" : category === "beauty" || category === "personal_care" ? "Concern, product form, size, verified ingredients or features, how to use it, and safe claims" : "Any category-specific facts a customer should know";
+  const startEdit = (product: any) => { setEditing(product); setOpen(true); setName(product.name || ""); setCategory(product.productCategory || "other"); setPrice(product.price || ""); setAskPrice(!product.price); setDetails(product.details || ""); setBestFor(product.bestFor || ""); setChoiceReasons(product.choiceReasons || ""); setBuyerNote(product.buyerNote || ""); setCategoryDetails(product.categoryDetails || ""); setShowHelpful(true); setFile(null); };
+  const save = async () => {
+    if (name.trim().length < 2) return toast.error("Add a product name first.");
+    const values = { name: name.trim(), price: askPrice ? undefined : price.trim() || undefined, details: details.trim() || undefined, productCategory: category, bestFor: bestFor.trim() || undefined, choiceReasons: choiceReasons.trim() || undefined, buyerNote: buyerNote.trim() || undefined, categoryDetails: categoryDetails.trim() || undefined };
+    if (editing) { update.mutate({ productId: editing.id, ...values }); return; }
+    if (!file) return toast.error("Add one real product image first.");
+    try { create.mutate({ ...values, image: { dataUrl: await readFile(file), fileName: file.name } }); } catch { toast.error("The image could not be read."); }
+  };
+  const pending = create.isPending || update.isPending;
+
+  return <section><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR CATALOGUE</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">My Products</h1><p className="mt-2 max-w-xl text-sm leading-6 text-[#6c776b]">Keep real product information ready for the content that actually needs it.</p></div><Button onClick={() => open ? reset() : setOpen(true)} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]"><Plus className="mr-2 h-4 w-4"/>{open ? "Close" : "Add product"}</Button></div>
+    {!products.data?.length && !open && <div className="mt-5 rounded-2xl border border-dashed border-[#cbd9c4] bg-[#fbfcf8] p-6"><Package className="h-6 w-6 text-[#719761]"/><h2 className="mt-3 font-serif text-2xl text-[#263327]">Add your first product when you are ready.</h2><p className="mt-2 max-w-xl text-sm leading-6 text-[#6f7b6f]">You never need a product for educational content. For a product-led post, ViraSquare needs a real image and the facts you are sure of.</p><Button onClick={() => setOpen(true)} className="mt-4 rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">Add a product</Button></div>}
+    {open && <section className="mt-5 rounded-2xl border border-[#dce8d5] bg-[#f8fbf5] p-4 sm:p-5"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">{editing ? "UPDATE PRODUCT" : "QUICK PRODUCT ADD"}</p><h2 className="mt-2 font-serif text-2xl text-[#263327]">{editing ? `Update ${editing.name}` : "Start with the essentials."}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#697568]">{editing ? "Keep the facts accurate as your product changes." : "Add a name, category, price or ask-for-price, and one real image. The extra questions are optional, but strongly recommended for stronger product content."}</p></div><div className="mt-5 grid gap-4 sm:grid-cols-2"><div className="grid gap-2"><Label>Product name</Label><Input value={name} onChange={event => setName(event.target.value)} placeholder="e.g. Everyday gold hoop earrings"/></div><div className="grid gap-2"><Label>Category</Label><select value={category} onChange={event => setCategory(event.target.value)} className="h-10 rounded-lg border border-input bg-background px-3 text-sm"><option value="fashion">Fashion</option><option value="accessories">Accessories</option><option value="beauty">Beauty</option><option value="personal_care">Personal care</option><option value="other">Other</option></select></div><div className="grid gap-2"><Label>Price</Label><Input disabled={askPrice} value={price} onChange={event => setPrice(event.target.value)} placeholder="e.g. 18,500"/><label className="flex items-center gap-2 text-xs text-[#687568]"><input type="checkbox" checked={askPrice} onChange={event => setAskPrice(event.target.checked)}/> Ask for price instead</label></div>{!editing && <div className="grid gap-2"><Label>Real product image</Label><label className="flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-[#b9cdb0] bg-white px-3 text-sm text-[#5d7558]"><Upload className="h-4 w-4"/><span className="truncate">{file ? file.name : "Choose PNG, JPEG, or WebP"}</span><input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event => setFile(event.target.files?.[0] ?? null)}/></label></div>}<div className="grid gap-2 sm:col-span-2"><Label>Help us understand this product</Label><p className="-mt-1 text-xs leading-5 text-[#718071]">Share facts you are sure of. ViraSquare will use them to make product content accurate and useful.</p><Textarea value={details} onChange={event => setDetails(event.target.value)} placeholder="For example: gold-plated, lightweight, available in two sizes, or made after order confirmation." className="min-h-24 resize-none"/></div></div>
+      <button type="button" onClick={() => setShowHelpful(value => !value)} className="mt-5 flex w-full items-center justify-between rounded-xl border border-[#d9e5d4] bg-white px-4 py-3 text-left"><span><span className="block text-sm font-semibold text-[#334b32]">Make product content stronger <span className="text-[#587d50]">(strongly recommended)</span></span><span className="mt-0.5 block text-xs text-[#718071]">Add useful context without making this a long form.</span></span><ChevronRight className={cn("h-4 w-4 transition-transform", showHelpful && "rotate-90")}/></button>
+      {showHelpful && <div className="mt-4 grid gap-4 rounded-xl border border-[#d9e5d4] bg-white p-4"><div className="grid gap-2"><Label>Who is this for, or when would they use it?</Label><Textarea value={bestFor} onChange={event => setBestFor(event.target.value)} placeholder="For example: people who want a simple everyday option, or a gift for a birthday." className="min-h-20 resize-none"/></div><div className="grid gap-2"><Label>What makes this worth choosing?</Label><Textarea value={choiceReasons} onChange={event => setChoiceReasons(event.target.value)} placeholder="Share only reasons you can stand behind, such as a material, process, convenience, or finish." className="min-h-20 resize-none"/></div><div className="grid gap-2"><Label>{categoryQuestion}</Label><Textarea value={categoryDetails} onChange={event => setCategoryDetails(event.target.value)} placeholder="Only include details you know are correct." className="min-h-20 resize-none"/></div><div className="grid gap-2"><Label>Anything a buyer should know before ordering? <span className="font-normal text-[#879187]">(optional)</span></Label><Textarea value={buyerNote} onChange={event => setBuyerNote(event.target.value)} placeholder="For example: allow three days for a custom order, or patch test first." className="min-h-20 resize-none"/></div></div>}
+      <div className="mt-6 flex flex-wrap gap-2"><Button onClick={save} disabled={pending} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{pending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}{editing ? "Save product details" : "Save product"}</Button><Button variant="outline" onClick={reset} className="rounded-xl">Cancel</Button></div>
+    </section>}
+    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{products.data?.map(product => { const insight = usage.data?.find(entry => entry.productId === product.id); return <article key={product.id} className="overflow-hidden rounded-2xl border border-[#e1e8dc] bg-white"><img src={product.imageUrl} alt={product.name} className="aspect-square w-full object-cover"/><div className="p-4"><div className="flex justify-between gap-2"><div><h2 className="font-serif text-xl text-[#263327]">{product.name}</h2><p className="mt-1 text-sm text-[#6f7c6e]">{product.price ? `₦${product.price}` : "Price on request"}</p></div><Button onClick={() => remove.mutate({ productId: product.id })} size="icon" variant="ghost" className="h-8 w-8 text-[#a25f55]" aria-label={`Remove ${product.name}`}><Trash2 className="h-4 w-4"/></Button></div><p className="mt-3 line-clamp-2 text-sm leading-5 text-[#738072]">{product.details || "Add product facts to strengthen future product content."}</p><Button onClick={() => startEdit(product)} variant="outline" className="mt-4 h-8 rounded-lg text-xs">Edit product details</Button><div className="mt-4 flex gap-2 text-[10px] font-bold uppercase tracking-wide"><span className="rounded-full bg-[#eef6e9] px-2 py-1 text-[#557445]">{insight?.visualCount || 0} visuals</span><span className="rounded-full bg-[#eef0ff] px-2 py-1 text-[#506099]">{insight?.postedCount || 0} posted</span></div></div></article>; })}</div>
+  </section>;
 }
 
 function BrandSettings({ profile, onEditProfile }: { profile: any; onEditProfile: () => void }) {
@@ -258,9 +335,22 @@ function BrandSettings({ profile, onEditProfile }: { profile: any; onEditProfile
   const [primary, setPrimary] = useState(profile.brandPrimaryColor || "#263327");
   const [accent, setAccent] = useState(profile.brandAccentColor || "#EAF2CA");
   const [cta, setCta] = useState(profile.defaultCta || "Send us a message to order.");
-  const save = trpc.virasquare.saveProfile.useMutation({ onSuccess: () => { utils.virasquare.profile.invalidate(); utils.virasquare.workspace.invalidate(); toast.success("Your card style is saved."); }, onError: error => toast.error(error.message) });
-  const submit = () => save.mutate({ businessName: profile.businessName, businessType: profile.businessType, businessCategory: profile.businessCategory, targetAudience: profile.targetAudience, customerMarket: profile.customerMarket || "Nigeria", contentPillars: profile.contentPillars, postingGoal: profile.postingGoal, weeklyPostGoal: profile.weeklyPostGoal, brandVoice: profile.brandVoice, brandPrimaryColor: primary, brandAccentColor: accent, defaultCta: cta });
-  return <section className="max-w-2xl"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR FOUNDATION</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">Brand</h1><div className="mt-6 rounded-2xl border border-[#e2e8de] bg-[#fffefa] p-5"><p className="font-serif text-2xl text-[#263327]">{profile.businessName}</p><p className="mt-2 text-sm leading-6 text-[#6c776b]">{profile.brandVoice}</p><div className="mt-6 grid gap-4 sm:grid-cols-2"><div className="grid gap-2"><Label>Primary card colour</Label><div className="flex items-center gap-2"><Input type="color" value={primary} onChange={event => setPrimary(event.target.value)} className="h-10 w-14 p-1" /><Input value={primary} onChange={event => setPrimary(event.target.value)} /></div></div><div className="grid gap-2"><Label>Accent colour</Label><div className="flex items-center gap-2"><Input type="color" value={accent} onChange={event => setAccent(event.target.value)} className="h-10 w-14 p-1" /><Input value={accent} onChange={event => setAccent(event.target.value)} /></div></div><div className="grid gap-2 sm:col-span-2"><Label>Default call to action</Label><Input value={cta} onChange={event => setCta(event.target.value)} placeholder="e.g. Send us a message to order." /></div></div><div className="mt-6 flex flex-wrap gap-2"><Button onClick={submit} disabled={save.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save card style</Button><Button onClick={onEditProfile} variant="outline" className="rounded-xl">Edit business profile</Button></div></div></section>;
+  const [handle, setHandle] = useState(profile.instagramHandle || "");
+  const [signature, setSignature] = useState(profile.closingSignature || "");
+  const [logo, setLogo] = useState<File | null>(null);
+  const [context, setContext] = useState<BusinessContext>(() => emptyBusinessContext(profile.businessContext));
+  useEffect(() => { setPrimary(profile.brandPrimaryColor || "#263327"); setAccent(profile.brandAccentColor || "#EAF2CA"); setCta(profile.defaultCta || "Send us a message to order."); setHandle(profile.instagramHandle || ""); setSignature(profile.closingSignature || ""); setContext(emptyBusinessContext(profile.businessContext)); }, [profile]);
+  const saveStyle = trpc.virasquare.saveProfile.useMutation({ onSuccess: () => { utils.virasquare.profile.invalidate(); utils.virasquare.workspace.invalidate(); toast.success("Your card style is saved."); }, onError: error => toast.error(error.message) });
+  const saveIdentity = trpc.virasquare.saveBrandIdentity.useMutation({ onSuccess: () => { setLogo(null); utils.virasquare.profile.invalidate(); utils.virasquare.workspace.invalidate(); toast.success("Your card identity is saved."); }, onError: error => toast.error(error.message) });
+  const saveContext = trpc.virasquare.saveBusinessContext.useMutation({ onSuccess: () => { utils.virasquare.profile.invalidate(); utils.virasquare.workspace.invalidate(); toast.success("Your business context is saved."); }, onError: error => toast.error(error.message) });
+  const submitStyle = () => saveStyle.mutate({ businessName: profile.businessName, businessType: profile.businessType, businessCategory: profile.businessCategory, targetAudience: profile.targetAudience, customerMarket: profile.customerMarket || "Nigeria", contentPillars: profile.contentPillars, postingGoal: profile.postingGoal, weeklyPostGoal: profile.weeklyPostGoal, brandVoice: profile.brandVoice, brandPrimaryColor: primary, brandAccentColor: accent, defaultCta: cta });
+  const submitIdentity = async () => { try { saveIdentity.mutate({ instagramHandle: handle.trim() || undefined, closingSignature: signature.trim() || undefined, logo: logo ? { dataUrl: await readFile(logo), fileName: logo.name } : undefined }); } catch { toast.error("The logo could not be read."); } };
+
+  return <section className="max-w-3xl"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR FOUNDATION</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">Brand</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[#6c776b]">Keep the information that helps ViraSquare sound recognisably like your business and make cards feel yours.</p>
+    <section className="mt-6 rounded-2xl border border-[#e2e8de] bg-[#fffefa] p-5"><div className="flex items-center gap-3">{profile.brandLogoUrl ? <img src={profile.brandLogoUrl} alt="Your brand logo" className="h-12 w-12 rounded-xl border border-[#e1e8dc] object-contain"/> : <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#263327] font-serif text-xl text-[#eaf2ca]">{profile.businessName.slice(0, 1).toUpperCase()}</div>}<div><p className="font-serif text-2xl text-[#263327]">{profile.businessName}</p><p className="mt-1 text-sm text-[#6c776b]">{profile.brandVoice}</p></div></div><div className="mt-6 grid gap-4 sm:grid-cols-2"><div className="grid gap-2"><Label>Primary card colour</Label><div className="flex items-center gap-2"><Input type="color" value={primary} onChange={event => setPrimary(event.target.value)} className="h-10 w-14 p-1"/><Input value={primary} onChange={event => setPrimary(event.target.value)}/></div></div><div className="grid gap-2"><Label>Accent colour</Label><div className="flex items-center gap-2"><Input type="color" value={accent} onChange={event => setAccent(event.target.value)} className="h-10 w-14 p-1"/><Input value={accent} onChange={event => setAccent(event.target.value)}/></div></div><div className="grid gap-2 sm:col-span-2"><Label>Default call to action</Label><Input value={cta} onChange={event => setCta(event.target.value)} placeholder="e.g. Send us a message to order."/></div></div><div className="mt-6 flex flex-wrap gap-2"><Button onClick={submitStyle} disabled={saveStyle.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{saveStyle.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Save card style</Button><Button onClick={onEditProfile} variant="outline" className="rounded-xl">Edit business profile</Button></div></section>
+    <section className="mt-5 rounded-2xl border border-[#e2e8de] bg-[#fffefa] p-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">CARD IDENTITY</p><h2 className="mt-2 font-serif text-2xl text-[#263327]">Make your cards recognisably yours.</h2><p className="mt-2 text-sm leading-6 text-[#6c776b]">A logo and Instagram handle are optional, but strongly recommended. Cards use your logo with your brand name at the top, then show your Instagram handle clearly in the footer.</p><div className="mt-5 grid gap-4 sm:grid-cols-2"><div className="grid gap-2 sm:col-span-2"><Label>Brand logo <span className="font-normal text-[#879187]">(optional, strongly recommended)</span></Label><label className="flex h-11 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-[#b9cdb0] bg-[#f8fbf6] px-3 text-sm text-[#5d7558]"><Upload className="h-4 w-4"/><span className="truncate">{logo ? logo.name : profile.brandLogoUrl ? "Choose a new logo to replace the current one" : "Choose PNG, JPEG, or WebP"}</span><input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event => setLogo(event.target.files?.[0] ?? null)}/></label></div><div className="grid gap-2"><Label>Instagram username <span className="font-normal text-[#879187]">(optional, strongly recommended)</span></Label><div className="relative"><Instagram className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#75965f]"/><Input value={handle} onChange={event => setHandle(event.target.value.replace(/^@+/, ""))} className="pl-9" placeholder="yourbusiness"/></div></div><div className="grid gap-2"><Label>Closing card signature <span className="font-normal text-[#879187]">(optional)</span></Label><Input value={signature} onChange={event => setSignature(event.target.value)} placeholder="A line used only on closing cards"/></div></div><p className="mt-3 text-xs leading-5 text-[#738071]">Your signature is a short line ViraSquare can use only on closing cards to make content feel more like yours.</p><Button onClick={submitIdentity} disabled={saveIdentity.isPending} className="mt-5 rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{saveIdentity.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Save card identity</Button></section>
+    <section className="mt-5 rounded-2xl border border-[#e2e8de] bg-[#fffefa] p-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">BUSINESS CONTEXT</p><h2 className="mt-2 font-serif text-2xl text-[#263327]">Help ViraSquare understand your business.</h2><p className="mt-2 text-sm leading-6 text-[#6c776b]">These answers are optional. They help ViraSquare make useful choices and avoid claims you would not stand behind.</p><div className="mt-5"><BusinessContextFields value={context} onChange={setContext} compact/></div><Button onClick={() => saveContext.mutate(context)} disabled={saveContext.isPending} className="mt-5 rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{saveContext.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Save business context</Button></section>
+  </section>;
 }
 
 function CalendarPanel({ plan, dates, select, makePlan, planning, weeklyPostGoal }: { plan: Item[]; dates: string[]; select: (item: Item) => void; makePlan: () => void; planning: boolean; weeklyPostGoal: number }) {
@@ -268,7 +358,7 @@ function CalendarPanel({ plan, dates, select, makePlan, planning, weeklyPostGoal
   const productPrep = plan.filter(item => item.requiresProduct).length;
   const hasActivePlan = plan.length >= Math.max(1, weeklyPostGoal);
   const emptyDay = emptyDayCopy(hasActivePlan);
-  return <section><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR CONTENT PLAN</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">Calendar</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[#6c776b]">This is the plan ViraSquare maps around your business and posting rhythm. Open a scheduled post when you are ready to use it.</p></div><Button onClick={makePlan} disabled={planning} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{planning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}{hasActivePlan ? "Refresh this week" : "Prepare my week"}</Button></div><div className="mt-6 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-[#edf4e9] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#53764b]">PLANNED THIS WEEK</p><p className="mt-2 font-serif text-3xl text-[#334b32]">{plan.length}</p></div><div className="rounded-2xl bg-[#fff2d6] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#806531]">READY TO USE</p><p className="mt-2 font-serif text-3xl text-[#68552e]">{ready}</p></div><div className="rounded-2xl bg-[#edf0ff] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#55639a]">PREP NEEDED</p><p className="mt-2 font-serif text-3xl text-[#394979]">{productPrep}</p></div></div><div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-7">{dates.map(date => { const item = plan.find(value => value.plannedFor === date); return <article key={date} className={cn("min-h-52 rounded-2xl border p-4", item ? "border-[#dbe6d6] bg-[#fffefa]" : hasActivePlan ? "border-[#d4e3cc] bg-[#f4f8f1]" : "border-dashed border-[#dbe3d7] bg-[#fbfcf9]")}><div className="flex items-start justify-between"><div><p className="text-[10px] font-bold uppercase tracking-wide text-[#788676]">{readable(date, { weekday: "short" })}</p><p className="mt-1 font-serif text-2xl text-[#263327]">{readable(date, { day: "numeric" })}</p></div>{item && <span className="rounded-full bg-[#edf4e9] px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-[#557447]">{item.lifecycleStatus}</span>}</div>{item ? <button onClick={() => select(item)} className="mt-6 text-left"><h2 className="font-serif text-lg leading-tight text-[#263327]">{item.title}</h2><p className="mt-3 line-clamp-3 text-xs leading-5 text-[#6d786b]">{item.brief}</p>{item.requiresProduct && <p className="mt-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#4d793d]"><Package className="h-3 w-3" />Prepare product</p>}</button> : <div className="mt-8 rounded-xl border border-[#dde8d8] bg-white/70 p-3"><p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#5d8152]">{emptyDay.eyebrow}</p><p className="mt-2 text-sm font-semibold leading-5 text-[#40513f]">{emptyDay.title}</p><p className="mt-1 text-xs leading-5 text-[#748071]">{emptyDay.detail}</p></div>}</article>; })}</div><div className="mt-5 rounded-2xl border border-[#e1e8dc] bg-white p-4 text-sm leading-6 text-[#6c776b]"><strong className="text-[#334b32]">A simple rule:</strong> Calendar shows ViraSquare’s plan. If you need a different idea for today, choose it from Today rather than building a post from the calendar.</div></section>;
+  return <section><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR CONTENT PLAN</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">Calendar</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[#6c776b]">This is the plan ViraSquare maps around your business and posting rhythm. Open a scheduled post when you are ready to use it.</p></div><Button onClick={makePlan} disabled={planning} className="rounded-xl bg-[#263327] hover:bg-[#3b4b3b]">{planning ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}{hasActivePlan ? "Refresh this week" : "Prepare my week"}</Button></div><div className="mt-6 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-[#edf4e9] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#53764b]">PLANNED THIS WEEK</p><p className="mt-2 font-serif text-3xl text-[#334b32]">{plan.length}</p></div><div className="rounded-2xl bg-[#fff2d6] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#806531]">READY TO USE</p><p className="mt-2 font-serif text-3xl text-[#68552e]">{ready}</p></div><div className="rounded-2xl bg-[#edf0ff] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#55639a]">PREP NEEDED</p><p className="mt-2 font-serif text-3xl text-[#394979]">{productPrep}</p></div></div><div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-7">{dates.map(date => { const item = plan.find(value => value.plannedFor === date); return <article key={date} className={cn("min-h-52 rounded-2xl border p-4", item ? "border-[#dbe6d6] bg-[#fffefa]" : hasActivePlan ? "border-[#d4e3cc] bg-[#f4f8f1]" : "border-dashed border-[#dbe3d7] bg-[#fbfcf9]")}><div className="flex items-start justify-between"><div><p className="text-[10px] font-bold uppercase tracking-wide text-[#788676]">{readable(date, { weekday: "short" })}</p><p className="mt-1 font-serif text-2xl text-[#263327]">{readable(date, { day: "numeric" })}</p></div>{item && <span className="rounded-full bg-[#edf4e9] px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-[#557447]">{item.lifecycleStatus}</span>}</div>{item ? <button onClick={() => select(item)} className="mt-6 text-left"><h2 className="font-serif text-lg leading-tight text-[#263327]">{item.title}</h2><p className="mt-3 line-clamp-3 text-xs leading-5 text-[#6d786b]">{item.brief}</p>{item.requiresProduct && <p className="mt-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#4d793d]"><Package className="h-3 w-3"/>Prepare product</p>}</button> : <div className="mt-8 rounded-xl border border-[#dde8d8] bg-white/70 p-3"><p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#5d8152]">{emptyDay.eyebrow}</p><p className="mt-2 text-sm font-semibold leading-5 text-[#40513f]">{emptyDay.title}</p><p className="mt-1 text-xs leading-5 text-[#748071]">{emptyDay.detail}</p></div>}</article>; })}</div><div className="mt-5 rounded-2xl border border-[#e1e8dc] bg-white p-4 text-sm leading-6 text-[#6c776b]"><strong className="text-[#334b32]">A simple rule:</strong> Calendar shows ViraSquare’s plan. If you need a different idea for today, choose it from Today rather than building a post from the calendar.</div></section>;
 }
 
 export function WorkspaceShell({ onEditProfile }: { onEditProfile: () => void }) {
@@ -283,16 +373,18 @@ export function WorkspaceShell({ onEditProfile }: { onEditProfile: () => void })
   const activity = trpc.virasquare.activity.useQuery(undefined, { enabled: view === "library" });
   const profile = trpc.virasquare.profile.useQuery();
   const makePlan = trpc.virasquare.generateWeeklyPlan.useMutation({ onSuccess: () => { workspace.refetch(); toast.success("Your week is planned."); }, onError: error => toast.error(error.message) });
-  if (workspace.isLoading) return <div className="grid min-h-screen place-items-center bg-[#f7f7f2]"><Loader2 className="h-6 w-6 animate-spin text-[#75965f]" /></div>;
+  if (workspace.isLoading) return <div className="grid min-h-screen place-items-center bg-[#f7f7f2]"><Loader2 className="h-6 w-6 animate-spin text-[#75965f]"/></div>;
   if (!workspace.data?.profile) return null;
-
   const current = workspace.data.todayContent as Item | null;
   const plan = workspace.data.weeklyPlan as Item[];
   const hasActivePlan = plan.length >= Math.max(1, workspace.data.profile.weeklyPostGoal);
   const emptyDay = emptyDayCopy(hasActivePlan);
   const todayProgress = todayProgressCopy(current?.lifecycleStatus);
   const navigate = (destination: View) => setView(destination);
-  const nav = (mobile = false) => <nav className={cn(mobile ? "grid grid-cols-5 gap-1" : "hidden items-center gap-1 lg:flex")}>{views.map(entry => { const Icon = entry.icon; return <button key={entry.id} onClick={() => navigate(entry.id)} className={cn("flex items-center justify-center gap-2 rounded-xl transition", mobile ? "flex-col px-1 py-2 text-[9px] font-semibold" : "px-3 py-2 text-sm font-semibold", view === entry.id ? "bg-[#263327] text-[#f7faed] shadow-sm" : "text-[#687466] hover:bg-[#eef4ea]")}><Icon className={cn("h-4 w-4", view === entry.id ? "text-[#eaf2ca]" : "text-[#789176]")} /><span>{mobile ? entry.mobileLabel : entry.label}</span></button>; })}</nav>;
+  const nav = (mobile = false) => <nav className={cn(mobile ? "grid grid-cols-5 gap-1" : "hidden items-center gap-1 lg:flex")}>{views.map(entry => { const Icon = entry.icon; return <button key={entry.id} onClick={() => navigate(entry.id)} className={cn("flex items-center justify-center gap-2 rounded-xl transition", mobile ? "flex-col px-1 py-2 text-[9px] font-semibold" : "px-3 py-2 text-sm font-semibold", view === entry.id ? "bg-[#263327] text-[#f7faed] shadow-sm" : "text-[#687466] hover:bg-[#eef4ea]")}><Icon className={cn("h-4 w-4", view === entry.id ? "text-[#eaf2ca]" : "text-[#789176]")}/><span>{mobile ? entry.mobileLabel : entry.label}</span></button>; })}</nav>;
 
-  return <main className="min-h-screen bg-[#f7f7f2] pb-12 text-[#263327]"><div className="mx-auto max-w-6xl px-3 py-3 sm:px-5 sm:py-5"><header className="rounded-2xl border border-white bg-[#fffefa]/95 px-3 py-3 shadow-sm sm:px-4"><div className="flex items-center justify-between gap-3"><button onClick={() => navigate("today")} className="flex shrink-0 items-center gap-2.5 text-left"><div className="grid h-9 w-9 place-items-center rounded-xl bg-[#263327] font-serif text-lg italic text-[#ecf8c5]">v</div><span className="font-semibold tracking-[-.04em] text-[#263327]">virasquare</span></button>{nav()}<button onClick={() => navigate("brand")} className="hidden rounded-xl px-3 py-2 text-xs font-semibold text-[#667265] hover:bg-[#eef4ea] sm:block">{workspace.data.profile.businessName}</button><button onClick={() => navigate("brand")} className="grid h-8 w-8 place-items-center rounded-full bg-[#e5efdf] text-xs font-bold text-[#537344] sm:hidden">{workspace.data.profile.businessName.slice(0, 1).toUpperCase()}</button></div><div className="mt-3 border-t border-[#edf0ea] pt-2 lg:hidden">{nav(true)}</div></header>{reminder.data && <button onClick={() => setSelected(reminder.data?.item as Item)} className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border border-[#cfe0c7] bg-[#eef7e9] p-4 text-left text-sm text-[#45623e]"><span><strong>Prepare for tomorrow.</strong> {reminder.data.note}</span><Package className="h-5 w-5 shrink-0" /></button>}<section className="pt-6">{view === "today" && <section><div className="rounded-[2rem] bg-[#263327] p-6 text-[#f7faed] shadow-lg sm:p-9"><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#cce1b8]">{readable(today, { weekday: "long", month: "long", day: "numeric" })}</p><p className="mt-7 text-sm text-[#c7d4c1]">Today’s planned content</p><h1 className="mt-1 max-w-4xl font-serif text-4xl leading-[.95] sm:text-5xl lg:text-6xl">{current?.objective || "Finding your focus"}</h1>{current && <div className={cn("mt-6 inline-flex items-center gap-3 rounded-xl border px-3 py-2", current.lifecycleStatus === "posted" ? "border-[#c9dfb4]/50 bg-[#4a6845]" : "border-white/15 bg-white/8")}><CheckCircle2 className={cn("h-4 w-4", current.lifecycleStatus === "posted" ? "text-[#eaf2ca]" : "text-[#cce1b8]")} /><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#cce1b8]">{todayProgress.label}</p><p className="mt-0.5 text-xs text-[#e3ecdc]">{todayProgress.detail}</p></div></div>}{current ? <button onClick={() => setSelected(current)} className="group mt-6 w-full max-w-4xl rounded-2xl border border-white/10 bg-white/10 p-5 text-left transition hover:border-[#eaf2ca]/40 hover:bg-white/15"><p className="text-[10px] font-bold uppercase tracking-wider text-[#cce1b8]">Your planned post · {current.lifecycleStatus}</p><h2 className="mt-2 font-serif text-2xl sm:text-3xl">{current.title}</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-[#d6e0d1]">{current.brief}</p><span className="mt-5 inline-flex items-center rounded-xl bg-[#eaf2ca] px-3 py-2 text-xs font-bold text-[#263327] shadow-sm transition group-hover:bg-[#f6fadf]">Open today’s post <ChevronRight className="ml-1 h-3.5 w-3.5" /></span></button> : <p className="mt-7">Your first recommendation is being prepared.</p>}</div><div className="mt-8 flex items-end justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">THIS WEEK</p><h2 className="mt-1 font-serif text-2xl">Your planned rhythm</h2></div><button onClick={() => navigate("calendar")} className="text-sm font-semibold text-[#527542]">View calendar <ChevronRight className="inline h-4 w-4" /></button></div><div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-7">{dates.map(date => { const item = plan.find(value => value.plannedFor === date); return <article key={date} className={cn("min-h-40 rounded-2xl border p-3", item ? "border-[#e2e8de] bg-[#fffefa]" : hasActivePlan ? "border-[#d4e3cc] bg-[#f4f8f1]" : "border-dashed border-[#dce5d8] bg-[#fbfcf9]")}><p className="text-[10px] font-bold uppercase tracking-wider text-[#788676]">{readable(date, { weekday: "short" })}</p><p className="mt-1 font-serif text-xl">{readable(date, { day: "numeric" })}</p>{item ? <button onClick={() => setSelected(item)} className="mt-5 text-left"><p className="line-clamp-3 text-xs font-medium leading-5 text-[#475347]">{item.title}</p><p className="mt-2 text-[10px] font-bold uppercase text-[#75965f]">{item.lifecycleStatus}</p></button> : <div className="mt-5"><p className="text-[10px] font-bold uppercase tracking-[.1em] text-[#5d8152]">{emptyDay.eyebrow}</p><p className="mt-2 text-xs font-semibold leading-5 text-[#4b5c49]">{emptyDay.title}</p><p className="mt-1 text-[11px] leading-4 text-[#788475]">{emptyDay.detail}</p></div>}</article>; })}</div><AlternativeIdeaGenerator date={today} onSelected={setSelected} /></section>}{view === "calendar" && <CalendarPanel plan={plan} dates={dates} select={setSelected} makePlan={() => makePlan.mutate({ dates })} planning={makePlan.isPending} weeklyPostGoal={workspace.data.profile.weeklyPostGoal} />}{view === "products" && <ProductManager />}{view === "library" && <section><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR WORK</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">Library</h1><div className="mt-5 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-[#eaf3e4] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#527542]">Generated</p><p className="mt-2 font-serif text-3xl text-[#334b32]">{activity.data?.filter(event => event.eventType === "generated").length || 0}</p></div><div className="rounded-2xl bg-[#fff2d6] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#806531]">Downloaded</p><p className="mt-2 font-serif text-3xl text-[#68552e]">{activity.data?.filter(event => event.eventType === "downloaded").length || 0}</p></div><div className="rounded-2xl bg-[#edf0ff] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#55639a]">Posted</p><p className="mt-2 font-serif text-3xl text-[#394979]">{activity.data?.filter(event => event.eventType === "posted").length || 0}</p></div></div><div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{library.data?.map((entry: any) => <button key={entry.id} onClick={() => setSelected({ ...entry, hashtags: [], carouselSlides: [] } as Item)} className="rounded-2xl border border-[#e2e8de] bg-[#fffefa] p-4 text-left"><p className="text-[10px] font-bold uppercase tracking-wide text-[#75965f]">{entry.lifecycleStatus}</p><h2 className="mt-3 font-serif text-xl text-[#263327]">{entry.title}</h2><p className="mt-2 line-clamp-2 text-sm text-[#6c776b]">{entry.brief}</p></button>)}</div><p className="mt-7 text-sm text-[#6c776b]">{visuals.data?.filter(Boolean).length || 0} visual set(s) saved in your library.</p></section>}{view === "brand" && profile.data && <BrandSettings profile={profile.data} onEditProfile={onEditProfile} />}</section></div>{selected && <ContentDetail item={selected} close={() => setSelected(null)} />}</main>;
+  return <main className="min-h-screen bg-[#f7f7f2] pb-12 text-[#263327]"><div className="mx-auto max-w-6xl px-3 py-3 sm:px-5 sm:py-5"><header className="rounded-2xl border border-white bg-[#fffefa]/95 px-3 py-3 shadow-sm sm:px-4"><div className="flex items-center justify-between gap-3"><button onClick={() => navigate("today")} className="flex shrink-0 items-center gap-2.5 text-left"><div className="grid h-9 w-9 place-items-center rounded-xl bg-[#263327] font-serif text-lg italic text-[#ecf8c5]">v</div><span className="font-semibold tracking-[-.04em] text-[#263327]">virasquare</span></button>{nav()}<button onClick={() => navigate("brand")} className="hidden rounded-xl px-3 py-2 text-xs font-semibold text-[#667265] hover:bg-[#eef4ea] sm:block">{workspace.data.profile.businessName}</button><button onClick={() => navigate("brand")} className="grid h-8 w-8 place-items-center rounded-full bg-[#e5efdf] text-xs font-bold text-[#537344] sm:hidden">{workspace.data.profile.businessName.slice(0, 1).toUpperCase()}</button></div><div className="mt-3 border-t border-[#edf0ea] pt-2 lg:hidden">{nav(true)}</div></header>
+    {reminder.data && <button onClick={() => setSelected(reminder.data?.item as Item)} className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border border-[#cfe0c7] bg-[#eef7e9] p-4 text-left text-sm text-[#45623e]"><span><strong>Prepare for tomorrow.</strong> {reminder.data.note}</span><Package className="h-5 w-5 shrink-0"/></button>}
+    <section className="pt-6">{view === "today" && <section><div className="rounded-[2rem] bg-[#263327] p-6 text-[#f7faed] shadow-lg sm:p-9"><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#cce1b8]">{readable(today, { weekday: "long", month: "long", day: "numeric" })}</p><p className="mt-7 text-sm text-[#c7d4c1]">Today’s planned content</p><h1 className="mt-1 max-w-4xl font-serif text-4xl leading-[.95] sm:text-5xl lg:text-6xl">{current?.objective || "Finding your focus"}</h1>{current && <div className={cn("mt-6 inline-flex items-center gap-3 rounded-xl border px-3 py-2", current.lifecycleStatus === "posted" ? "border-[#c9dfb4]/50 bg-[#4a6845]" : "border-white/15 bg-white/8")}><CheckCircle2 className={cn("h-4 w-4", current.lifecycleStatus === "posted" ? "text-[#eaf2ca]" : "text-[#cce1b8]")}/><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#cce1b8]">{todayProgress.label}</p><p className="mt-0.5 text-xs text-[#e3ecdc]">{todayProgress.detail}</p></div></div>}{current ? <button onClick={() => setSelected(current)} className="group mt-6 w-full max-w-4xl rounded-2xl border border-white/10 bg-white/10 p-5 text-left transition hover:border-[#eaf2ca]/40 hover:bg-white/15"><p className="text-[10px] font-bold uppercase tracking-wider text-[#cce1b8]">Your planned post · {current.lifecycleStatus}</p><h2 className="mt-2 font-serif text-2xl sm:text-3xl">{current.title}</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-[#d6e0d1]">{current.brief}</p><span className="mt-5 inline-flex items-center rounded-xl bg-[#eaf2ca] px-3 py-2 text-xs font-bold text-[#263327] shadow-sm transition group-hover:bg-[#f6fadf]">Open today’s post <ChevronRight className="ml-1 h-3.5 w-3.5"/></span></button> : <p className="mt-7">Your first recommendation is being prepared.</p>}</div><div className="mt-8 flex items-end justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">THIS WEEK</p><h2 className="mt-1 font-serif text-2xl">Your planned rhythm</h2></div><button onClick={() => navigate("calendar")} className="text-sm font-semibold text-[#527542]">View calendar <ChevronRight className="inline h-4 w-4"/></button></div><div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-7">{dates.map(date => { const item = plan.find(value => value.plannedFor === date); return <article key={date} className={cn("min-h-40 rounded-2xl border p-3", item ? "border-[#e2e8de] bg-[#fffefa]" : hasActivePlan ? "border-[#d4e3cc] bg-[#f4f8f1]" : "border-dashed border-[#dce5d8] bg-[#fbfcf9]")}><p className="text-[10px] font-bold uppercase tracking-wider text-[#788676]">{readable(date, { weekday: "short" })}</p><p className="mt-1 font-serif text-xl">{readable(date, { day: "numeric" })}</p>{item ? <button onClick={() => setSelected(item)} className="mt-5 text-left"><p className="line-clamp-3 text-xs font-medium leading-5 text-[#475347]">{item.title}</p><p className="mt-2 text-[10px] font-bold uppercase text-[#75965f]">{item.lifecycleStatus}</p></button> : <div className="mt-5"><p className="text-[10px] font-bold uppercase tracking-[.1em] text-[#5d8152]">{emptyDay.eyebrow}</p><p className="mt-2 text-xs font-semibold leading-5 text-[#4b5c49]">{emptyDay.title}</p><p className="mt-1 text-[11px] leading-4 text-[#788475]">{emptyDay.detail}</p></div>}</article>; })}</div><AlternativeIdeaGenerator date={today} onSelected={setSelected} onNeedProduct={() => { navigate("products"); toast.message("Add a product first, then come back to create product-led content."); }}/></section>}
+      {view === "calendar" && <CalendarPanel plan={plan} dates={dates} select={setSelected} makePlan={() => makePlan.mutate({ dates })} planning={makePlan.isPending} weeklyPostGoal={workspace.data.profile.weeklyPostGoal}/>} {view === "products" && <ProductManager/>} {view === "library" && <section><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#75965f]">YOUR WORK</p><h1 className="mt-1 font-serif text-3xl text-[#263327]">Library</h1><div className="mt-5 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-[#eaf3e4] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#527542]">Generated</p><p className="mt-2 font-serif text-3xl text-[#334b32]">{activity.data?.filter(event => event.eventType === "generated").length || 0}</p></div><div className="rounded-2xl bg-[#fff2d6] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#806531]">Downloaded</p><p className="mt-2 font-serif text-3xl text-[#68552e]">{activity.data?.filter(event => event.eventType === "downloaded").length || 0}</p></div><div className="rounded-2xl bg-[#edf0ff] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#55639a]">Posted</p><p className="mt-2 font-serif text-3xl text-[#394979]">{activity.data?.filter(event => event.eventType === "posted").length || 0}</p></div></div><div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{library.data?.map((entry: any) => <button key={entry.id} onClick={() => setSelected({ ...entry, hashtags: [], carouselSlides: [] } as Item)} className="rounded-2xl border border-[#e2e8de] bg-[#fffefa] p-4 text-left"><p className="text-[10px] font-bold uppercase tracking-wide text-[#75965f]">{entry.lifecycleStatus}</p><h2 className="mt-3 font-serif text-xl text-[#263327]">{entry.title}</h2><p className="mt-2 line-clamp-2 text-sm text-[#6c776b]">{entry.brief}</p></button>)}</div><p className="mt-7 text-sm text-[#6c776b]">{visuals.data?.filter(Boolean).length || 0} visual set(s) saved in your library.</p></section>}{view === "brand" && profile.data && <BrandSettings profile={profile.data} onEditProfile={onEditProfile}/>}</section></div><ProgressivePrompts profile={workspace.data.profile} current={current} productCount={workspace.data.productCount} onOpenProducts={() => navigate("products")}/>{selected && <ContentDetail item={selected} close={() => setSelected(null)}/>}</main>;
 }

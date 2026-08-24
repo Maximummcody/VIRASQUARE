@@ -113,3 +113,17 @@
 - [x] Complete one final cross-family visual review of every layout changed by the stable-footer text-panel refinement.
 - [x] Receive simple user confirmation that OpenAI sharing remains disabled and that one new ViraSquare post plus visual can be created normally.
 - [x] Add protected title and graphic-badge lanes to prevent header collisions in long-title rich cards without changing other templates.
+- [x] Audit and redesign the product-information flow so product-specific content is grounded in category-aware verified facts rather than only name, price, image, and freeform details.
+- [x] Design a post-value “Make your content more like your business” profile-enrichment flow that collects only useful additional business context after users see ViraSquare’s value.
+- [x] Discuss and approve only business-context questions that materially change ViraSquare’s ideas, claims, content angles, proof, or calls to action before implementation.
+- [x] Finalize user-friendly core-question wording with brief parenthetical examples that work across the first audience categories.
+- [x] Define and approve a restrained card-branding hierarchy: logo and brand name at the top, Instagram handle in the footer, and no cluttering decorative additions.
+- [x] Finalize the plain-language product-information entry point and high-impact category-aware product questions before changing the product form.
+- [x] Decide the exact product-led generation handoff, including when a user selects a product and which verified facts ViraSquare may use.
+- [x] Preserve the agreed journey: first value, optional Business context prompt, gentle product invitation, soft no-product reminders, and mandatory product selection only for product-led content.
+- [x] Do not add a bulk-product feature; keep the two extended product questions optional but strongly recommended for individual products.
+- [x] Build the approved progressive Business context prompt and saveable context page without expanding first-time onboarding.
+- [x] Build quick product add plus optional, strongly recommended product enrichment fields without a bulk-product feature.
+- [x] Require selected product facts only for product-led generation and offer gentle no-product reminders outside that path.
+- [x] Add optional brand-logo, brand-name, Instagram-footer, and closing-signature configuration to Card Engine outputs.
+- [ ] Test and synchronize the complete progressive personalization foundation after user validation.

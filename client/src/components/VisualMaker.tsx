@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { Download, ImagePlus, Layers3, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type ContentItem = {
@@ -14,6 +14,7 @@ type ContentItem = {
   caption: string | null;
   requiresProduct: boolean;
   preparationNote: string | null;
+  productId?: number | null;
   carouselSlides: Array<{ cardType?: string; eyebrow?: string; heading: string; body: string; footer?: string }>;
 };
 
@@ -37,6 +38,10 @@ export function VisualMaker({ item }: { item: ContentItem }) {
   const [file, setFile] = useState<File | null>(null);
   const [deliverable, setDeliverable] = useState<any>(null);
   const [problem, setProblem] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (item.productId) setSelectedProductId(item.productId);
+  }, [item.productId]);
 
   const createProduct = trpc.virasquare.createProduct.useMutation({
     onSuccess: product => {
@@ -146,7 +151,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
         <div className="grid gap-2"><Label>Product name</Label><Input value={productName} onChange={event => setProductName(event.target.value)} placeholder="e.g. Classic everyday watch" /></div>
         <div className="grid gap-2"><Label>Verified price <span className="font-normal text-[#879187]">(optional)</span></Label><Input value={price} onChange={event => setPrice(event.target.value)} placeholder="e.g. 50,000" /></div>
         <div className="grid gap-2 sm:col-span-2"><Label>Product photo</Label><label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[#b9cdb0] bg-[#f8fbf6] px-3 py-3 text-sm text-[#5d7558] hover:bg-[#eff6eb]"><Upload className="h-4 w-4" /><span className="truncate">{file ? file.name : "Choose a PNG, JPEG, or WebP image"}</span><input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event => setFile(event.target.files?.[0] ?? null)} /></label></div>
-        <div className="grid gap-2 sm:col-span-2"><Label>Verified details <span className="font-normal text-[#879187]">(optional)</span></Label><Textarea value={details} onChange={event => setDetails(event.target.value)} placeholder="Only add facts you know are correct, such as colour, material, size, or order information." className="min-h-20 resize-none" /></div>
+        <div className="grid gap-2 sm:col-span-2"><Label>Help us understand this product <span className="font-normal text-[#879187]">(optional)</span></Label><Textarea value={details} onChange={event => setDetails(event.target.value)} placeholder="Share facts you are sure of, such as colour, material, size, or order information." className="min-h-20 resize-none" /></div>
         <div className="sm:col-span-2"><Button onClick={addProduct} disabled={createProduct.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{createProduct.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}Save real product</Button></div>
       </div>}
     </div> : <div className="mt-5 rounded-xl border border-[#e0e9da] bg-white p-4"><p className="text-sm font-semibold text-[#3d4c3e]">This is a rich branded card set.</p><p className="mt-1 text-sm leading-6 text-[#788477]">No product image is needed. ViraSquare will turn the full structured content into complete, ready-to-post cards.</p></div>}

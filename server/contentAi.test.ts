@@ -40,6 +40,21 @@ describe("ViraSquare live AI availability", () => {
     expect(openAi.requestOpenAiStructuredText).toHaveBeenCalledWith(expect.objectContaining({ schemaName: "content_ideas", messages: expect.arrayContaining([expect.objectContaining({ role: "system" }), expect.objectContaining({ role: "user", content: expect.stringContaining("Jewellery care") })]) }));
   });
 
+  it("passes only the selected product facts into a product-led Luna request", async () => {
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ ideas: [{ title: "A clear everyday hoop guide", objective: "Feature a product", format: "promo", brief: "Explain the real material, lightweight feel, and two available sizes without inventing a claim." }] }));
+
+    await generateIdeas(profile, "promo", [], {
+      objective: "Feature a product",
+      selectedProduct: { id: 19, name: "Everyday hoop earrings", price: "18500", currency: "NGN", productCategory: "accessories", bestFor: "Everyday wear and simple gifting", choiceReasons: "Gold-plated finish and two sizes", buyerNote: "Confirm your preferred size before ordering", categoryDetails: "Lightweight hoops in small and medium", details: "Gold-plated, lightweight, two sizes" },
+    });
+
+    const call = openAi.requestOpenAiStructuredText.mock.calls.at(-1)?.[0];
+    expect(call.messages[0].content).toContain("use only its supplied facts");
+    expect(call.messages[1].content).toContain('"selectedProduct":{"id":19');
+    expect(call.messages[1].content).toContain('"name":"Everyday hoop earrings"');
+    expect(call.messages[1].content).toContain('"choiceReasons":"Gold-plated finish and two sizes"');
+  });
+
   it("carries the customer market and complete-card rendering contract into a Luna content request", async () => {
     openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "A practical jewellery care guide", objective: "Education", format: "caption", brief: "Help customers protect everyday pieces with realistic habits.", caption: "A useful caption.", hashtags: ["#JewelleryCare"], requiresProduct: false, preparationNote: "", carouselSlides: [] }));
 

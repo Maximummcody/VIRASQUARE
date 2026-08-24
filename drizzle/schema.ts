@@ -21,6 +21,7 @@ export const activityTypeValues = ["generated", "reviewed", "downloaded", "poste
 export const feedbackOutcomeValues = ["not_set", "conversations", "orders", "engagement", "saved_for_later"] as const;
 export const cardTypeValues = ["cover", "guide", "checklist", "comparison", "faq", "product", "closing"] as const;
 export const generationSourceValues = ["ai", "starter"] as const;
+export const contextStatusValues = ["not_started", "dismissed", "completed"] as const;
 
 export const businessProfiles = mysqlTable("business_profiles", {
   id: int("id").autoincrement().primaryKey(),
@@ -39,6 +40,11 @@ export const businessProfiles = mysqlTable("business_profiles", {
   brandPrimaryColor: varchar("brandPrimaryColor", { length: 20 }).notNull().default("#263327"),
   brandAccentColor: varchar("brandAccentColor", { length: 20 }).notNull().default("#EAF2CA"),
   defaultCta: varchar("defaultCta", { length: 120 }).notNull().default("Send us a message to order."),
+  instagramHandle: varchar("instagramHandle", { length: 80 }),
+  closingSignature: varchar("closingSignature", { length: 140 }),
+  businessContext: text("businessContext"),
+  businessContextStatus: mysqlEnum("businessContextStatus", contextStatusValues).notNull().default("not_started"),
+  productInviteStatus: mysqlEnum("productInviteStatus", contextStatusValues).notNull().default("not_started"),
   isOnboarded: boolean("isOnboarded").notNull().default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -55,6 +61,7 @@ export const contentItems = mysqlTable("content_items", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   profileId: int("profileId").notNull().references(() => businessProfiles.id, { onDelete: "cascade" }),
+  productId: int("productId").references(() => products.id, { onDelete: "set null" }),
   plannedFor: varchar("plannedFor", { length: 10 }).notNull(),
   title: varchar("title", { length: 300 }).notNull(),
   objective: varchar("objective", { length: 120 }).notNull(),
@@ -96,6 +103,11 @@ export const products = mysqlTable("products", {
   price: varchar("price", { length: 80 }),
   currency: varchar("currency", { length: 12 }).notNull().default("NGN"),
   details: text("details"),
+  productCategory: varchar("productCategory", { length: 100 }),
+  bestFor: varchar("bestFor", { length: 320 }),
+  choiceReasons: text("choiceReasons"),
+  buyerNote: varchar("buyerNote", { length: 500 }),
+  categoryDetails: text("categoryDetails"),
   imageKey: varchar("imageKey", { length: 512 }).notNull(),
   imageUrl: text("imageUrl").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

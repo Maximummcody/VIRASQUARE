@@ -11,6 +11,8 @@ const database = vi.hoisted(() => ({
   createContentItem: vi.fn(),
   createProduct: vi.fn(),
   addProductMedia: vi.fn(),
+  getProductById: vi.fn(),
+  updateProductInviteStatus: vi.fn(),
   getContentItemForDate: vi.fn(),
   updateContentLifecycle: vi.fn(),
   recordContentActivity: vi.fn(),
@@ -114,5 +116,12 @@ describe("ViraSquare protected procedures", () => {
 
     expect(ai.generateIdeas).toHaveBeenCalledWith(expect.objectContaining({ businessName: "Clarity Studio" }), "carousel", [], { objective: "Engagement", topic: "Choosing a confident brand voice" });
     expect(ideas[0]?.title).toBe("A helpful carousel");
+  });
+
+  it("requires a selected product for product-post format even when a different objective is supplied", async () => {
+    database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, userId: 72, businessName: "Clarity Studio", businessType: "Brand strategist", targetAudience: "Small business founders", contentPillars: JSON.stringify(["Educate", "Build trust"]), postingGoal: "Build authority", weeklyPostGoal: 4, brandVoice: "Clear and kind", isOnboarded: true });
+
+    await expect(viraSquareRouter.createCaller(context(72)).generateIdeas({ format: "promo", objective: "Education" })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    expect(database.getProductById).not.toHaveBeenCalled();
   });
 });

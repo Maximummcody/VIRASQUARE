@@ -63,4 +63,40 @@ describe("ViraSquare Card Engine", () => {
     expect(svg).toContain("from top to");
     expect(svg).toContain(">bottom</text>");
   });
+
+  it("uses the optional logo and Instagram footer without changing the branded-card copy layout", () => {
+    const svg = buildRichCardSvg({ ...brand, brandLogoDataUri: "data:image/png;base64,TE9HTw==", instagramHandle: "tomistime" }, {
+      cardType: "guide",
+      eyebrow: "STYLE NOTE",
+      heading: "Choose one dependable detail before adding more",
+      body: "Start with the piece you use most often, then add only the colour and texture that help the outfit feel considered for an ordinary day.",
+      footer: "Save this simple styling note",
+    }, 2, 4);
+
+    expect(svg).toContain('href="data:image/png;base64,TE9HTw=="');
+    expect(svg).toContain("@tomistime");
+    expect(svg).toContain("Tomi&apos;s Time");
+  });
+
+  it("uses the closing signature only on a closing card", () => {
+    const identity = { ...brand, instagramHandle: "tomistime", closingSignature: "With care, Tomi" };
+    const guide = buildRichCardSvg(identity, {
+      cardType: "guide",
+      eyebrow: "STYLE NOTE",
+      heading: "Keep one useful check before you make a choice",
+      body: "Use the detail you can verify, then explain why it helps the customer choose with more confidence and less uncertainty today.",
+      footer: "Save this practical reminder",
+    }, 2, 4);
+    const closing = buildRichCardSvg(identity, {
+      cardType: "closing",
+      eyebrow: "A FINAL NOTE",
+      heading: "Choose what feels useful for your everyday life",
+      body: "Keep the decision simple. Start with what fits your routine, then ask the questions that help you choose something you will enjoy using regularly.",
+      footer: "Come back when you need a clear guide",
+    }, 4, 4);
+
+    expect(guide).toContain("Tomi&apos;s Time");
+    expect(guide).not.toContain("With care, Tomi");
+    expect(closing).toContain("With care, Tomi");
+  });
 });

@@ -130,3 +130,5 @@
 - [x] Simplify product strengthening inputs to the two approved optional but strongly recommended questions, preserving existing saved product data.
 - [x] Refine workspace visual hierarchy and density: tighten Today, navigation, Calendar, reminder placement, and product-form rhythm without changing existing workflows.
 - [x] Apply the approved final workspace polish: a stronger visible Today progress moment, a composed Calendar board, and guided Business context styling without workflow changes.
+- [x] Create and maintain a user-approved deferred-work register so paused ViraSquare ideas are preserved without being built prematurely.
+- [ ] Decide ViraSquare’s defensible paid value beyond general chat tools before expanding the product-image workflow or other features.

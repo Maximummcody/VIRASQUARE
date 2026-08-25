@@ -140,6 +140,9 @@
 - [ ] Decide after testing whether default real-photo enhancement and optional styled-photo treatment use one or two image providers, with clear truth-preservation safeguards.
 - [ ] Preserve the clarified two-mode concept for later approval: believable default “Generate product-post card” and clearly disclosed optional “Stylish generation.”
 - [ ] Discuss and keep for later review an industry-aware product creative-direction system that hides structured image instructions behind simple owner choices.
-- [ ] Keep for later review: GPT Image 2 is the current leading candidate after user testing; default product-post generation must preserve the real uploaded product, while Stylish generation requires clear owner disclosure and consent.
+- [x] Select GPT Image 2 as the user-tested image-model direction for later implementation, subject to the kept product-truth and Stylish-generation safeguards.
+- [ ] Use the existing server-only OpenAI API account directly for GPT Image 2 when the user later approves product-visual implementation; do not add a separate image-service intermediary.
 - [ ] Run a limited real-product GPT Image 2 limit test before any implementation approval, covering product fidelity, text/layout limits, varied categories, and normal versus stylish modes.
 - [x] Keep for later approval a universal product-visual safety standard: faithful default product preservation and restrained, clearly disclosed Stylish generation.
+- [ ] Define and prepare the approved future scope for owner-reviewed Instagram/Facebook publishing and Calendar scheduling before integration implementation.
+- [x] Prepare a complete numbered schedule for all kept updates, with dependencies, workflow-change effects, and explicit user approval gates before building any phase.

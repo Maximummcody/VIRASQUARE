@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +39,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
   const [file, setFile] = useState<File | null>(null);
   const [deliverable, setDeliverable] = useState<any>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  const [stylishGeneration, setStylishGeneration] = useState(false);
 
   useEffect(() => {
     if (item.productId) setSelectedProductId(item.productId);
@@ -64,7 +66,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
     onSuccess: value => {
       setDeliverable(value);
       utils.virasquare.visuals.invalidate();
-      toast.success("Your complete visual is ready to review.");
+      toast.success(value.slides?.[0]?.sourceMode === "product" ? "Your original product photo was kept in the finished card." : "Your product card is ready to review.");
     },
     onError: error => {
       setProblem(error.message);
@@ -96,7 +98,6 @@ export function VisualMaker({ item }: { item: ContentItem }) {
 
   const selected = useMemo(() => products.data?.find(product => product.id === selectedProductId), [products.data, selectedProductId]);
   const canMakeProductPost = Boolean(item.requiresProduct && selectedProductId && item.caption);
-  const canMakeCarousel = Boolean(item.caption && (!item.requiresProduct || selectedProductId));
 
   const addProduct = async () => {
     if (!file || productName.trim().length < 2) {
@@ -119,7 +120,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
 
   const beginVisual = (type: "single_post" | "carousel") => {
     setProblem(null);
-    makeVisual.mutate({ itemId: item.id, productId: selectedProductId, type });
+    makeVisual.mutate({ itemId: item.id, productId: selectedProductId, type, visualMode: type === "single_post" && stylishGeneration ? "stylish" : "standard" });
   };
 
   return <section className="mt-5 rounded-2xl border border-[#dce8d5] bg-[#f8fbf5] p-4">
@@ -127,7 +128,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
       <div>
         <p className="eyebrow">MAKE MY VISUAL</p>
         <h3 className="mt-1 font-serif text-2xl text-[#2d3c2e]">A complete post, not just a prompt.</h3>
-        <p className="mt-1 max-w-xl text-sm leading-6 text-[#6b786b]">Use a real product when accuracy matters, or make a full carousel with relevant visual scenes for each slide.</p>
+        <p className="mt-1 max-w-xl text-sm leading-6 text-[#6b786b]">Product posts keep your real saved product at the centre. Educational posts remain rich branded card sets.</p>
       </div>
       <ImagePlus className="h-6 w-6 shrink-0 text-[#71975f]" />
     </div>
@@ -156,10 +157,19 @@ export function VisualMaker({ item }: { item: ContentItem }) {
       </div>}
     </div> : <div className="mt-5 rounded-xl border border-[#e0e9da] bg-white p-4"><p className="text-sm font-semibold text-[#3d4c3e]">This is a rich branded card set.</p><p className="mt-1 text-sm leading-6 text-[#788477]">No product image is needed. ViraSquare will turn the full structured content into complete, ready-to-post cards.</p></div>}
 
-    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      {item.requiresProduct && <button type="button" disabled={!canMakeProductPost || makeVisual.isPending} onClick={() => beginVisual("single_post")} className={cn("rounded-xl border p-4 text-left transition-colors", canMakeProductPost ? "border-[#a8c493] bg-white hover:border-[#789c67]" : "cursor-not-allowed border-[#e2e8df] bg-[#f5f7f4] opacity-65")}><p className="text-sm font-semibold text-[#344738]">Make product post</p><p className="mt-1 text-xs leading-5 text-[#748174]">{selected ? `Use ${selected.name} with the facts you saved.` : item.preparationNote || "Choose a real product above first."}</p></button>}
-      <button type="button" disabled={!canMakeCarousel || makeVisual.isPending} onClick={() => beginVisual("carousel")} className={cn("rounded-xl border p-4 text-left transition-colors", canMakeCarousel ? "border-[#a8c493] bg-white hover:border-[#789c67]" : "cursor-not-allowed border-[#e2e8df] bg-[#f5f7f4] opacity-65", !item.requiresProduct && "sm:col-span-2")}><p className="flex items-center gap-2 text-sm font-semibold text-[#344738]"><Layers3 className="h-4 w-4 text-[#71975f]" />Make complete card set</p><p className="mt-1 text-xs leading-5 text-[#748174]">Every card is structured, branded, and ready to review.</p></button>
-    </div>
+    {item.requiresProduct ? <div className="mt-4 rounded-2xl border border-[#cfe0c4] bg-white p-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#344738]">Generate product-post card</p>
+          <p className="mt-1 max-w-xl text-xs leading-5 text-[#748174]">{selected ? `ViraSquare will keep ${selected.name} believable, then add the exact saved price and brand details in its controlled card layout.` : item.preparationNote || "Choose a real product above first."}</p>
+        </div>
+        <Button type="button" disabled={!canMakeProductPost || makeVisual.isPending} onClick={() => beginVisual("single_post")} className="shrink-0 rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{makeVisual.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}{stylishGeneration ? "Generate stylish card" : "Generate product card"}</Button>
+      </div>
+      <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-[#e2eadc] bg-[#f8fbf5] p-3">
+        <Checkbox checked={stylishGeneration} onCheckedChange={value => setStylishGeneration(value === true)} className="mt-0.5 border-[#839e77] data-[state=checked]:bg-[#557b45]" />
+        <span><span className="text-sm font-semibold text-[#405142]">Stylish generation <span className="font-normal text-[#738071]">(optional)</span></span><span className="mt-1 block text-xs leading-5 text-[#748174]">Create a more campaign-style visual. It may change the background, lighting, crop, and small visual details. Use this when you want a creative look rather than an exact photo match.</span></span>
+      </label>
+    </div> : <div className="mt-4"><button type="button" disabled={!item.caption || makeVisual.isPending} onClick={() => beginVisual("carousel")} className={cn("w-full rounded-xl border p-4 text-left transition-colors", item.caption ? "border-[#a8c493] bg-white hover:border-[#789c67]" : "cursor-not-allowed border-[#e2e8df] bg-[#f5f7f4] opacity-65")}><p className="flex items-center gap-2 text-sm font-semibold text-[#344738]"><Layers3 className="h-4 w-4 text-[#71975f]" />Make complete card set</p><p className="mt-1 text-xs leading-5 text-[#748174]">Every card is structured, branded, and ready to review.</p></button></div>}
     {makeVisual.isPending && <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#eaf3e4] p-3 text-sm text-[#4e6b45]"><Loader2 className="h-4 w-4 animate-spin" />Making your complete visual set. This can take a short moment.</div>}
     {problem && <div role="alert" className="mt-4 flex items-start justify-between gap-3 rounded-xl border border-[#efd4c6] bg-[#fff5f0] p-3 text-sm text-[#834e3d]"><p>{problem} You can try again, use a smaller image, or choose a different saved product.</p><button onClick={() => setProblem(null)} className="font-semibold underline">Dismiss</button></div>}
 
@@ -168,7 +178,8 @@ export function VisualMaker({ item }: { item: ContentItem }) {
         <div><p className="eyebrow">YOUR READY-TO-POST VISUALS</p><h4 className="mt-1 font-serif text-xl text-[#2e3c2e]">Review each slide before you post.</h4></div>
         <div className="flex items-center gap-2"><Button onClick={() => { setProblem(null); exportVisualSet.mutate({ deliverableId: deliverable.id }); }} disabled={exportVisualSet.isPending} variant="outline" className="rounded-xl border-[#b7cda9] bg-white text-[#43663a] hover:bg-[#eef6e9]">{exportVisualSet.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download full set</Button><Sparkles className="h-5 w-5 text-[#71975f]" /></div>
       </div>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">{deliverable.slides.map((slide: any) => <article key={slide.id ?? slide.slideNumber} className="overflow-hidden rounded-2xl border border-[#e0e8dd] bg-white"><div className="aspect-[4/5] bg-[#edf2e8]">{slide.assetUrl ? <img src={slide.assetUrl} alt={`Visual slide ${slide.slideNumber}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm text-[#789075]">Preparing slide…</div>}</div><div className="flex items-center justify-between gap-2 p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#759166]">Slide {slide.slideNumber}</p><p className="mt-1 line-clamp-1 text-sm font-semibold text-[#405142]">{slide.heading}</p></div><div className="flex gap-1"><Button title="Refresh this slide" onClick={() => { setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: slide.slideNumber }); }} disabled={regenerate.isPending} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><RefreshCw className={cn("h-4 w-4", regenerate.isPending && "animate-spin")} /></Button>{slide.assetUrl && <Button asChild title="Download slide" size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><a href={slide.assetUrl} download={`virasquare-${slide.slideNumber}.png`}><Download className="h-4 w-4" /></a></Button>}</div></div></article>)}</div>
+      {deliverable.type === "single_post" && <div className={cn("mt-4 rounded-xl border p-3 text-xs leading-5", deliverable.slides[0]?.sourceMode === "product" ? "border-[#d4e5c9] bg-[#f4faef] text-[#527044]" : "border-[#e2eadc] bg-[#f8fbf5] text-[#657563]")}>{deliverable.slides[0]?.sourceMode === "product" ? "ViraSquare kept your original uploaded product photo in this card because the AI version was not available or did not pass safely." : deliverable.generationMode === "stylish" ? "Stylish generation was used for this card. The final price and brand details remain controlled by ViraSquare." : "Your product visual was made from your real uploaded product photo and the facts you saved."}</div>}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">{deliverable.slides.map((slide: any) => <article key={slide.id ?? slide.slideNumber} className="overflow-hidden rounded-2xl border border-[#e0e8dd] bg-white"><div className="aspect-[4/5] bg-[#edf2e8]">{slide.assetUrl ? <img src={slide.assetUrl} alt={`Visual slide ${slide.slideNumber}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm text-[#789075]">Preparing slide…</div>}</div><div className="flex items-center justify-between gap-2 p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#759166]">{deliverable.type === "single_post" ? "PRODUCT POST" : `Slide ${slide.slideNumber}`}</p><p className="mt-1 line-clamp-1 text-sm font-semibold text-[#405142]">{slide.heading}</p></div><div className="flex gap-1"><Button title={deliverable.type === "single_post" ? "Generate another version" : "Refresh this slide"} onClick={() => { setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: slide.slideNumber }); }} disabled={regenerate.isPending} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><RefreshCw className={cn("h-4 w-4", regenerate.isPending && "animate-spin")} /></Button>{slide.assetUrl && <Button asChild title="Download slide" size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><a href={slide.assetUrl} download={`virasquare-${slide.slideNumber}.png`}><Download className="h-4 w-4" /></a></Button>}</div></div></article>)}</div>
     </div>}
   </section>;
 }

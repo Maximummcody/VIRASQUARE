@@ -54,7 +54,8 @@ export const contentFormatValues = ["caption", "carousel", "tip", "promo", "stor
 export const contentStatusValues = ["planned", "completed"] as const;
 export const visualDeliverableTypeValues = ["single_post", "carousel", "story"] as const;
 export const visualDeliverableStatusValues = ["draft", "generating", "ready", "failed"] as const;
-export const visualSlideSourceValues = ["product", "generated", "template"] as const;
+export const visualGenerationModeValues = ["standard", "stylish"] as const;
+export const visualSlideSourceValues = ["product", "ai_product", "generated", "template"] as const;
 export const productMediaRoleValues = ["primary", "gallery"] as const;
 
 export const contentItems = mysqlTable("content_items", {
@@ -134,6 +135,7 @@ export const visualDeliverables = mysqlTable("visual_deliverables", {
   type: mysqlEnum("type", visualDeliverableTypeValues).notNull(),
   title: varchar("title", { length: 300 }).notNull(),
   aspectRatio: varchar("aspectRatio", { length: 20 }).notNull().default("1:1"),
+  generationMode: mysqlEnum("generationMode", visualGenerationModeValues).notNull().default("standard"),
   status: mysqlEnum("status", visualDeliverableStatusValues).notNull().default("draft"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

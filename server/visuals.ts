@@ -1,9 +1,11 @@
 import { storageGetSignedUrl, storagePut } from "./storage";
 import { Resvg } from "@resvg/resvg-js";
 import { assertRichCardFits, resolvedTemplateFamily } from "./richCardQuality";
+import { createOpenAiProductVisual } from "./openaiImageProvider";
 
 type Brand = { businessName: string; businessType: string; brandVoice: string; primaryColor?: string; accentColor?: string; defaultCta?: string; brandLogoKey?: string | null; brandLogoDataUri?: string; instagramHandle?: string | null; closingSignature?: string | null };
-type ProductSource = { name: string; price: string | null; currency: string; details: string | null; imageKey: string };
+type ProductSource = { name: string; price: string | null; currency: string; details: string | null; imageKey: string; productCategory?: string | null; bestFor?: string | null; choiceReasons?: string | null; buyerNote?: string | null; categoryDetails?: string | null };
+export type ProductVisualMode = "standard" | "stylish";
 type TemplateFamily = "editorial" | "action" | "comparison" | "explainer" | "conversation";
 type GraphicCue = "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none";
 
@@ -16,7 +18,7 @@ export type VisualSlideDraft = {
   templateFamily?: TemplateFamily;
   graphicCue?: GraphicCue;
 };
-export type RenderedVisual = { assetKey: string; assetUrl: string; sourceMode: "product" | "generated" | "template" };
+export type RenderedVisual = { assetKey: string; assetUrl: string; sourceMode: "product" | "ai_product" | "generated" | "template" };
 
 function escapeXml(value: string) { return value.replace(/[<>&'"]/g, character => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[character] ?? character); }
 function key(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "visual"; }
@@ -129,10 +131,31 @@ function richCardSvg({ brand, draft, number, total, postTemplateFamily }: { bran
 
 export function buildRichCardSvg(brand: Brand, draft: VisualSlideDraft, slideNumber = 1, totalSlides = 1, postTemplateFamily?: TemplateFamily) { return richCardSvg({ brand, draft, number: slideNumber, total: totalSlides, postTemplateFamily }); }
 
-async function dataUriFromKey(storageKey: string) { const url = await storageGetSignedUrl(storageKey); const response = await fetch(url); if (!response.ok) throw new Error("The product image could not be read from storage."); const buffer = Buffer.from(await response.arrayBuffer()); const mime = response.headers.get("content-type")?.split(";")[0] || "image/jpeg"; return `data:${mime};base64,${buffer.toString("base64")}`; }
-async function renderSvg(svg: string, keyPrefix: string): Promise<RenderedVisual> { const png = new Resvg(svg, { fitTo: { mode: "width", value: 1080 } }).render().asPng(); const { key: storedKey, url } = await storagePut(`visuals/${keyPrefix}.png`, png, "image/png"); return { assetKey: storedKey, assetUrl: url, sourceMode: "template" }; }
+async function imageFromKey(storageKey: string) { const url = await storageGetSignedUrl(storageKey); const response = await fetch(url); if (!response.ok) throw new Error("The product image could not be read from storage."); const buffer = Buffer.from(await response.arrayBuffer()); const rawMime = response.headers.get("content-type")?.split(";")[0] || "image/jpeg"; const mime: "image/png" | "image/jpeg" | "image/webp" = rawMime === "image/png" || rawMime === "image/webp" || rawMime === "image/jpeg" ? rawMime : "image/jpeg"; return { buffer, mime, dataUri: `data:${mime};base64,${buffer.toString("base64")}` }; }
+async function dataUriFromKey(storageKey: string) { return (await imageFromKey(storageKey)).dataUri; }
+async function renderSvg(svg: string, keyPrefix: string, sourceMode: RenderedVisual["sourceMode"] = "template"): Promise<RenderedVisual> { const png = new Resvg(svg, { fitTo: { mode: "width", value: 1080 } }).render().asPng(); const { key: storedKey, url } = await storagePut(`visuals/${keyPrefix}.png`, png, "image/png"); return { assetKey: storedKey, assetUrl: url, sourceMode }; }
 function imageBlock(imageData: string, x: number, y: number, width: number, height: number, radius = 46) { const clipId = `clip-${Math.random().toString(36).slice(2, 9)}`; return `<defs><clipPath id="${clipId}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" /></clipPath></defs><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="#e5ece0"/><image href="${imageData}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" clip-path="url(#${clipId})"/>`; }
 function productSvg({ brand, product, image, draft, number, total }: { brand: Brand; product: ProductSource; image: string; draft: VisualSlideDraft; number: number; total: number }) { const colors = palette(brand); const title = wrappedLines(draft.heading, 22).slice(0, 3); const price = product.price ? `${product.currency === "NGN" ? "₦" : `${product.currency} `}${product.price}` : "Ask for today’s price"; return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.soft}"/><circle cx="970" cy="145" r="230" fill="${colors.accent}" opacity=".72"/>${headerSvg(brand, draft, number, total, colors)}${imageBlock(image, 82, 150, 916, 570)}<rect x="82" y="770" width="916" height="456" rx="48" fill="${colors.ink}"/>${textRows(title, 130, 870, 59, "#FFFEFA")}<text x="130" y="${870 + title.length * 65 + 30}" font-family="Arial, sans-serif" font-size="27" fill="#D5E3CF">${escapeXml(short(draft.body || product.details || "A thoughtful choice for your everyday needs.", 160))}</text><line x1="130" y1="1080" x2="950" y2="1080" stroke="#ffffff" stroke-opacity=".20"/><text x="130" y="1145" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="${colors.accent}">${escapeXml(price)}</text>${footerSvg(brand, draft, colors, 1182, true)}</svg>`; }
+
+function productPostSupport(product: ProductSource) { return product.bestFor || product.choiceReasons || product.details || product.buyerNote || "A considered choice, presented with the real details you saved."; }
+export function buildProductVisualPrompt(product: ProductSource, mode: ProductVisualMode) {
+  const facts = [product.productCategory && `Category: ${product.productCategory}.`, product.bestFor && `Best for: ${product.bestFor}.`, product.choiceReasons && `Verified reasons to choose it: ${product.choiceReasons}.`, product.details && `Other verified details: ${product.details}.`].filter(Boolean).join("\n");
+  const shared = `Use the uploaded image as the product source of truth. The product is ${product.name}. Preserve the exact product shown: its colour, shape, material, texture, pattern, size, quantity, labels, visible markings, and important details must remain real, recognisable, and believable. Do not replace, redesign, remove, add, simplify, or invent any product feature, claim, packaging, accessory, person, hand, or extra product.\n\nSaved facts for context only. Do not render these as text in the image and do not invent beyond them:\n${facts || "No extra facts were supplied."}\n\nCreate a vertical 4:5 product visual with clean breathing room around the product. Do not add words, price, logo, Instagram handle, labels, or call-to-action text. ViraSquare adds exact brand details separately.`;
+  if (mode === "stylish") return `${shared}\n\nThe owner chose Stylish generation. Use restrained campaign-style lighting, a refined setting, and a stronger but believable composition. You may creatively improve the background, lighting, crop, and small visual details, but never turn the product into a different item or an obvious AI illustration, 3D render, fantasy scene, or crowded flyer.`;
+  return `${shared}\n\nThis is the normal Generate product-post card route. Improve presentation only: clean a distracting background, use natural professional product lighting and realistic shadows, and keep the result like a believable well-shot product photograph. Do not make the product look obviously AI-generated or overly stylised.`;
+}
+
+export async function renderProductPostCard({ brand, product, mode }: { brand: Brand; product: ProductSource; mode: ProductVisualMode }) {
+  const [sourceImage, renderedBrand] = await Promise.all([imageFromKey(product.imageKey), withBrandLogo(brand)]);
+  const draft: VisualSlideDraft = { cardType: "product", eyebrow: mode === "stylish" ? "STYLED PRODUCT VISUAL" : "REAL PRODUCT POST", heading: product.name, body: productPostSupport(product), footer: brand.defaultCta || "Send us a message to order." };
+  try {
+    const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt: buildProductVisualPrompt(product, mode) });
+    const generatedUri = `data:image/png;base64,${generated.toString("base64")}`;
+    return renderSvg(productSvg({ brand: renderedBrand, product, image: generatedUri, draft, number: 1, total: 1 }), `product-ai-${Date.now()}`, "ai_product");
+  } catch {
+    return renderSvg(productSvg({ brand: renderedBrand, product, image: sourceImage.dataUri, draft, number: 1, total: 1 }), `product-original-${Date.now()}`, "product");
+  }
+}
 
 async function withBrandLogo(brand: Brand) { if (!brand.brandLogoKey) return brand; try { return { ...brand, brandLogoDataUri: await dataUriFromKey(brand.brandLogoKey) }; } catch { return brand; } }
 export async function renderProductVisual({ brand, product, heading, supporting }: { brand: Brand; product: ProductSource; heading: string; supporting: string }) { const [image, renderedBrand] = await Promise.all([dataUriFromKey(product.imageKey), withBrandLogo(brand)]); const draft: VisualSlideDraft = { cardType: "product", eyebrow: brand.businessName, heading, body: supporting, footer: brand.defaultCta || "Send us a message to order." }; const visual = await renderSvg(productSvg({ brand: renderedBrand, product, image, draft, number: 1, total: 1 }), `product-${Date.now()}`); return { ...visual, sourceMode: "product" as const }; }

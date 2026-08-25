@@ -1,0 +1,2 @@
+ALTER TABLE `visual_slides` MODIFY COLUMN `sourceMode` enum('product','ai_product','generated','template') NOT NULL DEFAULT 'template';--> statement-breakpoint
+ALTER TABLE `visual_deliverables` ADD `generationMode` enum('standard','stylish') DEFAULT 'standard' NOT NULL;

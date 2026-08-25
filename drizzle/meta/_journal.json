@@ -64,6 +64,13 @@
       "when": 1787582760569,
       "tag": "0008_mysterious_jocasta",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1787679456987,
+      "tag": "0009_wealthy_iron_lad",
+      "breakpoints": true
     }
   ]
 }

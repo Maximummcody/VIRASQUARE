@@ -138,11 +138,17 @@
 - [ ] Explain provider setup and run a fair real-product image benchmark only after the user selects which image-model accounts to connect.
 - [ ] Establish a low-risk image-model test path before paid production setup, and require product visuals to preserve the real product rather than default to obviously AI-generated scenes.
 - [ ] Decide after testing whether default real-photo enhancement and optional styled-photo treatment use one or two image providers, with clear truth-preservation safeguards.
-- [ ] Preserve the clarified two-mode concept for later approval: believable default “Generate product-post card” and clearly disclosed optional “Stylish generation.”
+- [x] Preserve the clarified two-mode concept for later approval: believable default “Generate product-post card” and clearly disclosed optional “Stylish generation.”
 - [ ] Discuss and keep for later review an industry-aware product creative-direction system that hides structured image instructions behind simple owner choices.
 - [x] Select GPT Image 2 as the user-tested image-model direction for later implementation, subject to the kept product-truth and Stylish-generation safeguards.
-- [ ] Use the existing server-only OpenAI API account directly for GPT Image 2 when the user later approves product-visual implementation; do not add a separate image-service intermediary.
+- [x] Use the existing server-only OpenAI API account directly for GPT Image 2 when the user later approves product-visual implementation; do not add a separate image-service intermediary.
 - [ ] Run a limited real-product GPT Image 2 limit test before any implementation approval, covering product fidelity, text/layout limits, varied categories, and normal versus stylish modes.
 - [x] Keep for later approval a universal product-visual safety standard: faithful default product preservation and restrained, clearly disclosed Stylish generation.
 - [ ] Define and prepare the approved future scope for owner-reviewed Instagram/Facebook publishing and Calendar scheduling before integration implementation.
 - [x] Prepare a complete numbered schedule for all kept updates, with dependencies, workflow-change effects, and explicit user approval gates before building any phase.
+- [x] Group 1.1: Add direct server-side GPT Image 2 product-visual generation using the existing OpenAI API key, with no separate image-service intermediary.
+- [x] Group 1.2: Build the default Generate product-post card route that preserves the uploaded product and uses a controlled ViraSquare card layout for exact facts and branding.
+- [x] Group 1.3: Build the optional Stylish generation route with clear pre-generation disclosure, restrained prompts, and owner choice.
+- [x] Group 1.4: Add product-truth checks, safe original-photo fallback, stored product-visual records, and review/regeneration controls.
+- [x] Group 1.5: Add focused tests and complete Group 1 validation without changing educational-card generation or existing posts.
+- [ ] Group 1 acceptance test: use an OpenAI-verified account to create both a default and Stylish product-post card with a real saved product, then review product truth and fallback messaging.

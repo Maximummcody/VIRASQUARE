@@ -11,10 +11,21 @@ ViraSquare should not compete with general chat tools by offering generic captio
 | Order | Kept idea | What it means | Status |
 |---:|---|---|---|
 | 1 | Product-first visual route | A product-led request produces one strong, ready-to-post single product creative using a real saved product image, truthful saved product facts, price or ask-for-price, brand identity, and Instagram. It is not a story-style carousel. | Discussed; not approved to build yet |
-| 2 | GPT Image 2 for real product-photo requests | Luna handles the product message and safe wording. GPT Image 2 is considered only when an owner has selected a saved product with a real uploaded image and asks for product content. The final layout must keep saved facts and brand details controlled by ViraSquare. | Access/setup and final approval pending |
-| 3 | Product selling package | For one product, provide a finished product visual, matching caption, short WhatsApp/DM reply for likely customer questions, and one different next product-content angle. | Kept for later decision |
-| 4 | Business memory and next-best action | Use saved business context, product facts, recent content, and the owner’s plan to show the next useful action rather than waiting for a prompt. | Kept for later decision |
-| 5 | Simple “What worked?” learning loop | After posting, let the owner optionally say whether a post brought messages, orders, profile visits, or nothing yet. Use only this owner-confirmed feedback to improve later suggestions. | Kept for later decision |
+| 2 | Two-mode product visual standard | **Generate product-post card** is the normal route: it keeps the uploaded product real, recognisable, and believable while improving only presentation. **Stylish generation** is optional and clearly explains that background, lighting, crop, and small visual details may change. | Kept for later final build approval |
+| 3 | GPT Image 2 candidate | The owner’s direct test currently makes GPT Image 2 the leading image candidate. It should only be selected for production after a limited real-product test and explicit approval. | Kept; final selection pending |
+| 4 | Product selling package | For one product, provide a finished product visual, matching caption, short WhatsApp/DM reply for likely customer questions, and one different next product-content angle. | Kept for later decision |
+| 5 | Business memory and next-best action | Use saved business context, product facts, recent content, and the owner’s plan to show the next useful action rather than waiting for a prompt. | Kept for later decision |
+| 6 | Simple “What worked?” learning loop | After posting, let the owner optionally say whether a post brought messages, orders, profile visits, or nothing yet. Use only this owner-confirmed feedback to improve later suggestions. | Kept for later decision |
+
+## Kept Expansion Ideas
+
+| Idea | What it means | Status |
+|---|---|---|
+| Calendar publishing and scheduling | Owner reviews a prepared post, then posts now or schedules it from Calendar. Initial practical scope is Instagram and Facebook; no forced autoposting. | Kept for later decision |
+| Launch and restock campaigns | A saved product or business moment becomes a short, intentional multi-day plan rather than a random single post. | Kept for later decision |
+| Customer question to content | An owner’s real customer question becomes a truthful customer reply, content idea, and product angle. | Kept for later decision |
+| Fair image-model benchmark | Compare selected models using the same real uploaded products, with product truth and believable output as the primary criteria. | Kept for later decision |
+| TikTok and Pinterest expansion | Revisit after Instagram/Facebook publishing is proven and reliable. | Kept for later decision |
 
 ## Important Guardrails
 
@@ -24,6 +35,8 @@ ViraSquare should not compete with general chat tools by offering generic captio
 - Product facts, prices, availability, claims, results, ingredients, fit, and proof must remain truthful and owner-provided.
 - Educational content remains product-free unless the owner intentionally chooses a product-led route.
 - All product-visual decisions must visibly reward the effort of adding a product.
+- Default product-post generation may improve presentation but must not redesign, replace, remove, or invent the uploaded product or its visible facts.
+- Stylish generation must be optional, restrained, clearly explained before use, and must not invent product facts or turn the item into a different product.
 
 ## Other Paused Work
 
@@ -32,4 +45,3 @@ ViraSquare should not compete with general chat tools by offering generic captio
 | ViraSquare-owned customer support channels | When the product approaches real-user operations and support demand exists. |
 | Authenticated visual-flow manual validation | When the owner is ready to test the complete signed-in journey on desktop and mobile. |
 | Library refinement and content reuse | After the core paid-value path and product visual experience are clearly decided. |
-

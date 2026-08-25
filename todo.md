@@ -132,3 +132,14 @@
 - [x] Apply the approved final workspace polish: a stronger visible Today progress moment, a composed Calendar board, and guided Business context styling without workflow changes.
 - [x] Create and maintain a user-approved deferred-work register so paused ViraSquare ideas are preserved without being built prematurely.
 - [ ] Decide ViraSquare’s defensible paid value beyond general chat tools before expanding the product-image workflow or other features.
+- [ ] Research and evaluate direct Instagram publishing, alternative product-image models, and other differentiated value ideas before any implementation decision.
+- [ ] Evaluate direct publishing and calendar-based scheduling across relevant social platforms before choosing a supported launch scope.
+- [ ] Keep for later approval: real product posts and product selling package; Instagram/Facebook publishing and calendar scheduling; launch/restock campaigns; customer-question content; fair image-model benchmark; later TikTok/Pinterest expansion.
+- [ ] Explain provider setup and run a fair real-product image benchmark only after the user selects which image-model accounts to connect.
+- [ ] Establish a low-risk image-model test path before paid production setup, and require product visuals to preserve the real product rather than default to obviously AI-generated scenes.
+- [ ] Decide after testing whether default real-photo enhancement and optional styled-photo treatment use one or two image providers, with clear truth-preservation safeguards.
+- [ ] Preserve the clarified two-mode concept for later approval: believable default “Generate product-post card” and clearly disclosed optional “Stylish generation.”
+- [ ] Discuss and keep for later review an industry-aware product creative-direction system that hides structured image instructions behind simple owner choices.
+- [ ] Keep for later review: GPT Image 2 is the current leading candidate after user testing; default product-post generation must preserve the real uploaded product, while Stylish generation requires clear owner disclosure and consent.
+- [ ] Run a limited real-product GPT Image 2 limit test before any implementation approval, covering product fidelity, text/layout limits, varied categories, and normal versus stylish modes.
+- [x] Keep for later approval a universal product-visual safety standard: faithful default product preservation and restrained, clearly disclosed Stylish generation.

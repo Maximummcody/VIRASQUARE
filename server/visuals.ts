@@ -6,6 +6,7 @@ import { createOpenAiProductVisual } from "./openaiImageProvider";
 type Brand = { businessName: string; businessType: string; brandVoice: string; primaryColor?: string; accentColor?: string; defaultCta?: string; brandLogoKey?: string | null; brandLogoDataUri?: string; instagramHandle?: string | null; closingSignature?: string | null };
 type ProductSource = { name: string; price: string | null; currency: string; details: string | null; imageKey: string; productCategory?: string | null; bestFor?: string | null; choiceReasons?: string | null; buyerNote?: string | null; categoryDetails?: string | null };
 export type ProductVisualMode = "standard" | "stylish";
+export type ProductFlyerComposition = "spotlight" | "editorial_split" | "detail_led" | "price_led" | "campaign";
 type TemplateFamily = "editorial" | "action" | "comparison" | "explainer" | "conversation";
 type GraphicCue = "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none";
 
@@ -135,7 +136,72 @@ async function imageFromKey(storageKey: string) { const url = await storageGetSi
 async function dataUriFromKey(storageKey: string) { return (await imageFromKey(storageKey)).dataUri; }
 async function renderSvg(svg: string, keyPrefix: string, sourceMode: RenderedVisual["sourceMode"] = "template"): Promise<RenderedVisual> { const png = new Resvg(svg, { fitTo: { mode: "width", value: 1080 } }).render().asPng(); const { key: storedKey, url } = await storagePut(`visuals/${keyPrefix}.png`, png, "image/png"); return { assetKey: storedKey, assetUrl: url, sourceMode }; }
 function imageBlock(imageData: string, x: number, y: number, width: number, height: number, radius = 46) { const clipId = `clip-${Math.random().toString(36).slice(2, 9)}`; return `<defs><clipPath id="${clipId}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" /></clipPath></defs><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="#e5ece0"/><image href="${imageData}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" clip-path="url(#${clipId})"/>`; }
-function productSvg({ brand, product, image, draft, number, total }: { brand: Brand; product: ProductSource; image: string; draft: VisualSlideDraft; number: number; total: number }) { const colors = palette(brand); const title = wrappedLines(draft.heading, 22).slice(0, 3); const price = product.price ? `${product.currency === "NGN" ? "₦" : `${product.currency} `}${product.price}` : "Ask for today’s price"; return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.soft}"/><circle cx="970" cy="145" r="230" fill="${colors.accent}" opacity=".72"/>${headerSvg(brand, draft, number, total, colors)}${imageBlock(image, 82, 150, 916, 570)}<rect x="82" y="770" width="916" height="456" rx="48" fill="${colors.ink}"/>${textRows(title, 130, 870, 59, "#FFFEFA")}<text x="130" y="${870 + title.length * 65 + 30}" font-family="Arial, sans-serif" font-size="27" fill="#D5E3CF">${escapeXml(short(draft.body || product.details || "A thoughtful choice for your everyday needs.", 160))}</text><line x1="130" y1="1080" x2="950" y2="1080" stroke="#ffffff" stroke-opacity=".20"/><text x="130" y="1145" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="${colors.accent}">${escapeXml(price)}</text>${footerSvg(brand, draft, colors, 1182, true)}</svg>`; }
+
+function productPrice(product: ProductSource) {
+  if (!product.price) return "Ask for price";
+  const raw = product.price.trim();
+  const numericSource = raw.replace(/,/g, "");
+  const numeric = Number(numericSource);
+  const display = numericSource && Number.isFinite(numeric) && /^\d+(?:\.\d+)?$/.test(numericSource)
+    ? new Intl.NumberFormat("en-NG", { maximumFractionDigits: 2 }).format(numeric)
+    : raw;
+  return `${product.currency === "NGN" ? "₦" : `${product.currency} `}${display}`;
+}
+function productSupport(product: ProductSource) { return short(product.choiceReasons || product.bestFor || product.details || product.buyerNote || "Product details saved by the owner.", 105); }
+function productBrandLockup(brand: Brand, colors: ReturnType<typeof palette>, inverse = false) {
+  const text = inverse ? "#FFFEFA" : colors.ink;
+  const mark = inverse ? colors.accent : colors.ink;
+  const markText = inverse ? colors.ink : "#FFFEFA";
+  const logo = brand.brandLogoDataUri
+    ? `<image href="${brand.brandLogoDataUri}" x="84" y="74" width="48" height="48" preserveAspectRatio="xMidYMid meet"/>`
+    : `<rect x="84" y="74" width="48" height="48" rx="16" fill="${mark}"/><text x="108" y="107" text-anchor="middle" font-family="Georgia, serif" font-size="25" font-weight="700" fill="${markText}">${escapeXml(brand.businessName.slice(0, 1).toUpperCase())}</text>`;
+  return `${logo}<text x="148" y="103" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="${text}">${escapeXml(short(brand.businessName, 34))}</text>`;
+}
+function productMeta(brand: Brand, colors: ReturnType<typeof palette>, y: number, inverse = false) {
+  const tone = inverse ? "#DCE8D5" : colors.sage;
+  const handle = brand.instagramHandle ? `@${brand.instagramHandle.replace(/^@+/, "")}` : brand.businessName;
+  return `<line x1="84" y1="${y - 34}" x2="996" y2="${y - 34}" stroke="${inverse ? "#ffffff" : colors.mist}" stroke-opacity="${inverse ? ".22" : "1"}"/><text x="84" y="${y}" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="1.2" fill="${tone}">${escapeXml(handle)}</text><text x="996" y="${y}" text-anchor="end" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="${inverse ? "#FFFEFA" : colors.ink}">${escapeXml(short(brand.defaultCta || "Send a message to order", 34).toUpperCase())}</text>`;
+}
+
+export function chooseProductFlyerComposition(product: ProductSource, mode: ProductVisualMode): ProductFlyerComposition {
+  if (mode === "stylish") return "campaign";
+  const category = (product.productCategory || "").toLowerCase();
+  const hasDetail = Boolean(product.choiceReasons || product.details || product.categoryDetails);
+  if (/(fashion|clothing|hair|wig|beauty)/.test(category)) return "editorial_split";
+  if (hasDetail) return "detail_led";
+  if (product.price) return "price_led";
+  return "spotlight";
+}
+
+function productSpotlightFlyer(brand: Brand, product: ProductSource, image: string) {
+  const colors = palette(brand); const title = wrappedLines(product.name, 24).slice(0, 2); const support = wrappedLines(productSupport(product), 54).slice(0, 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.soft}"/><rect x="52" y="44" width="976" height="1262" rx="52" fill="${colors.paper}"/>${productBrandLockup(brand, colors)}<rect x="84" y="158" width="912" height="650" rx="42" fill="${colors.accent}" opacity=".42"/>${imageBlock(image, 112, 184, 856, 600, 38)}<rect x="84" y="858" width="912" height="350" rx="38" fill="${colors.ink}"/>${textRows(title, 132, 936, 57, "#FFFEFA", 700, 1.06)}${textRows(support, 132, 1080, 25, "#DCE8D5", 400, 1.36, "Arial, sans-serif")}<text x="132" y="1172" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="${colors.accent}">${escapeXml(productPrice(product))}</text>${productMeta(brand, colors, 1260, true)}</svg>`;
+}
+function productEditorialSplitFlyer(brand: Brand, product: ProductSource, image: string) {
+  const colors = palette(brand); const title = wrappedLines(product.name, 15).slice(0, 3); const support = wrappedLines(productSupport(product), 29).slice(0, 4);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.paper}"/><rect x="0" y="0" width="472" height="1350" fill="${colors.ink}"/><circle cx="58" cy="1234" r="240" fill="${colors.accent}" opacity=".24"/>${productBrandLockup(brand, colors, true)}<text x="84" y="278" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2.2" fill="${colors.accent}">PRODUCT EDIT</text>${textRows(title, 84, 372, 58, "#FFFEFA", 700, 1.06)}${textRows(support, 84, 610, 24, "#DCE8D5", 400, 1.4, "Arial, sans-serif")}<text x="84" y="1000" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="${colors.accent}">${escapeXml(productPrice(product))}</text>${productMeta(brand, colors, 1222, true)}<rect x="502" y="74" width="514" height="1202" rx="48" fill="${colors.accent}" opacity=".38"/>${imageBlock(image, 530, 106, 458, 1138, 42)}</svg>`;
+}
+function productDetailLedFlyer(brand: Brand, product: ProductSource, image: string) {
+  const colors = palette(brand); const title = wrappedLines(product.name, 24).slice(0, 2); const detail = wrappedLines(productSupport(product), 52).slice(0, 3);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.soft}"/><rect x="52" y="44" width="976" height="1262" rx="52" fill="${colors.paper}"/>${productBrandLockup(brand, colors)}${imageBlock(image, 84, 158, 912, 526, 38)}<text x="84" y="782" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2.1" fill="${colors.sage}">WHY CHOOSE IT</text>${textRows(title, 84, 870, 56, colors.ink, 700, 1.06)}<rect x="84" y="1016" width="912" height="150" rx="30" fill="${colors.accent}" opacity=".65"/>${textRows(detail, 122, 1080, 26, colors.ink, 400, 1.35, "Arial, sans-serif")}<text x="84" y="1230" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="${colors.ink}">${escapeXml(productPrice(product))}</text>${productMeta(brand, colors, 1278)}</svg>`;
+}
+function productPriceLedFlyer(brand: Brand, product: ProductSource, image: string) {
+  const colors = palette(brand); const title = wrappedLines(product.name, 23).slice(0, 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.ink}"/><rect x="54" y="44" width="972" height="1262" rx="52" fill="#203025" stroke="#ffffff" stroke-opacity=".14"/>${productBrandLockup(brand, colors, true)}<rect x="84" y="164" width="912" height="672" rx="40" fill="${colors.paper}"/>${imageBlock(image, 112, 192, 856, 616, 34)}<rect x="84" y="878" width="912" height="216" rx="36" fill="${colors.accent}"/>${textRows(title, 126, 954, 50, colors.ink, 700, 1.06)}<text x="126" y="1148" font-family="Georgia, serif" font-size="66" font-weight="700" fill="${colors.accent}">${escapeXml(productPrice(product))}</text>${productMeta(brand, colors, 1260, true)}</svg>`;
+}
+function productCampaignFlyer(brand: Brand, product: ProductSource, image: string) {
+  const colors = palette(brand); const title = wrappedLines(product.name, 22).slice(0, 2); const support = wrappedLines(productSupport(product), 48).slice(0, 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.ink}"/><circle cx="930" cy="206" r="300" fill="${colors.accent}" opacity=".22"/><rect x="52" y="44" width="976" height="1262" rx="52" fill="none" stroke="#ffffff" stroke-opacity=".18"/>${productBrandLockup(brand, colors, true)}<text x="84" y="160" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2.2" fill="${colors.accent}">STYLED PRODUCT VISUAL</text>${imageBlock(image, 84, 214, 912, 642, 44)}<rect x="84" y="902" width="912" height="290" rx="38" fill="#FFFEFA"/>${textRows(title, 130, 978, 54, colors.ink, 700, 1.06)}${textRows(support, 130, 1114, 24, colors.body, 400, 1.35, "Arial, sans-serif")}<text x="130" y="1172" font-family="Arial, sans-serif" font-size="31" font-weight="700" fill="${colors.ink}">${escapeXml(productPrice(product))}</text>${productMeta(brand, colors, 1260, true)}</svg>`;
+}
+function productSvg({ brand, product, image, mode }: { brand: Brand; product: ProductSource; image: string; mode: ProductVisualMode }) {
+  const composition = chooseProductFlyerComposition(product, mode);
+  if (composition === "editorial_split") return productEditorialSplitFlyer(brand, product, image);
+  if (composition === "detail_led") return productDetailLedFlyer(brand, product, image);
+  if (composition === "price_led") return productPriceLedFlyer(brand, product, image);
+  if (composition === "campaign") return productCampaignFlyer(brand, product, image);
+  return productSpotlightFlyer(brand, product, image);
+}
+export function buildProductFlyerSvg(brand: Brand, product: ProductSource, image: string, mode: ProductVisualMode) { return productSvg({ brand, product, image, mode }); }
 
 function productPostSupport(product: ProductSource) { return product.bestFor || product.choiceReasons || product.details || product.buyerNote || "A considered choice, presented with the real details you saved."; }
 export function buildProductVisualPrompt(product: ProductSource, mode: ProductVisualMode) {
@@ -147,16 +213,15 @@ export function buildProductVisualPrompt(product: ProductSource, mode: ProductVi
 
 export async function renderProductPostCard({ brand, product, mode }: { brand: Brand; product: ProductSource; mode: ProductVisualMode }) {
   const [sourceImage, renderedBrand] = await Promise.all([imageFromKey(product.imageKey), withBrandLogo(brand)]);
-  const draft: VisualSlideDraft = { cardType: "product", eyebrow: mode === "stylish" ? "STYLED PRODUCT VISUAL" : "REAL PRODUCT POST", heading: product.name, body: productPostSupport(product), footer: brand.defaultCta || "Send us a message to order." };
   try {
     const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt: buildProductVisualPrompt(product, mode) });
     const generatedUri = `data:image/png;base64,${generated.toString("base64")}`;
-    return renderSvg(productSvg({ brand: renderedBrand, product, image: generatedUri, draft, number: 1, total: 1 }), `product-ai-${Date.now()}`, "ai_product");
+    return renderSvg(buildProductFlyerSvg(renderedBrand, product, generatedUri, mode), `product-ai-${Date.now()}`, "ai_product");
   } catch {
-    return renderSvg(productSvg({ brand: renderedBrand, product, image: sourceImage.dataUri, draft, number: 1, total: 1 }), `product-original-${Date.now()}`, "product");
+    return renderSvg(buildProductFlyerSvg(renderedBrand, product, sourceImage.dataUri, "standard"), `product-original-${Date.now()}`, "product");
   }
 }
 
 async function withBrandLogo(brand: Brand) { if (!brand.brandLogoKey) return brand; try { return { ...brand, brandLogoDataUri: await dataUriFromKey(brand.brandLogoKey) }; } catch { return brand; } }
-export async function renderProductVisual({ brand, product, heading, supporting }: { brand: Brand; product: ProductSource; heading: string; supporting: string }) { const [image, renderedBrand] = await Promise.all([dataUriFromKey(product.imageKey), withBrandLogo(brand)]); const draft: VisualSlideDraft = { cardType: "product", eyebrow: brand.businessName, heading, body: supporting, footer: brand.defaultCta || "Send us a message to order." }; const visual = await renderSvg(productSvg({ brand: renderedBrand, product, image, draft, number: 1, total: 1 }), `product-${Date.now()}`); return { ...visual, sourceMode: "product" as const }; }
-export async function renderCarouselSlide({ brand, draft, slideNumber, totalSlides, product, useProduct, postTemplateFamily }: { brand: Brand; draft: VisualSlideDraft; slideNumber: number; totalSlides: number; product?: ProductSource; useProduct?: boolean; postTemplateFamily?: TemplateFamily }) { const renderedBrand = await withBrandLogo(brand); if (product && useProduct && draft.cardType === "product") { const image = await dataUriFromKey(product.imageKey); const visual = await renderSvg(productSvg({ brand: renderedBrand, product, image, draft, number: slideNumber, total: totalSlides }), `card-product-${Date.now()}-${slideNumber}`); return { ...visual, sourceMode: "product" as const }; } const family = postTemplateFamily || resolvedTemplateFamily(draft); return renderSvg(buildRichCardSvg(renderedBrand, draft, slideNumber, totalSlides, family), `card-${key(family)}-${Date.now()}-${slideNumber}`); }
+export async function renderProductVisual({ brand, product }: { brand: Brand; product: ProductSource; heading: string; supporting: string }) { const [image, renderedBrand] = await Promise.all([dataUriFromKey(product.imageKey), withBrandLogo(brand)]); const visual = await renderSvg(buildProductFlyerSvg(renderedBrand, product, image, "standard"), `product-${Date.now()}`); return { ...visual, sourceMode: "product" as const }; }
+export async function renderCarouselSlide({ brand, draft, slideNumber, totalSlides, product, useProduct, postTemplateFamily }: { brand: Brand; draft: VisualSlideDraft; slideNumber: number; totalSlides: number; product?: ProductSource; useProduct?: boolean; postTemplateFamily?: TemplateFamily }) { const renderedBrand = await withBrandLogo(brand); if (product && useProduct && draft.cardType === "product") { const image = await dataUriFromKey(product.imageKey); const visual = await renderSvg(buildProductFlyerSvg(renderedBrand, product, image, "standard"), `card-product-${Date.now()}-${slideNumber}`); return { ...visual, sourceMode: "product" as const }; } const family = postTemplateFamily || resolvedTemplateFamily(draft); return renderSvg(buildRichCardSvg(renderedBrand, draft, slideNumber, totalSlides, family), `card-${key(family)}-${Date.now()}-${slideNumber}`); }

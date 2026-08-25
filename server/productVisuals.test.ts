@@ -6,7 +6,7 @@ const imageProvider = vi.hoisted(() => ({ createOpenAiProductVisual: vi.fn() }))
 vi.mock("./storage", () => storage);
 vi.mock("./openaiImageProvider", () => imageProvider);
 
-import { buildProductVisualPrompt, renderProductPostCard } from "./visuals";
+import { buildProductFlyerSvg, buildProductVisualPrompt, chooseProductFlyerComposition, renderProductPostCard } from "./visuals";
 
 const brand = { businessName: "Kora Time", businessType: "Accessories", brandVoice: "Warm and clear", primaryColor: "#263327", accentColor: "#EAF2CA", defaultCta: "Send us a message to order.", instagramHandle: "koratime" };
 const product = { name: "Everyday G-Shock", price: "45000", currency: "NGN", details: "Red resin watch", imageKey: "72/products/watch.jpg", productCategory: "accessories", bestFor: "Workdays and weekends", choiceReasons: "Durable resin strap and easy-to-read face" };
@@ -33,6 +33,25 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(prompt).toContain("background, lighting, crop, and small visual details");
     expect(prompt).toContain("never turn the product into a different item");
     expect(prompt).toContain("crowded flyer");
+  });
+
+  it("selects a controlled practical flyer for Default and reserves Campaign for Stylish", () => {
+    expect(chooseProductFlyerComposition(product, "standard")).toBe("detail_led");
+    expect(chooseProductFlyerComposition(product, "stylish")).toBe("campaign");
+    expect(chooseProductFlyerComposition({ ...product, details: null, bestFor: null, choiceReasons: null, price: null, productCategory: "other" }, "standard")).toBe("spotlight");
+  });
+
+  it("keeps exact saved product and brand facts inside controlled flyer layouts", () => {
+    const image = "data:image/png;base64,cHJldGVuZC1pbWFnZQ==";
+    const defaultSvg = buildProductFlyerSvg(brand, product, image, "standard");
+    const stylishSvg = buildProductFlyerSvg(brand, product, image, "stylish");
+
+    expect(defaultSvg).toContain("Everyday G-Shock");
+    expect(defaultSvg).toContain("₦45,000");
+    expect(defaultSvg).toContain("@koratime");
+    expect(defaultSvg).toContain("WHY CHOOSE IT");
+    expect(stylishSvg).toContain("STYLED PRODUCT VISUAL");
+    expect(stylishSvg).toContain("Everyday G-Shock");
   });
 
   it("keeps the original product photo when GPT Image 2 is unavailable", async () => {

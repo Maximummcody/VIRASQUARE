@@ -8,6 +8,9 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import * as db from "../db";
+import { expireArchivedProducts } from "../productArchiveExpiry";
+import { sdk } from "./sdk";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -44,6 +47,20 @@ async function startServer() {
       createContext,
     })
   );
+  app.post("/api/scheduled/expire-archived-products", async (req, res) => {
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user.isCron || !user.taskUid) return res.status(403).json({ error: "cron-only" });
+      const job = await db.getProductArchiveExpiryJobByTaskUid(user.taskUid);
+      if (!job) return res.json({ ok: true, skipped: "orphan" });
+      const result = await expireArchivedProducts();
+      return res.json({ ok: true, ...result });
+    } catch (error) {
+      const detail = error instanceof Error ? { message: error.message, stack: error.stack } : { message: String(error) };
+      console.error("[product-archive-expiry] scheduled cleanup failed", error);
+      return res.status(500).json({ error: detail.message, stack: detail.stack, context: { url: req.originalUrl }, timestamp: new Date().toISOString() });
+    }
+  });
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);

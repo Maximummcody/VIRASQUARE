@@ -4,6 +4,7 @@ import {
   businessProfiles,
   contentActivityEvents,
   contentItems,
+  productArchiveExpiryJobs,
   productMedia,
   productSellingPackages,
   products,
@@ -256,17 +257,30 @@ export async function replaceContentForDate(item: Omit<InsertContentItem, "id" |
 export async function listProductsByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(products).where(eq(products.userId, userId)).orderBy(desc(products.createdAt));
+  return db.select().from(products).where(and(eq(products.userId, userId), eq(products.archiveStatus, "active"))).orderBy(desc(products.createdAt));
+}
+
+export async function listArchivedProductsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).where(and(eq(products.userId, userId), eq(products.archiveStatus, "archived"))).orderBy(desc(products.archivedAt));
 }
 
 export async function countProductsByUserId(userId: number) {
   const db = await getDb();
   if (!db) return 0;
-  const rows = await db.select({ id: products.id }).from(products).where(eq(products.userId, userId));
+  const rows = await db.select({ id: products.id }).from(products).where(and(eq(products.userId, userId), eq(products.archiveStatus, "active")));
   return rows.length;
 }
 
 export async function getProductById(userId: number, productId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(products).where(and(eq(products.userId, userId), eq(products.id, productId), eq(products.archiveStatus, "active"))).limit(1);
+  return result[0];
+}
+
+export async function getProductRecordById(userId: number, productId: number) {
   const db = await getDb();
   if (!db) return undefined;
   const result = await db.select().from(products).where(and(eq(products.userId, userId), eq(products.id, productId))).limit(1);
@@ -291,10 +305,46 @@ export async function updateProduct(userId: number, productId: number, updates: 
   return getProductById(userId, productId);
 }
 
-export async function deleteProduct(userId: number, productId: number) {
+export async function archiveProduct(userId: number, productId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  await db.delete(products).where(and(eq(products.id, productId), eq(products.userId, userId)));
+  const now = new Date();
+  const expiresAt = new Date(now);
+  expiresAt.setUTCDate(expiresAt.getUTCDate() + 30);
+  await db.update(products).set({ archiveStatus: "archived", archivedAt: now, archiveExpiresAt: expiresAt, updatedAt: now }).where(and(eq(products.id, productId), eq(products.userId, userId), eq(products.archiveStatus, "active")));
+  return getProductRecordById(userId, productId);
+}
+
+export async function restoreArchivedProduct(userId: number, productId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(products).set({ archiveStatus: "active", archivedAt: null, archiveExpiresAt: null, updatedAt: new Date() }).where(and(eq(products.id, productId), eq(products.userId, userId), eq(products.archiveStatus, "archived")));
+  return getProductById(userId, productId);
+}
+
+export async function permanentlyDeleteExpiredProducts(now = new Date()) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const expired = await db.select({ id: products.id, userId: products.userId }).from(products).where(and(eq(products.archiveStatus, "archived"), lte(products.archiveExpiresAt, now)));
+  for (const product of expired) {
+    await db.delete(products).where(and(eq(products.id, product.id), eq(products.archiveStatus, "archived"), lte(products.archiveExpiresAt, now)));
+  }
+  return expired.length;
+}
+
+const PRODUCT_ARCHIVE_EXPIRY_JOB_KEY = "product-archive-expiry";
+
+export async function getProductArchiveExpiryJobByTaskUid(taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const result = await db.select().from(productArchiveExpiryJobs).where(eq(productArchiveExpiryJobs.scheduleCronTaskUid, taskUid)).limit(1);
+  return result[0];
+}
+
+export async function saveProductArchiveExpiryTaskUid(taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.insert(productArchiveExpiryJobs).values({ jobKey: PRODUCT_ARCHIVE_EXPIRY_JOB_KEY, scheduleCronTaskUid: taskUid }).onDuplicateKeyUpdate({ set: { scheduleCronTaskUid: taskUid, updatedAt: new Date() } });
 }
 
 export async function listProductMedia(productId: number) {

@@ -15,6 +15,14 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
+export const productArchiveExpiryJobs = mysqlTable("product_archive_expiry_jobs", {
+  id: int("id").autoincrement().primaryKey(),
+  jobKey: varchar("jobKey", { length: 64 }).notNull().unique(),
+  scheduleCronTaskUid: varchar("scheduleCronTaskUid", { length: 65 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [index("product_archive_expiry_task_idx").on(table.scheduleCronTaskUid)]);
+
 export const businessCategoryValues = ["fashion", "accessories", "beauty", "personal_care", "other"] as const;
 export const lifecycleStatusValues = ["planned", "generated", "reviewed", "downloaded", "posted", "archived"] as const;
 export const activityTypeValues = ["generated", "reviewed", "downloaded", "posted", "feedback", "archived"] as const;
@@ -58,6 +66,7 @@ export const visualDeliverableStatusValues = ["draft", "generating", "ready", "f
 export const visualGenerationModeValues = ["standard", "stylish"] as const;
 export const visualSlideSourceValues = ["product", "ai_product", "generated", "template"] as const;
 export const productMediaRoleValues = ["primary", "gallery"] as const;
+export const productArchiveStatusValues = ["active", "archived"] as const;
 
 export const contentItems = mysqlTable("content_items", {
   id: int("id").autoincrement().primaryKey(),
@@ -114,9 +123,12 @@ export const products = mysqlTable("products", {
   categoryDetails: text("categoryDetails"),
   imageKey: varchar("imageKey", { length: 512 }).notNull(),
   imageUrl: text("imageUrl").notNull(),
+  archiveStatus: mysqlEnum("archiveStatus", productArchiveStatusValues).notNull().default("active"),
+  archivedAt: timestamp("archivedAt"),
+  archiveExpiresAt: timestamp("archiveExpiresAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => [index("product_user_idx").on(table.userId)]);
+}, (table) => [index("product_user_idx").on(table.userId), index("product_archive_expiry_idx").on(table.archiveStatus, table.archiveExpiresAt)]);
 
 export const productMedia = mysqlTable("product_media", {
   id: int("id").autoincrement().primaryKey(),

@@ -13,6 +13,10 @@ const database = vi.hoisted(() => ({
   createProduct: vi.fn(),
   addProductMedia: vi.fn(),
   getProductById: vi.fn(),
+  getProductWithMedia: vi.fn(),
+  listArchivedProductsByUserId: vi.fn(),
+  archiveProduct: vi.fn(),
+  restoreArchivedProduct: vi.fn(),
   getVisualDeliverableById: vi.fn(),
   getProductSellingPackage: vi.fn(),
   upsertProductSellingPackage: vi.fn(),
@@ -42,6 +46,59 @@ function context(userId: number | null): TrpcContext {
 }
 
 describe("ViraSquare protected procedures", () => {
+  it("archives only an available owner product and returns its recovery deadline", async () => {
+    const active = { id: 19, userId: 72, name: "Classic watch", archiveStatus: "active" };
+    const archived = { ...active, archiveStatus: "archived", archiveExpiresAt: new Date("2026-09-25T12:00:00Z") };
+    database.getProductById.mockResolvedValue(active);
+    database.archiveProduct.mockResolvedValue(archived);
+
+    const result = await viraSquareRouter.createCaller(context(72)).archiveProduct({ productId: 19 });
+
+    expect(database.archiveProduct).toHaveBeenCalledWith(72, 19);
+    expect(result.archived).toMatchObject({ id: 19, archiveStatus: "archived" });
+  });
+
+  it("lists and restores only the caller’s archived products", async () => {
+    const archived = { id: 19, userId: 72, name: "Classic watch", archiveStatus: "archived" };
+    const restored = { ...archived, archiveStatus: "active", archiveExpiresAt: null };
+    database.listArchivedProductsByUserId.mockResolvedValue([archived]);
+    database.restoreArchivedProduct.mockResolvedValue(restored);
+
+    const listed = await viraSquareRouter.createCaller(context(72)).archivedProducts();
+    const result = await viraSquareRouter.createCaller(context(72)).restoreArchivedProduct({ productId: 19 });
+
+    expect(database.listArchivedProductsByUserId).toHaveBeenCalledWith(72);
+    expect(database.restoreArchivedProduct).toHaveBeenCalledWith(72, 19);
+    expect(listed).toEqual([archived]);
+    expect(result).toMatchObject({ id: 19, archiveStatus: "active" });
+  });
+
+  it("does not attach an archived product to newly selected content", async () => {
+    database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, userId: 72, businessName: "Test Store", businessType: "Accessories", targetAudience: "Nigerian accessory buyers", contentPillars: JSON.stringify(["Sell", "Trust"]), postingGoal: "Create useful posts", weeklyPostGoal: 4, customerMarket: "Nigeria", brandVoice: "Warm", defaultCta: "Send a message", isOnboarded: true });
+    database.getProductById.mockResolvedValue(undefined);
+
+    await expect(viraSquareRouter.createCaller(context(72)).saveIdea({ date: "2026-08-26", title: "Show the watch", objective: "Feature a product", format: "promo", brief: "Use the saved facts for a product-led post.", productId: 19 })).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(database.replaceContentForDate).not.toHaveBeenCalled();
+  });
+
+  it("blocks a new flyer regeneration when its saved product has been archived", async () => {
+    database.getVisualDeliverableById.mockResolvedValue({ id: 501, userId: 72, type: "single_post", productId: 19, generationMode: "standard", slides: [{ slideNumber: 1, heading: "Classic watch", body: "", eyebrow: "PRODUCT FLYER", footer: "" }] });
+    database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, businessName: "Test Store", businessType: "Accessories", customerMarket: "Nigeria", brandVoice: "Warm", defaultCta: "Send a message" });
+    database.getProductWithMedia.mockResolvedValue(undefined);
+
+    await expect(viraSquareRouter.createCaller(context(72)).regenerateVisualSlide({ deliverableId: 501, slideNumber: 1 })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+  });
+
+  it("keeps an existing selling package readable without needing an active product", async () => {
+    const savedPackage = { id: 6, userId: 72, deliverableId: 501, caption: "Existing saved caption" };
+    database.getProductSellingPackage.mockResolvedValue(savedPackage);
+    database.getProductById.mockClear();
+
+    const result = await viraSquareRouter.createCaller(context(72)).productSellingPackage({ deliverableId: 501 });
+
+    expect(result).toEqual(savedPackage);
+    expect(database.getProductById).not.toHaveBeenCalled();
+  });
   it("rejects unauthenticated content-completion requests", async () => {
     await expect(viraSquareRouter.createCaller(context(null)).setCompletion({ itemId: 44, completed: true })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });

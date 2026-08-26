@@ -1,3 +1,4 @@
+import { ProductPicker } from "@/components/ProductPicker";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -203,13 +204,7 @@ export function VisualMaker({ item, onOpenProductEducation }: { item: ContentIte
         </div>
         <Button onClick={() => setIsAdding(value => !value)} variant="ghost" className="h-9 text-[#557b45] hover:bg-[#edf5e9]">{isAdding ? "Cancel" : "Add product"}</Button>
       </div>
-      {products.isLoading ? <div className="mt-4 flex items-center gap-2 text-sm text-[#718071]"><Loader2 className="h-4 w-4 animate-spin" />Loading your products…</div> : <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        {products.data?.map(product => <button key={product.id} type="button" onClick={() => setSelectedProductId(product.id)} className={cn("flex min-w-36 items-center gap-2 rounded-xl border p-2 text-left transition-colors", selectedProductId === product.id ? "border-[#789b67] bg-[#eff7ea]" : "border-[#e1e8dc] bg-[#fffefa] hover:border-[#bdd0b1]")}>
-          <img src={product.imageUrl} alt="" className="h-10 w-10 rounded-lg object-cover" />
-          <span className="min-w-0"><span className="block truncate text-xs font-semibold text-[#3d4b3e]">{product.name}</span><span className="block truncate text-[11px] text-[#789075]">{product.price ? `₦${product.price}` : "No price added"}</span></span>
-        </button>)}
-        {!products.data?.length && <p className="py-2 text-sm text-[#7a8679]">Add your first real product photo to make a verified product post.</p>}
-      </div>}
+      {products.isLoading ? <div className="mt-4 flex items-center gap-2 text-sm text-[#718071]"><Loader2 className="h-4 w-4 animate-spin" />Loading your products…</div> : products.data?.length ? <div className="mt-4"><ProductPicker products={products.data} value={selectedProductId} onChange={setSelectedProductId} label="Search your real products" placeholder="Search or choose a real product" /></div> : <p className="mt-4 py-2 text-sm text-[#7a8679]">Add your first real product photo to make a verified product post.</p>}
       {isAdding && <div className="mt-4 grid gap-3 border-t border-[#e8eee4] pt-4 sm:grid-cols-2">
         <div className="grid gap-2"><Label>Product name</Label><Input value={productName} onChange={event => setProductName(event.target.value)} placeholder="e.g. Classic everyday watch" /></div>
         <div className="grid gap-2"><Label>Verified price <span className="font-normal text-[#879187]">(optional)</span></Label><Input value={price} onChange={event => setPrice(event.target.value)} placeholder="e.g. 50,000" /></div>

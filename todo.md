@@ -224,3 +224,7 @@
 - [ ] Visual-system acceptance test: generate several real educational carousels with different content jobs, then confirm the selected system is coherent, readable, varied across posts, and truthful to the saved brand and product facts.
 - [x] Refine Daily Brief weekly cards into clear past, today, and future visual states, with one calm Today label and no status or workflow changes.
 - [x] Add a contextual Calendar Jump to today control that appears only away from the current date and preserves plan data and post statuses.
+- [x] Replace long saved-product dropdowns with an accessible searchable product picker while preserving selected-product behavior.
+- [x] Apply the searchable picker to all product-led content and product-education selection entry points.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved searchable product-picker refinement.
+- [ ] Searchable product-picker acceptance test: use a real product-led idea or flyer flow to search by product name and price, select a result, and confirm the correct saved product is used.

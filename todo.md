@@ -197,3 +197,4 @@
 - [x] Add a Clear filters action that appears only when Library search or a content filter is active.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library pagination and reset controls.
 - [ ] Library pagination acceptance test: review a tab with more than nine real saved items, move between pages, and apply then clear a search or content filter.
+- [x] Rebalance the Library search, filter, and sort controls so long selected labels remain visually clear without competing with search.

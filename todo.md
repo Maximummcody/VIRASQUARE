@@ -259,5 +259,5 @@
 - [ ] Evaluate a mobile pull-to-refresh pattern for My Products before implementation.
 - [x] Replace immediate product deletion with a 30-day archive lifecycle that supports restore, clear expiry messaging, and no new use of archived products.
 - [x] Preserve existing flyers, posts, selling packages, downloads, Library history, and planned content when a product is archived or permanently removed.
-- [ ] Add a deployed, idempotent daily automatic cleanup that permanently removes products after their 30-day archive window.
-- [ ] Add regression coverage, validate, checkpoint, and synchronize the approved archive-retention system.
+- [x] Add a deployed, idempotent daily automatic cleanup that permanently removes products after their 30-day archive window.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved archive-retention system.

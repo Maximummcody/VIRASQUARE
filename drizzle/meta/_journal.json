@@ -71,6 +71,13 @@
       "when": 1787679456987,
       "tag": "0009_wealthy_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1787719560949,
+      "tag": "0010_violet_starbolt",
+      "breakpoints": true
     }
   ]
 }

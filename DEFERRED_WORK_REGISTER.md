@@ -10,10 +10,10 @@ ViraSquare should not compete with general chat tools by offering generic captio
 
 | Order | Kept idea | What it means | Status |
 |---:|---|---|---|
-| 1 | Product-first visual route | A product-led request produces one strong, ready-to-post single product creative using a real saved product image, truthful saved product facts, price or ask-for-price, brand identity, and Instagram. It is not a story-style carousel. | Discussed; not approved to build yet |
-| 2 | Two-mode product visual standard | **Generate product-post card** is the normal route: it keeps the uploaded product real, recognisable, and believable while improving only presentation. **Stylish generation** is optional and clearly explains that background, lighting, crop, and small visual details may change. | Kept for later final build approval |
-| 3 | GPT Image 2 candidate | The owner’s direct test currently makes GPT Image 2 the leading image candidate. It should only be selected for production after a limited real-product test and explicit approval. | Kept; final selection pending |
-| 4 | Product selling package | For one product, provide a finished product visual, matching caption, short WhatsApp/DM reply for likely customer questions, and one different next product-content angle. | Kept for later decision |
+| 1 | Product-first visual route | A product-led request produces one strong, ready-to-post single product creative using a real saved product image, truthful saved product facts, price or ask-for-price, brand identity, and Instagram. It is not a story-style carousel. | Approved and implemented; owner acceptance remains in progress |
+| 2 | Two-mode product visual standard | **Generate product-post card** is the normal route: it keeps the uploaded product real, recognisable, and believable while improving only presentation. **Stylish generation** is optional and clearly explains that background, lighting, crop, and small details may change. | Approved and implemented; owner acceptance remains in progress |
+| 3 | GPT Image 2 candidate | The owner’s direct test made GPT Image 2 the selected image provider for the product-visual route. | Approved and implemented; owner acceptance remains in progress |
+| 4 | Product selling package | For one product, provide a finished product visual, matching caption, short WhatsApp/DM reply for likely customer questions, and one different next product-content angle. | Approved and implemented; owner acceptance remains in progress |
 | 5 | Business memory and next-best action | Use saved business context, product facts, recent content, and the owner’s plan to show the next useful action rather than waiting for a prompt. | Kept for later decision |
 | 6 | Simple “What worked?” learning loop | After posting, let the owner optionally say whether a post brought messages, orders, profile visits, or nothing yet. Use only this owner-confirmed feedback to improve later suggestions. | Kept for later decision |
 

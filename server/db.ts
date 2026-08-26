@@ -5,6 +5,7 @@ import {
   contentActivityEvents,
   contentItems,
   productMedia,
+  productSellingPackages,
   products,
   visualDeliverables,
   visualSlides,
@@ -12,6 +13,7 @@ import {
   type InsertContentActivityEvent,
   type InsertContentItem,
   type InsertProductMedia,
+  type InsertProductSellingPackage,
   type InsertProduct,
   type InsertUser,
   type InsertVisualDeliverable,
@@ -348,6 +350,22 @@ export async function getVisualDeliverableById(userId: number, deliverableId: nu
   if (!deliverable) return undefined;
   const slides = await db.select().from(visualSlides).where(eq(visualSlides.deliverableId, deliverableId)).orderBy(asc(visualSlides.slideNumber));
   return { ...deliverable, slides };
+}
+
+export async function getProductSellingPackage(userId: number, deliverableId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(productSellingPackages).where(and(eq(productSellingPackages.userId, userId), eq(productSellingPackages.deliverableId, deliverableId))).limit(1);
+  return rows[0];
+}
+
+export async function upsertProductSellingPackage(sellingPackage: Omit<InsertProductSellingPackage, "id" | "createdAt" | "updatedAt">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.insert(productSellingPackages).values(sellingPackage).onDuplicateKeyUpdate({ set: { productId: sellingPackage.productId, caption: sellingPackage.caption, buyerReply: sellingPackage.buyerReply, nextAngleTitle: sellingPackage.nextAngleTitle, nextAngleDescription: sellingPackage.nextAngleDescription, updatedAt: new Date() } });
+  const saved = await getProductSellingPackage(sellingPackage.userId, sellingPackage.deliverableId);
+  if (!saved) throw new Error("The product selling package could not be saved.");
+  return saved;
 }
 
 export async function listVisualDeliverablesByUserId(userId: number, limit = 12) {

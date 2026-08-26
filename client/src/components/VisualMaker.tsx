@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { requestAttachmentDownload } from "@/lib/downloads";
-import { Download, ImagePlus, Layers3, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
+import { Copy, Download, ImagePlus, Layers3, Loader2, MessageCircleMore, RefreshCw, Sparkles, TrendingUp, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ function readFile(file: File) {
 export function VisualMaker({ item }: { item: ContentItem }) {
   const utils = trpc.useUtils();
   const products = trpc.virasquare.products.useQuery();
+  const savedVisuals = trpc.virasquare.visuals.useQuery();
   const [selectedProductId, setSelectedProductId] = useState<number | undefined>();
   const [isAdding, setIsAdding] = useState(false);
   const [productName, setProductName] = useState("");
@@ -42,10 +43,29 @@ export function VisualMaker({ item }: { item: ContentItem }) {
   const [problem, setProblem] = useState<string | null>(null);
   const [stylishGeneration, setStylishGeneration] = useState(false);
   const [correction, setCorrection] = useState("");
+  const sellingPackage = trpc.virasquare.productSellingPackage.useQuery({ deliverableId: deliverable?.id || 0 }, { enabled: Boolean(deliverable?.id && deliverable.type === "single_post") });
+  const sellingPackageData = sellingPackage.data;
+
+  const createSellingPackage = trpc.virasquare.generateProductSellingPackage.useMutation({
+    onSuccess: async () => {
+      await utils.virasquare.productSellingPackage.invalidate({ deliverableId: deliverable?.id || 0 });
+      toast.success("Your product selling package is ready to review.");
+    },
+    onError: error => {
+      setProblem(error.message);
+      toast.error(error.message);
+    },
+  });
 
   useEffect(() => {
     if (item.productId) setSelectedProductId(item.productId);
   }, [item.productId]);
+
+  useEffect(() => {
+    if (deliverable || !savedVisuals.data) return;
+    const saved = savedVisuals.data.find(visual => visual?.contentItemId === item.id && visual.status === "ready" && (item.requiresProduct ? visual.type === "single_post" : visual.type === "carousel"));
+    if (saved) setDeliverable(saved);
+  }, [deliverable, item.id, item.requiresProduct, savedVisuals.data]);
 
   const createProduct = trpc.virasquare.createProduct.useMutation({
     onSuccess: product => {
@@ -126,6 +146,15 @@ export function VisualMaker({ item }: { item: ContentItem }) {
     makeVisual.mutate({ itemId: item.id, productId: selectedProductId, type, visualMode: type === "single_post" && stylishGeneration ? "stylish" : "standard" });
   };
 
+  const copyPackageText = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied.`);
+    } catch {
+      toast.error("Copy was not available. Please select the text and copy it yourself.");
+    }
+  };
+
   return <section className="mt-5 rounded-2xl border border-[#dce8d5] bg-[#f8fbf5] p-4">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
@@ -183,6 +212,15 @@ export function VisualMaker({ item }: { item: ContentItem }) {
       </div>
       {deliverable.type === "single_post" && <div className={cn("mt-4 rounded-xl border p-3 text-xs leading-5", deliverable.slides[0]?.sourceMode === "product" ? "border-[#d4e5c9] bg-[#f4faef] text-[#527044]" : "border-[#e2eadc] bg-[#f8fbf5] text-[#657563]")}>{deliverable.slides[0]?.sourceMode === "product" ? "ViraSquare kept your original uploaded product photo in this card because the AI flyer was not available. You can try again or make a different version." : deliverable.generationMode === "stylish" ? "Stylish generation was used for this complete product flyer. Review the product, wording, price, and brand details before you post." : "Your complete product flyer was made from your saved product, brand, and product facts. Review every important detail before you post."}</div>}
       {deliverable.type === "single_post" && <div className="mt-4 rounded-xl border border-[#dce8d5] bg-white p-3"><div className="flex flex-col gap-3 sm:flex-row sm:items-end"><div className="min-w-0 flex-1"><Label htmlFor="flyer-correction" className="text-sm font-semibold text-[#405142]">Need something corrected?</Label><p className="mt-1 text-xs leading-5 text-[#748174]">Tell ViraSquare one clear issue, such as a misspelt name, wrong price, missing Instagram, or product detail that must stay true.</p><Textarea id="flyer-correction" value={correction} onChange={event => setCorrection(event.target.value)} placeholder="For example: Keep the price exactly as ₦35,000 and spell the product name correctly." className="mt-2 min-h-20 resize-none" /></div><Button onClick={() => { const firstSlide = deliverable.slides[0]; if (!correction.trim()) { setProblem("Tell ViraSquare what needs correcting first."); return; } setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: firstSlide.slideNumber, correction: correction.trim() }); }} disabled={regenerate.isPending || correction.trim().length < 3} className="shrink-0 rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{regenerate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}Fix and regenerate</Button></div></div>}
+      {deliverable.type === "single_post" && <section className="mt-4 overflow-hidden rounded-2xl border border-[#cfe0c5] bg-[#f7fbf4]">
+        <div className="border-b border-[#dce9d6] bg-[#edf5e8] p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="eyebrow">PRODUCT SELLING PACKAGE</p><h5 className="mt-1 font-serif text-2xl text-[#2d3c2e]">Turn this flyer into a fuller selling set.</h5><p className="mt-2 max-w-2xl text-xs leading-5 text-[#667565]">Get a matching caption, a short buyer reply, and a different future selling angle. ViraSquare uses your saved product and brand facts only. Nothing is posted or sent for you.</p></div>{!sellingPackageData && <Button onClick={() => createSellingPackage.mutate({ deliverableId: deliverable.id })} disabled={createSellingPackage.isPending} className="shrink-0 rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{createSellingPackage.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Prepare selling package</Button>}</div></div>
+        {sellingPackage.isLoading && <div className="flex items-center gap-2 p-4 text-sm text-[#667565]"><Loader2 className="h-4 w-4 animate-spin" />Loading your saved selling package…</div>}
+        {sellingPackageData && <div className="grid gap-3 p-4 lg:grid-cols-3">
+          <article className="rounded-xl border border-[#dfe8db] bg-white p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#5f8256]">MATCHING CAPTION</p><h6 className="mt-1 text-sm font-semibold text-[#405142]">Ready to post</h6></div><Button type="button" size="icon" variant="ghost" title="Copy caption" onClick={() => copyPackageText(sellingPackageData.caption, "Caption")} className="h-8 w-8 text-[#557b45]"><Copy className="h-4 w-4" /></Button></div><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#495848]">{sellingPackageData.caption}</p></article>
+          <article className="rounded-xl border border-[#dfe8db] bg-white p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#5f8256]">BUYER REPLY</p><h6 className="mt-1 flex items-center gap-1 text-sm font-semibold text-[#405142]"><MessageCircleMore className="h-4 w-4" />For WhatsApp or DM</h6></div><Button type="button" size="icon" variant="ghost" title="Copy buyer reply" onClick={() => copyPackageText(sellingPackageData.buyerReply, "Buyer reply")} className="h-8 w-8 text-[#557b45]"><Copy className="h-4 w-4" /></Button></div><p className="mt-3 text-sm leading-6 text-[#495848]">{sellingPackageData.buyerReply}</p></article>
+          <article className="rounded-xl border border-[#dfe8db] bg-white p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#5f8256]">NEXT PRODUCT ANGLE</p><h6 className="mt-1 flex items-center gap-1 text-sm font-semibold text-[#405142]"><TrendingUp className="h-4 w-4" />{sellingPackageData.nextAngleTitle}</h6></div><Button type="button" size="icon" variant="ghost" title="Copy next angle" onClick={() => copyPackageText(`${sellingPackageData.nextAngleTitle}\n\n${sellingPackageData.nextAngleDescription}`, "Next product angle")} className="h-8 w-8 text-[#557b45]"><Copy className="h-4 w-4" /></Button></div><p className="mt-3 text-sm leading-6 text-[#495848]">{sellingPackageData.nextAngleDescription}</p></article>
+        </div>}
+      </section>}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">{deliverable.slides.map((slide: any) => <article key={slide.id ?? slide.slideNumber} className="overflow-hidden rounded-2xl border border-[#e0e8dd] bg-white"><div className="aspect-[4/5] bg-[#edf2e8]">{slide.assetUrl ? <img src={slide.assetUrl} alt={`Visual slide ${slide.slideNumber}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm text-[#789075]">Preparing slide…</div>}</div><div className="flex items-center justify-between gap-2 p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#759166]">{deliverable.type === "single_post" ? "PRODUCT POST" : `Slide ${slide.slideNumber}`}</p><p className="mt-1 line-clamp-1 text-sm font-semibold text-[#405142]">{slide.heading}</p></div><div className="flex gap-1"><Button title={deliverable.type === "single_post" ? "Generate another version" : "Refresh this slide"} onClick={() => { setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: slide.slideNumber }); }} disabled={regenerate.isPending} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><RefreshCw className={cn("h-4 w-4", regenerate.isPending && "animate-spin")} /></Button>{slide.assetUrl && <Button type="button" title="Download slide" onClick={() => requestAttachmentDownload(slide.assetUrl, `virasquare-${deliverable.type === "single_post" ? "product-flyer" : `slide-${slide.slideNumber}`}.png`)} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><Download className="h-4 w-4" /></Button>}</div></div></article>)}</div>
     </div>}
   </section>;

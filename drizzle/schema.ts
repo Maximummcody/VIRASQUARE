@@ -157,6 +157,19 @@ export const visualSlides = mysqlTable("visual_slides", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => [uniqueIndex("visual_slide_order_idx").on(table.deliverableId, table.slideNumber)]);
 
+export const productSellingPackages = mysqlTable("product_selling_packages", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  deliverableId: int("deliverableId").notNull().references(() => visualDeliverables.id, { onDelete: "cascade" }),
+  productId: int("productId").references(() => products.id, { onDelete: "set null" }),
+  caption: text("caption").notNull(),
+  buyerReply: text("buyerReply").notNull(),
+  nextAngleTitle: varchar("nextAngleTitle", { length: 240 }).notNull(),
+  nextAngleDescription: text("nextAngleDescription").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [uniqueIndex("selling_package_deliverable_idx").on(table.deliverableId), index("selling_package_user_idx").on(table.userId)]);
+
 export type BusinessProfile = typeof businessProfiles.$inferSelect;
 export type InsertBusinessProfile = typeof businessProfiles.$inferInsert;
 export type ContentItem = typeof contentItems.$inferSelect;
@@ -171,3 +184,5 @@ export type VisualDeliverable = typeof visualDeliverables.$inferSelect;
 export type InsertVisualDeliverable = typeof visualDeliverables.$inferInsert;
 export type VisualSlide = typeof visualSlides.$inferSelect;
 export type InsertVisualSlide = typeof visualSlides.$inferInsert;
+export type ProductSellingPackage = typeof productSellingPackages.$inferSelect;
+export type InsertProductSellingPackage = typeof productSellingPackages.$inferInsert;

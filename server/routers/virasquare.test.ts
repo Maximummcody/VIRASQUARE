@@ -12,6 +12,9 @@ const database = vi.hoisted(() => ({
   createProduct: vi.fn(),
   addProductMedia: vi.fn(),
   getProductById: vi.fn(),
+  getVisualDeliverableById: vi.fn(),
+  getProductSellingPackage: vi.fn(),
+  upsertProductSellingPackage: vi.fn(),
   updateProductInviteStatus: vi.fn(),
   getContentItemForDate: vi.fn(),
   updateContentLifecycle: vi.fn(),
@@ -19,10 +22,12 @@ const database = vi.hoisted(() => ({
 }));
 const ai = vi.hoisted(() => ({ generateDailyDraft: vi.fn(), generateIdeas: vi.fn(), generateWeeklyPlan: vi.fn() }));
 const storage = vi.hoisted(() => ({ storagePut: vi.fn() }));
+const sellingPackage = vi.hoisted(() => ({ generateProductSellingPackage: vi.fn() }));
 
 vi.mock("../db", () => database);
 vi.mock("../contentAi", () => ai);
 vi.mock("../storage", () => storage);
+vi.mock("../productSellingPackage", () => sellingPackage);
 
 import { viraSquareRouter } from "./virasquare";
 
@@ -123,5 +128,33 @@ describe("ViraSquare protected procedures", () => {
 
     await expect(viraSquareRouter.createCaller(context(72)).generateIdeas({ format: "promo", objective: "Education" })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
     expect(database.getProductById).not.toHaveBeenCalled();
+  });
+
+  it("creates one selling package only for the owner's ready single-product flyer", async () => {
+    const profile = { id: 7, userId: 72, businessName: "Ades Closet", businessType: "Fashion seller", targetAudience: "Women", customerMarket: "Nigeria", contentPillars: JSON.stringify(["Sell", "Trust"]), postingGoal: "Sell", weeklyPostGoal: 4, brandVoice: "Warm and clear", defaultCta: "Send us a message to order.", instagramHandle: "adescloset", isOnboarded: true };
+    const deliverable = { id: 501, userId: 72, contentItemId: 84, productId: 19, type: "single_post", title: "Mirror handbag", aspectRatio: "4:5", generationMode: "standard", status: "ready", slides: [] };
+    const product = { id: 19, userId: 72, name: "Mirror handbag", price: "35000", currency: "NGN", details: "Reflective finish", productCategory: "fashion", bestFor: "Women who want a statement accessory", choiceReasons: "Reflective finish", buyerNote: null, categoryDetails: null };
+    const generated = { caption: "Meet the Mirror handbag. Price: ₦35,000. Send us a message to order.", buyerReply: "Hello, the Mirror handbag is ₦35,000. Send us a message to order.", nextAngleTitle: "Show the reflective finish", nextAngleDescription: "Focus on the reflective finish and why it gives the bag a statement look." };
+    database.getVisualDeliverableById.mockResolvedValue(deliverable);
+    database.getProductSellingPackage.mockResolvedValue(undefined);
+    database.getBusinessProfileByUserId.mockResolvedValue(profile);
+    database.getProductById.mockResolvedValue(product);
+    sellingPackage.generateProductSellingPackage.mockResolvedValue(generated);
+    database.upsertProductSellingPackage.mockResolvedValue({ id: 2, userId: 72, deliverableId: 501, productId: 19, ...generated });
+
+    const result = await viraSquareRouter.createCaller(context(72)).generateProductSellingPackage({ deliverableId: 501 });
+
+    expect(database.getVisualDeliverableById).toHaveBeenCalledWith(72, 501);
+    expect(sellingPackage.generateProductSellingPackage).toHaveBeenCalledWith(expect.objectContaining({ product: expect.objectContaining({ name: "Mirror handbag", price: "35000" }) }));
+    expect(database.upsertProductSellingPackage).toHaveBeenCalledWith(expect.objectContaining({ userId: 72, deliverableId: 501, productId: 19, ...generated }));
+    expect(result.caption).toContain("₦35,000");
+  });
+
+  it("does not generate a selling package from a non-ready or non-product visual", async () => {
+    sellingPackage.generateProductSellingPackage.mockClear();
+    database.getVisualDeliverableById.mockResolvedValue({ id: 502, userId: 72, productId: null, type: "carousel", status: "ready", slides: [] });
+
+    await expect(viraSquareRouter.createCaller(context(72)).generateProductSellingPackage({ deliverableId: 502 })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    expect(sellingPackage.generateProductSellingPackage).not.toHaveBeenCalled();
   });
 });

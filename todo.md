@@ -166,3 +166,8 @@
 - [x] Preserve product truth, required saved facts, owner review, and existing educational-card generation while validating full-flyer outputs.
 - [x] Run one controlled live server-side GPT Image 2 request through the configured OpenAI API account and record the connection result.
 - [x] Correct the product-flyer download action so it downloads the image file without opening it in the active app tab.
+- [x] Group 2.1: Define and persist a truthful product selling package tied to a completed product visual.
+- [x] Group 2.2: Generate a ready-to-use product caption, buyer reply help, and a distinct next selling angle from saved product and brand facts.
+- [x] Group 2.3: Build an owner review interface for the product selling package without changing Group 1 flyer generation.
+- [x] Group 2.4: Add focused truth and regression coverage, then validate, checkpoint, and synchronize the Group 2 product selling package.
+- [ ] Group 2 acceptance test: use one real completed product flyer to prepare and review the caption, buyer reply, and next selling angle before moving to Group 3.

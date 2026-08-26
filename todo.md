@@ -205,3 +205,9 @@
 - [x] Add a mobile-only fixed bottom navigation while preserving the current desktop top navigation and all existing destinations.
 - [x] Add regression coverage, validate on mobile, checkpoint, and synchronize the approved mobile refinement.
 - [ ] Mobile refinement acceptance test: use a real phone to open a product flyer, correction, selling package, education sheet, Library, and each bottom-navigation destination.
+- [x] Discuss and approve any Today home-screen hierarchy or lead-action improvement before implementation; do not change the page during review.
+- [x] Discuss and approve any professional daily-command-centre and weekly-progress enhancement for Today before implementation; do not change the page during review.
+- [x] Prepare and obtain approval for the exact truthful Daily Brief hierarchy, state copy, and action rules before implementing the Today redesign.
+- [x] Implement the approved responsive Daily Brief on Today: truthful Weekly Momentum, state-specific Today action, existing alternative path, supporting weekly context, and factual reflection.
+- [x] Add regression coverage, validate desktop and mobile, checkpoint, and synchronize the approved Daily Brief without changing navigation, Calendar, Library, product workflows, or saved content.
+- [ ] Daily Brief acceptance test: review no-plan, rest-day, planned-post, ready-post, and completed-post states with real owner data, then confirm the weekly momentum wording feels accurate.

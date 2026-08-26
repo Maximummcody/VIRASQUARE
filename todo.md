@@ -177,3 +177,4 @@
 - [x] Add a separate optional “Create an educational carousel about this product” follow-up route from a completed product flyer.
 - [x] Keep the selected product linked to the new educational flow while making its content, card generation, and future pricing boundary visibly separate from the original product post.
 - [ ] Product-content flow acceptance test: create a normal product flyer, confirm no rich-card set appears, then create one separate product-linked educational carousel and confirm it does not replace the original product post or Calendar entry.
+- [x] Reorder completed product-review sections so the flyer appears before correction, selling-package, education, and feedback tools without changing their behavior.

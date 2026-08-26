@@ -228,3 +228,11 @@
 - [x] Apply the searchable picker to all product-led content and product-education selection entry points.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved searchable product-picker refinement.
 - [ ] Searchable product-picker acceptance test: use a real product-led idea or flyer flow to search by product name and price, select a result, and confirm the correct saved product is used.
+- [x] Discuss and approve a product-flyer discovery strategy that balances first-time value, onboarding friction, Calendar mix, and image-generation cost before implementation.
+- [x] Discuss and approve any gentle product-page suggestion before adding a product-to-post shortcut.
+- [x] Add a no-cost static product-flyer capability preview after first value, without generating an image automatically.
+- [x] Add a gentle first-product invitation that explains the product-post value without blocking onboarding.
+- [x] Offer one product-selling opportunity only after a real product exists, while retaining a balanced educational and engagement Calendar mix.
+- [x] Add a quiet product-detail shortcut into the existing deliberate flyer, caption, and selling-package flow without generating automatically.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-flyer discovery sequence.
+- [ ] Product-flyer discovery acceptance test: review the no-cost preview, first-product invitation, product-detail starter, one planned selling opportunity, and confirm no image is generated until the owner deliberately creates the flyer.

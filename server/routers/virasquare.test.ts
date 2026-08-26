@@ -20,6 +20,7 @@ const database = vi.hoisted(() => ({
   getContentItemForDate: vi.fn(),
   updateContentLifecycle: vi.fn(),
   recordContentActivity: vi.fn(),
+  attachProductToContent: vi.fn(),
 }));
 const ai = vi.hoisted(() => ({ generateDailyDraft: vi.fn(), generateIdeas: vi.fn(), generateWeeklyPlan: vi.fn() }));
 const storage = vi.hoisted(() => ({ storagePut: vi.fn() }));
@@ -140,6 +141,30 @@ describe("ViraSquare protected procedures", () => {
 
     await expect(viraSquareRouter.createCaller(context(72)).generateIdeas({ format: "promo", objective: "Education" })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
     expect(database.getProductById).not.toHaveBeenCalled();
+  });
+
+  it("attaches only the owner’s saved product to an eligible planned selling post", async () => {
+    const item = { id: 91, userId: 72, profileId: 7, plannedFor: "2026-08-18", title: "Show one real product", objective: "Feature a product", format: "promo", brief: "A product-selling opportunity.", caption: null, hashtags: null, carouselSlides: null, requiresProduct: true, preparationNote: "Choose one saved product.", status: "planned", lifecycleStatus: "planned", createdAt: new Date(), updatedAt: new Date() };
+    const product = { id: 19, userId: 72, name: "Classic watch", price: "50000", currency: "NGN", details: "Stainless steel case" };
+    const saved = { ...item, productId: 19, preparationNote: "Use the saved product image and the facts you supplied for this product." };
+    database.getContentItemById.mockResolvedValue(item);
+    database.getProductById.mockResolvedValue(product);
+    database.attachProductToContent.mockResolvedValue(saved);
+
+    const result = await viraSquareRouter.createCaller(context(72)).attachProductToContent({ itemId: 91, productId: 19 });
+
+    expect(database.getContentItemById).toHaveBeenCalledWith(72, 91);
+    expect(database.getProductById).toHaveBeenCalledWith(72, 19);
+    expect(database.attachProductToContent).toHaveBeenCalledWith(72, 91, 19);
+    expect(result.productId).toBe(19);
+  });
+
+  it("refuses product attachment for a post that is not a product-selling opportunity", async () => {
+    database.getContentItemById.mockResolvedValue({ id: 92, userId: 72, requiresProduct: false });
+    database.getProductById.mockResolvedValue({ id: 19, userId: 72 });
+
+    await expect(viraSquareRouter.createCaller(context(72)).attachProductToContent({ itemId: 92, productId: 19 })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    expect(database.attachProductToContent).not.toHaveBeenCalledWith(72, 92, 19);
   });
 
   it("creates one selling package only for the owner's ready single-product flyer", async () => {

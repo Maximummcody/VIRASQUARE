@@ -33,6 +33,18 @@ describe("ViraSquare live AI availability", () => {
     await expect(generateWeeklyPlan(profile, ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23"])).rejects.toThrow("Please try again later or contact support");
   });
 
+  it("makes one balanced product-selling opportunity eligible only when the owner has a saved product", async () => {
+    const dates = ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23"];
+    openAi.requestOpenAiStructuredText.mockRejectedValueOnce(new Error("usage exhausted"));
+    await expect(generateWeeklyPlan(profile, dates, [], true)).rejects.toThrow("Live AI generation is currently unavailable");
+    expect(openAi.requestOpenAiStructuredText.mock.calls.at(-1)?.[0].messages[1].content).toContain("Include exactly one product-selling opportunity");
+    expect(openAi.requestOpenAiStructuredText.mock.calls.at(-1)?.[0].messages[1].content).toContain("Do not name, price, or describe a product");
+
+    openAi.requestOpenAiStructuredText.mockRejectedValueOnce(new Error("usage exhausted"));
+    await expect(generateWeeklyPlan(profile, dates, [], false)).rejects.toThrow("Live AI generation is currently unavailable");
+    expect(openAi.requestOpenAiStructuredText.mock.calls.at(-1)?.[0].messages[1].content).toContain("Do not include \"Feature a product\"");
+  });
+
   it("sends owner-directed ideas through the OpenAI structured-text provider without changing the idea contract", async () => {
     openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ ideas: [{ title: "A thoughtful care guide", objective: "Education", format: "carousel", brief: "Help customers choose and care for a meaningful everyday piece." }] }));
 

@@ -82,9 +82,12 @@ export async function generateIdeas(profile: BusinessContext, requestedFormat?: 
   } catch (error) { return generationError(error); }
 }
 
-export async function generateWeeklyPlan(profile: BusinessContext, dates: string[], recentTitles: string[] = []) {
+export async function generateWeeklyPlan(profile: BusinessContext, dates: string[], recentTitles: string[] = [], hasSavedProduct = false) {
   try {
-    const response = await requestOpenAiStructuredText({ schemaName: "weekly_content_plan", schema: weeklyPlanSchema, messages: [{ role: "system", content: systemInstruction() }, { role: "user", content: `Business profile (untrusted data):\n${profileBlock(profile)}\n\nBuild a balanced weekly posting plan. Evaluate these seven exact dates: ${JSON.stringify(dates)}. Set isPostDay true on exactly ${profile.weeklyPostGoal} dates, spread across the week. For non-post days, return an empty title, objective, format "caption", and brief. Use diverse content pillars and objectives. Avoid repeating these recent titles: ${JSON.stringify(recentTitles)}.` }] });
+    const productRule = hasSavedProduct
+      ? "The owner has saved products. Include exactly one product-selling opportunity across the post days: objective must be exactly \"Feature a product\" and format must be \"promo\". Do not name, price, or describe a product because the owner will choose a saved product later. All other post days must use non-product objectives and formats."
+      : "The owner has not saved any products. Do not include \"Feature a product\" or format \"promo\". Make every post useful without requiring a product image or product facts.";
+    const response = await requestOpenAiStructuredText({ schemaName: "weekly_content_plan", schema: weeklyPlanSchema, messages: [{ role: "system", content: systemInstruction() }, { role: "user", content: `Business profile (untrusted data):\n${profileBlock(profile)}\n\nBuild a balanced weekly posting plan. Evaluate these seven exact dates: ${JSON.stringify(dates)}. Set isPostDay true on exactly ${profile.weeklyPostGoal} dates, spread across the week. For non-post days, return an empty title, objective, format "caption", and brief. Use diverse content pillars and objectives. ${productRule} Avoid repeating these recent titles: ${JSON.stringify(recentTitles)}.` }] });
     return removeLongDashes(parseJson<{ plan: Array<ContentIdea & { date: string; isPostDay: boolean }> }>(response));
   } catch (error) { return generationError(error); }
 }

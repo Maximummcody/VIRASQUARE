@@ -210,6 +210,13 @@ export async function updateContentLifecycle(userId: number, itemId: number, lif
   return getContentItemById(userId, itemId);
 }
 
+export async function attachProductToContent(userId: number, itemId: number, productId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(contentItems).set({ productId, requiresProduct: true, preparationNote: "Use the saved product image and the facts you supplied for this product.", updatedAt: new Date() }).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
+  return getContentItemById(userId, itemId);
+}
+
 export async function recordContentActivity(event: Omit<InsertContentActivityEvent, "id" | "createdAt">) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");

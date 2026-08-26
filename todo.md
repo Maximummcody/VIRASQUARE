@@ -236,3 +236,7 @@
 - [x] Add a quiet product-detail shortcut into the existing deliberate flyer, caption, and selling-package flow without generating automatically.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-flyer discovery sequence.
 - [ ] Product-flyer discovery acceptance test: review the no-cost preview, first-product invitation, product-detail starter, one planned selling opportunity, and confirm no image is generated until the owner deliberately creates the flyer.
+- [x] Replace oversized desktop My Products cards with a compact responsive management catalogue while preserving product details, edits, usage facts, and mobile rows.
+- [x] Add a restrained accessible attention cue to the product-post suggestion and a no-cost sample-flyer preview for hover, focus, and mobile tap.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-catalogue density and preview refinement.
+- [ ] Product catalogue acceptance test: review multiple real products on desktop and mobile, open the flyer preview by hover or tap, and confirm no flyer is generated until Make product post is chosen.

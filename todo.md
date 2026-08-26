@@ -244,3 +244,6 @@
 - [x] Make the Add product control switch clearly to a close-form control with a distinct close icon while the product form is open.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-interaction correction.
 - [ ] Product interaction acceptance test: open and close the static flyer preview by button, then open and close the product form to confirm the Add product control changes state clearly.
+- [x] Add compact visible Make product post and Preview actions to each mobile product row while retaining row-tap editing and delete controls.
+- [x] Validate, checkpoint, and synchronize the approved mobile product-action visibility refinement.
+- [ ] Mobile product-action acceptance test: confirm each saved product exposes visible Make product post and Preview actions without opening edit details first.

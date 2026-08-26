@@ -254,3 +254,6 @@
 - [x] Add responsive My Products loading skeletons while saved product rows and cards are being fetched.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-page feedback refinement.
 - [ ] Product feedback acceptance test: confirm the deletion success message after intentional deletion of a disposable product and observe the skeleton during a product-list refresh.
+- [x] Conduct a discussion-only cross-section UX audit and obtain approval before implementing further experience improvements.
+- [ ] Evaluate safe reversible-product recovery versus permanent deletion before considering an Undo action.
+- [ ] Evaluate a mobile pull-to-refresh pattern for My Products before implementation.

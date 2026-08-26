@@ -113,6 +113,17 @@ describe("ViraSquare protected procedures", () => {
     expect(result.lifecycleStatus).toBe("posted");
   });
 
+  it("records an explicit save-to-drafts action without marking the content as posted", async () => {
+    database.updateContentLifecycle.mockResolvedValue({ id: 82, userId: 72, profileId: 7, plannedFor: "2026-08-11", title: "A product post", objective: "Feature a product", format: "promo", brief: "Feature a real product.", caption: "Ready caption", hashtags: null, carouselSlides: null, requiresProduct: true, preparationNote: null, status: "planned", lifecycleStatus: "reviewed", feedbackOutcome: "saved_for_later", createdAt: new Date(), updatedAt: new Date() });
+
+    const result = await viraSquareRouter.createCaller(context(72)).setLifecycle({ itemId: 82, lifecycleStatus: "reviewed", outcome: "saved_for_later" });
+
+    expect(database.updateContentLifecycle).toHaveBeenCalledWith(72, 82, "reviewed", { outcome: "saved_for_later", note: undefined });
+    expect(database.recordContentActivity).toHaveBeenCalledWith(expect.objectContaining({ userId: 72, contentItemId: 82, eventType: "reviewed", metadata: expect.stringContaining("saved_for_later") }));
+    expect(result.lifecycleStatus).toBe("reviewed");
+    expect(result.feedbackOutcome).toBe("saved_for_later");
+  });
+
   it("passes an owner's requested goal, format, and topic into the Today-page idea generator", async () => {
     database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, userId: 72, businessName: "Clarity Studio", businessType: "Brand strategist", targetAudience: "Small business founders", contentPillars: JSON.stringify(["Educate", "Build trust"]), postingGoal: "Build authority", weeklyPostGoal: 4, brandVoice: "Clear and kind", isOnboarded: true });
     database.getRecentContentItems.mockResolvedValue([]);

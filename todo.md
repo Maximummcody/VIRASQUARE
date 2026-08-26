@@ -178,3 +178,4 @@
 - [x] Keep the selected product linked to the new educational flow while making its content, card generation, and future pricing boundary visibly separate from the original product post.
 - [ ] Product-content flow acceptance test: create a normal product flyer, confirm no rich-card set appears, then create one separate product-linked educational carousel and confirm it does not replace the original product post or Calendar entry.
 - [x] Reorder completed product-review sections so the flyer appears before correction, selling-package, education, and feedback tools without changing their behavior.
+- [x] Add an explicit Save to Drafts action that keeps a generated post, flyer, and selling package available in Library while preserving Archive as a separate action.

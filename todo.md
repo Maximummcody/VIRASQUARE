@@ -198,3 +198,10 @@
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library pagination and reset controls.
 - [ ] Library pagination acceptance test: review a tab with more than nine real saved items, move between pages, and apply then clear a search or content filter.
 - [x] Rebalance the Library search, filter, and sort controls so long selected labels remain visually clear without competing with search.
+- [x] Audit Group 1 and Group 2 owner acceptance checks plus mobile layouts before recommending any pre-Group-3 changes.
+- [x] Present only necessary pre-Group-3 fixes for owner approval; do not start Group 3 during the audit.
+- [x] Complete a focused Mobile Readiness Pass across product flyer review, selling package, product education, Library, forms, dialogs, and touch interactions before recommending adjustments.
+- [x] Apply the approved Mobile Interaction Polish: clearer full-width mobile primary actions, larger compact action targets, better sheet scrolling, cleaner product-review rhythm, and responsive Library controls.
+- [x] Add a mobile-only fixed bottom navigation while preserving the current desktop top navigation and all existing destinations.
+- [x] Add regression coverage, validate on mobile, checkpoint, and synchronize the approved mobile refinement.
+- [ ] Mobile refinement acceptance test: use a real phone to open a product flyer, correction, selling package, education sheet, Library, and each bottom-navigation destination.

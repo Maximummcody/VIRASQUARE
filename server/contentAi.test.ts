@@ -55,6 +55,29 @@ describe("ViraSquare live AI availability", () => {
     expect(call.messages[1].content).toContain('"choiceReasons":"Gold-plated finish and two sizes"');
   });
 
+  it("removes rich-card payloads from a normal product post even if the provider includes them", async () => {
+    const accidentalCard = { cardType: "product", eyebrow: "PRODUCT", heading: "Everyday hoop earrings", body: "Gold-plated lightweight hoops in two sizes for everyday wear.", footer: "Send a message to order.", templateFamily: "editorial", graphicCue: "quality" };
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "Everyday hoops", objective: "Feature a product", format: "promo", brief: "Feature the saved hoops truthfully.", caption: "Everyday hoop earrings for a simple finish. Price: ₦18,500. Send us a message to order.", hashtags: [], requiresProduct: true, preparationNote: "Use the saved product image and verified price.", carouselSlides: [accidentalCard] }));
+
+    const draft = await generateDailyDraft(profile, "2026-08-24", { title: "Everyday hoops", objective: "Feature a product", format: "promo", brief: "Feature the saved hoops truthfully." }, [], { id: 19, name: "Everyday hoop earrings", price: "18500", currency: "NGN", details: "Gold-plated, lightweight, two sizes" });
+
+    expect(draft.format).toBe("promo");
+    expect(draft.carouselSlides).toEqual([]);
+    expect(openAi.requestOpenAiStructuredText.mock.calls.at(-1)?.[0].messages[1].content).toContain("A normal product post uses the product flyer");
+  });
+
+  it("keeps rich cards for an explicitly selected educational carousel about a saved product", async () => {
+    const body = "Start with one clear choice customers can make. Explain why it matters for everyday use, then keep the details practical and easy to compare.";
+    const slide = (cardType: "cover" | "guide" | "checklist" | "closing") => ({ cardType, eyebrow: "PRODUCT EDUCATION", heading: "Choose your everyday hoops with confidence", body, footer: "Save this for your next choice", templateFamily: "action", graphicCue: "choice" });
+    openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "How to choose everyday hoops", objective: "Education", format: "carousel", brief: "Help customers consider their everyday preference.", caption: "A useful guide before you choose your next pair.", hashtags: [], requiresProduct: false, preparationNote: "", carouselSlides: [slide("cover"), slide("guide"), slide("checklist"), slide("closing")] }));
+
+    const draft = await generateDailyDraft(profile, "2026-08-24", { title: "How to choose everyday hoops", objective: "Education", format: "carousel", brief: "Help customers consider their everyday preference." }, [], { id: 19, name: "Everyday hoop earrings", details: "Gold-plated, lightweight, two sizes" });
+
+    expect(draft.format).toBe("carousel");
+    expect(draft.carouselSlides).toHaveLength(4);
+    expect(draft.requiresProduct).toBe(false);
+  });
+
   it("carries the customer market and complete-card rendering contract into a Luna content request", async () => {
     openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "A practical jewellery care guide", objective: "Education", format: "caption", brief: "Help customers protect everyday pieces with realistic habits.", caption: "A useful caption.", hashtags: ["#JewelleryCare"], requiresProduct: false, preparationNote: "", carouselSlides: [] }));
 

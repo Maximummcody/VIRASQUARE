@@ -11,7 +11,7 @@ ViraSquare will use the existing **server-only OpenAI API account** directly. Lu
 | Group | Main outcome | Why it comes at this point | Approval status |
 |---:|---|---|---|
 | 1 | Trustworthy product-post visuals | Makes saved products visibly worth adding before adding more product features. | Approved and implemented; owner acceptance remains in progress |
-| 2 | Product selling package | Turns one product into a useful selling set, not just one image. | Approved and implemented; owner acceptance remains in progress |
+| 2 | Product selling package | Turns one product into a useful selling set, not just one image, with an optional separate product-linked educational carousel. | Approved and implemented; owner acceptance remains in progress |
 | 3 | Business memory and learning | Makes ViraSquare improve from the owner’s real business and feedback. | Waiting for approval |
 | 4 | Instagram/Facebook review, publishing, and scheduling | Makes Calendar useful from planning through posting. | Waiting for approval |
 | 5 | Campaigns and customer-question content | Adds high-value selling workflows after the core publishing flow is stable. | Waiting for approval |

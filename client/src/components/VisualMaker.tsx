@@ -13,10 +13,12 @@ import { toast } from "sonner";
 type ContentItem = {
   id: number;
   title: string;
+  format: "caption" | "carousel" | "tip" | "promo" | "story";
   caption: string | null;
   requiresProduct: boolean;
   preparationNote: string | null;
   productId?: number | null;
+  entryType?: "calendar" | "product_education";
   carouselSlides: Array<{ cardType?: string; eyebrow?: string; heading: string; body: string; footer?: string }>;
 };
 
@@ -29,7 +31,7 @@ function readFile(file: File) {
   });
 }
 
-export function VisualMaker({ item }: { item: ContentItem }) {
+export function VisualMaker({ item, onOpenProductEducation }: { item: ContentItem; onOpenProductEducation?: (item: ContentItem) => void }) {
   const utils = trpc.useUtils();
   const products = trpc.virasquare.products.useQuery();
   const savedVisuals = trpc.virasquare.visuals.useQuery();
@@ -43,6 +45,9 @@ export function VisualMaker({ item }: { item: ContentItem }) {
   const [problem, setProblem] = useState<string | null>(null);
   const [stylishGeneration, setStylishGeneration] = useState(false);
   const [correction, setCorrection] = useState("");
+  const [educationOpen, setEducationOpen] = useState(false);
+  const [educationTopic, setEducationTopic] = useState("");
+  const [educationIdeas, setEducationIdeas] = useState<Array<{ title: string; objective: string; format: "caption" | "carousel" | "tip" | "promo" | "story"; brief: string }>>([]);
   const sellingPackage = trpc.virasquare.productSellingPackage.useQuery({ deliverableId: deliverable?.id || 0 }, { enabled: Boolean(deliverable?.id && deliverable.type === "single_post") });
   const sellingPackageData = sellingPackage.data;
 
@@ -56,10 +61,31 @@ export function VisualMaker({ item }: { item: ContentItem }) {
       toast.error(error.message);
     },
   });
+  const suggestProductEducation = trpc.virasquare.generateIdeas.useMutation({
+    onSuccess: value => setEducationIdeas(value as Array<{ title: string; objective: string; format: "caption" | "carousel" | "tip" | "promo" | "story"; brief: string }>),
+    onError: error => toast.error(error.message),
+  });
+  const saveProductEducation = trpc.virasquare.saveProductEducationIdea.useMutation({
+    onSuccess: value => {
+      setEducationOpen(false);
+      setEducationIdeas([]);
+      setEducationTopic("");
+      toast.success("Your separate educational carousel is ready to develop.");
+      onOpenProductEducation?.(value as ContentItem);
+      utils.virasquare.library.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
 
   useEffect(() => {
     if (item.productId) setSelectedProductId(item.productId);
   }, [item.productId]);
+
+  useEffect(() => {
+    setDeliverable(null);
+    setProblem(null);
+    setCorrection("");
+  }, [item.id]);
 
   useEffect(() => {
     if (deliverable || !savedVisuals.data) return;
@@ -154,6 +180,10 @@ export function VisualMaker({ item }: { item: ContentItem }) {
       toast.error("Copy was not available. Please select the text and copy it yourself.");
     }
   };
+  const openEducationIdeas = () => {
+    if (!item.productId) return;
+    suggestProductEducation.mutate({ format: "carousel", objective: "Education", topic: educationTopic.trim() || undefined, productId: item.productId });
+  };
 
   return <section className="mt-5 rounded-2xl border border-[#dce8d5] bg-[#f8fbf5] p-4">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -187,7 +217,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
         <div className="grid gap-2 sm:col-span-2"><Label>Help us understand this product <span className="font-normal text-[#879187]">(optional)</span></Label><Textarea value={details} onChange={event => setDetails(event.target.value)} placeholder="Share facts you are sure of, such as colour, material, size, or order information." className="min-h-20 resize-none" /></div>
         <div className="sm:col-span-2"><Button onClick={addProduct} disabled={createProduct.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{createProduct.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}Save real product</Button></div>
       </div>}
-    </div> : <div className="mt-5 rounded-xl border border-[#e0e9da] bg-white p-4"><p className="text-sm font-semibold text-[#3d4c3e]">This is a rich branded card set.</p><p className="mt-1 text-sm leading-6 text-[#788477]">No product image is needed. ViraSquare will turn the full structured content into complete, ready-to-post cards.</p></div>}
+    </div> : <div className="mt-5 rounded-xl border border-[#e0e9da] bg-white p-4"><p className="text-sm font-semibold text-[#3d4c3e]">{item.entryType === "product_education" ? "This is a separate educational carousel." : "This is a rich branded card set."}</p><p className="mt-1 text-sm leading-6 text-[#788477]">{item.entryType === "product_education" ? "It is linked to your saved product facts, but it is separate from the product flyer and its selling package." : "No product image is needed. ViraSquare will turn the full structured content into complete, ready-to-post cards."}</p></div>}
 
     {item.requiresProduct ? <div className="mt-4 rounded-2xl border border-[#cfe0c4] bg-white p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -220,8 +250,10 @@ export function VisualMaker({ item }: { item: ContentItem }) {
           <article className="rounded-xl border border-[#dfe8db] bg-white p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#5f8256]">BUYER REPLY</p><h6 className="mt-1 flex items-center gap-1 text-sm font-semibold text-[#405142]"><MessageCircleMore className="h-4 w-4" />For WhatsApp or DM</h6></div><Button type="button" size="icon" variant="ghost" title="Copy buyer reply" onClick={() => copyPackageText(sellingPackageData.buyerReply, "Buyer reply")} className="h-8 w-8 text-[#557b45]"><Copy className="h-4 w-4" /></Button></div><p className="mt-3 text-sm leading-6 text-[#495848]">{sellingPackageData.buyerReply}</p></article>
           <article className="rounded-xl border border-[#dfe8db] bg-white p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#5f8256]">NEXT PRODUCT ANGLE</p><h6 className="mt-1 flex items-center gap-1 text-sm font-semibold text-[#405142]"><TrendingUp className="h-4 w-4" />{sellingPackageData.nextAngleTitle}</h6></div><Button type="button" size="icon" variant="ghost" title="Copy next angle" onClick={() => copyPackageText(`${sellingPackageData.nextAngleTitle}\n\n${sellingPackageData.nextAngleDescription}`, "Next product angle")} className="h-8 w-8 text-[#557b45]"><Copy className="h-4 w-4" /></Button></div><p className="mt-3 text-sm leading-6 text-[#495848]">{sellingPackageData.nextAngleDescription}</p></article>
         </div>}
+        {item.entryType !== "product_education" && <div className="border-t border-[#dce9d6] bg-white px-4 py-3"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-semibold text-[#405142]">Want to teach, not just sell?</p><p className="mt-1 text-xs leading-5 text-[#738072]">Create a separate educational carousel about this product. It will not change this flyer, caption, or selling package.</p></div><Button type="button" variant="outline" onClick={() => setEducationOpen(true)} className="shrink-0 rounded-xl border-[#b8cdaa] text-[#45663d] hover:bg-[#edf5e8]"><Layers3 className="mr-2 h-4 w-4" />Create educational carousel</Button></div></div>}
       </section>}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">{deliverable.slides.map((slide: any) => <article key={slide.id ?? slide.slideNumber} className="overflow-hidden rounded-2xl border border-[#e0e8dd] bg-white"><div className="aspect-[4/5] bg-[#edf2e8]">{slide.assetUrl ? <img src={slide.assetUrl} alt={`Visual slide ${slide.slideNumber}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm text-[#789075]">Preparing slide…</div>}</div><div className="flex items-center justify-between gap-2 p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#759166]">{deliverable.type === "single_post" ? "PRODUCT POST" : `Slide ${slide.slideNumber}`}</p><p className="mt-1 line-clamp-1 text-sm font-semibold text-[#405142]">{slide.heading}</p></div><div className="flex gap-1"><Button title={deliverable.type === "single_post" ? "Generate another version" : "Refresh this slide"} onClick={() => { setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: slide.slideNumber }); }} disabled={regenerate.isPending} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><RefreshCw className={cn("h-4 w-4", regenerate.isPending && "animate-spin")} /></Button>{slide.assetUrl && <Button type="button" title="Download slide" onClick={() => requestAttachmentDownload(slide.assetUrl, `virasquare-${deliverable.type === "single_post" ? "product-flyer" : `slide-${slide.slideNumber}`}.png`)} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><Download className="h-4 w-4" /></Button>}</div></div></article>)}</div>
     </div>}
+    {educationOpen && <div className="fixed inset-0 z-[60] flex items-end justify-center bg-[#172017]/45 p-3 backdrop-blur-sm sm:items-center sm:p-6"><div role="dialog" aria-modal="true" aria-label="Create an educational carousel about this product" className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-[#fffefa] shadow-2xl"><header className="sticky top-0 flex items-start justify-between gap-4 border-b border-[#e3eadf] bg-[#fffefa]/95 px-5 py-4"><div><p className="eyebrow">SEPARATE PRODUCT EDUCATION</p><h4 className="mt-1 font-serif text-2xl text-[#2d3c2e]">Teach customers about {selected?.name || "this product"}.</h4><p className="mt-2 max-w-2xl text-xs leading-5 text-[#6c786b]">This will be a new educational carousel, separate from the product flyer you just made. ViraSquare will use saved product facts only.</p></div><Button type="button" size="icon" variant="ghost" title="Close educational carousel ideas" onClick={() => setEducationOpen(false)} className="shrink-0 rounded-full text-lg">×</Button></header><div className="p-5"><Label htmlFor="product-education-topic">What should customers learn? <span className="font-normal text-[#738072]">(optional)</span></Label><Textarea id="product-education-topic" value={educationTopic} onChange={event => setEducationTopic(event.target.value)} placeholder="For example: How to choose an everyday handbag, or what to consider before buying." className="mt-2 min-h-24 resize-none"/><div className="mt-4 flex justify-end"><Button type="button" onClick={openEducationIdeas} disabled={suggestProductEducation.isPending} className="rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{suggestProductEducation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Suggest educational angles</Button></div>{educationIdeas.length > 0 && <section className="mt-6 border-t border-[#e5ebe1] pt-5"><p className="eyebrow">CHOOSE AN EDUCATIONAL ANGLE</p><div className="mt-3 grid gap-3 sm:grid-cols-2">{educationIdeas.map((idea, index) => <article key={`${idea.title}-${index}`} className="flex flex-col rounded-2xl border border-[#dfe8db] bg-white p-4"><h5 className="font-serif text-xl leading-tight text-[#334336]">{idea.title}</h5><p className="mt-3 flex-1 text-sm leading-6 text-[#697669]">{idea.brief}</p><Button type="button" variant="outline" disabled={saveProductEducation.isPending} onClick={() => saveProductEducation.mutate({ sourceItemId: item.id, title: idea.title, brief: idea.brief })} className="mt-5 rounded-xl">Choose this educational carousel</Button></article>)}</div></section>}</div></div></div>}
   </section>;
 }

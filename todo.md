@@ -171,3 +171,9 @@
 - [x] Group 2.3: Build an owner review interface for the product selling package without changing Group 1 flyer generation.
 - [x] Group 2.4: Add focused truth and regression coverage, then validate, checkpoint, and synchronize the Group 2 product selling package.
 - [ ] Group 2 acceptance test: use one real completed product flyer to prepare and review the caption, buyer reply, and next selling angle before moving to Group 3.
+- [x] Remove the rich-card set from the normal Feature a product workflow so its default result is a flyer, matching caption, and selling package.
+- [x] Preserve rich-card generation for educational content and deliberate product explainer carousel choices.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-content workflow simplification.
+- [x] Add a separate optional “Create an educational carousel about this product” follow-up route from a completed product flyer.
+- [x] Keep the selected product linked to the new educational flow while making its content, card generation, and future pricing boundary visibly separate from the original product post.
+- [ ] Product-content flow acceptance test: create a normal product flyer, confirm no rich-card set appears, then create one separate product-linked educational carousel and confirm it does not replace the original product post or Calendar entry.

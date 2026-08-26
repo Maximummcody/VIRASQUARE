@@ -52,6 +52,7 @@ export const businessProfiles = mysqlTable("business_profiles", {
 
 export const contentFormatValues = ["caption", "carousel", "tip", "promo", "story"] as const;
 export const contentStatusValues = ["planned", "completed"] as const;
+export const contentEntryTypeValues = ["calendar", "product_education"] as const;
 export const visualDeliverableTypeValues = ["single_post", "carousel", "story"] as const;
 export const visualDeliverableStatusValues = ["draft", "generating", "ready", "failed"] as const;
 export const visualGenerationModeValues = ["standard", "stylish"] as const;
@@ -63,6 +64,8 @@ export const contentItems = mysqlTable("content_items", {
   userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   profileId: int("profileId").notNull().references(() => businessProfiles.id, { onDelete: "cascade" }),
   productId: int("productId").references(() => products.id, { onDelete: "set null" }),
+  sourceContentItemId: int("sourceContentItemId"),
+  entryType: mysqlEnum("entryType", contentEntryTypeValues).notNull().default("calendar"),
   plannedFor: varchar("plannedFor", { length: 10 }).notNull(),
   title: varchar("title", { length: 300 }).notNull(),
   objective: varchar("objective", { length: 120 }).notNull(),
@@ -85,7 +88,7 @@ export const contentItems = mysqlTable("content_items", {
   completedAt: timestamp("completedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => [index("content_item_user_date_idx").on(table.userId, table.plannedFor), index("content_item_profile_idx").on(table.profileId)]);
+}, (table) => [index("content_item_user_date_idx").on(table.userId, table.plannedFor), index("content_item_profile_idx").on(table.profileId), index("content_item_entry_type_idx").on(table.userId, table.entryType)]);
 
 export const contentActivityEvents = mysqlTable("content_activity_events", {
   id: int("id").autoincrement().primaryKey(),

@@ -134,7 +134,7 @@ export async function updateBrandIdentity(userId: number, identity: { instagramH
 export async function getContentItemForDate(userId: number, date: string) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(contentItems).where(and(eq(contentItems.userId, userId), eq(contentItems.plannedFor, date))).orderBy(desc(contentItems.createdAt)).limit(1);
+  const result = await db.select().from(contentItems).where(and(eq(contentItems.userId, userId), eq(contentItems.plannedFor, date), eq(contentItems.entryType, "calendar"))).orderBy(desc(contentItems.createdAt)).limit(1);
   return result[0];
 }
 
@@ -148,7 +148,7 @@ export async function getContentItemById(userId: number, itemId: number) {
 export async function getContentItemsForRange(userId: number, start: string, end: string) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(contentItems).where(and(eq(contentItems.userId, userId), gte(contentItems.plannedFor, start), lte(contentItems.plannedFor, end))).orderBy(contentItems.plannedFor);
+  return db.select().from(contentItems).where(and(eq(contentItems.userId, userId), eq(contentItems.entryType, "calendar"), gte(contentItems.plannedFor, start), lte(contentItems.plannedFor, end))).orderBy(contentItems.plannedFor);
 }
 
 export async function getRecentContentItems(userId: number, limit = 12) {
@@ -160,7 +160,7 @@ export async function getRecentContentItems(userId: number, limit = 12) {
 export async function getCompletedContentDates(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const rows = await db.select({ plannedFor: contentItems.plannedFor }).from(contentItems).where(and(eq(contentItems.userId, userId), eq(contentItems.status, "completed")));
+  const rows = await db.select({ plannedFor: contentItems.plannedFor }).from(contentItems).where(and(eq(contentItems.userId, userId), eq(contentItems.entryType, "calendar"), eq(contentItems.status, "completed")));
   return rows.map(row => row.plannedFor);
 }
 
@@ -232,7 +232,7 @@ export async function setContentCompletion(userId: number, itemId: number, compl
 export async function removePlannedContentFromDate(userId: number, startDate: string) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  await db.delete(contentItems).where(and(eq(contentItems.userId, userId), gte(contentItems.plannedFor, startDate), eq(contentItems.status, "planned")));
+  await db.delete(contentItems).where(and(eq(contentItems.userId, userId), eq(contentItems.entryType, "calendar"), gte(contentItems.plannedFor, startDate), eq(contentItems.status, "planned")));
 }
 
 export async function replaceContentForDate(item: Omit<InsertContentItem, "id" | "createdAt" | "updatedAt">) {

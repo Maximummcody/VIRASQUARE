@@ -7,6 +7,7 @@ const database = vi.hoisted(() => ({
   removePlannedContentFromDate: vi.fn(),
   getBusinessProfileByUserId: vi.fn(),
   replaceContentForDate: vi.fn(),
+  getContentItemById: vi.fn(),
   getRecentContentItems: vi.fn(),
   createContentItem: vi.fn(),
   createProduct: vi.fn(),
@@ -156,5 +157,27 @@ describe("ViraSquare protected procedures", () => {
 
     await expect(viraSquareRouter.createCaller(context(72)).generateProductSellingPackage({ deliverableId: 502 })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
     expect(sellingPackage.generateProductSellingPackage).not.toHaveBeenCalled();
+  });
+
+  it("creates a separate non-calendar educational carousel linked to the owner’s product post", async () => {
+    const profile = { id: 7, userId: 72, businessName: "Ades Closet", businessType: "Fashion seller", targetAudience: "Women", customerMarket: "Nigeria", contentPillars: JSON.stringify(["Sell", "Trust"]), postingGoal: "Sell", weeklyPostGoal: 4, brandVoice: "Warm and clear", isOnboarded: true };
+    const source = { id: 84, userId: 72, profileId: 7, plannedFor: "2026-08-26", productId: 19, title: "Mirror handbag", objective: "Feature a product", format: "promo", brief: "Feature the saved handbag." };
+    const product = { id: 19, userId: 72, name: "Mirror handbag", price: "35000", currency: "NGN", details: "Reflective finish" };
+    const saved = { id: 85, userId: 72, profileId: 7, plannedFor: "2026-08-26", productId: 19, sourceContentItemId: 84, entryType: "product_education", title: "How to choose an everyday handbag", objective: "Education", format: "carousel", brief: "Help customers know what to consider.", caption: null, hashtags: null, carouselSlides: null, requiresProduct: false, preparationNote: null, status: "planned", lifecycleStatus: "planned" };
+    database.getContentItemById.mockResolvedValue(source);
+    database.getBusinessProfileByUserId.mockResolvedValue(profile);
+    database.getProductById.mockResolvedValue(product);
+    database.createContentItem.mockResolvedValue(saved);
+
+    const result = await viraSquareRouter.createCaller(context(72)).saveProductEducationIdea({ sourceItemId: 84, title: "How to choose an everyday handbag", brief: "Help customers know what to consider." });
+
+    expect(database.createContentItem).toHaveBeenCalledWith(expect.objectContaining({ userId: 72, sourceContentItemId: 84, entryType: "product_education", productId: 19, format: "carousel", requiresProduct: false }));
+    expect(result.entryType).toBe("product_education");
+  });
+
+  it("refuses a product-education carousel when the selected source has no saved product", async () => {
+    database.getContentItemById.mockResolvedValue({ id: 86, userId: 72, productId: null });
+
+    await expect(viraSquareRouter.createCaller(context(72)).saveProductEducationIdea({ sourceItemId: 86, title: "A product guide", brief: "A separate educational angle." })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
   });
 });

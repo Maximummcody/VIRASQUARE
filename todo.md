@@ -184,3 +184,4 @@
 - [x] Reorganize the crowded mixed Library into clear Drafts, Ready to post, Posted, and Archived views without removing content records.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library organization update.
 - [ ] Drafts and Library acceptance test: save one real generated post, confirm the success message and Drafts tab entry, then review Ready to post, Posted, and Archived views.
+- [x] Add accessible information icons with concise hover and tap explanations for Drafts, Ready to post, Posted, and Archived Library tabs.

@@ -193,3 +193,7 @@
 - [x] Add compact filtering and sorting controls beside Library search without changing saved work or work-state tabs.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library filtering and sorting controls.
 - [ ] Library organization acceptance test: use search, one content filter, and two sort orders with real saved work to confirm the controls feel clear.
+- [x] Add responsive Library pagination so large result collections remain quick to browse.
+- [x] Add a Clear filters action that appears only when Library search or a content filter is active.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library pagination and reset controls.
+- [ ] Library pagination acceptance test: review a tab with more than nine real saved items, move between pages, and apply then clear a search or content filter.

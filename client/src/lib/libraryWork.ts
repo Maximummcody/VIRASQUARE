@@ -51,3 +51,16 @@ export function sortLibraryWork<T extends { title?: string | null; updatedAt?: D
     return sort === "title_asc" ? comparison : -comparison;
   });
 }
+
+export function paginateLibraryWork<T>(entries: T[], page: number, pageSize = 9) {
+  const safePageSize = Math.max(1, pageSize);
+  const totalPages = Math.max(1, Math.ceil(entries.length / safePageSize));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const start = (currentPage - 1) * safePageSize;
+  return {
+    items: entries.slice(start, start + safePageSize),
+    currentPage,
+    totalPages,
+    totalItems: entries.length,
+  };
+}

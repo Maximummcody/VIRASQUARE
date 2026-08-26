@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterLibraryContent, filterLibraryWork, getLibraryWorkTab, libraryWorkCount, searchLibraryWork, sortLibraryWork } from "../client/src/lib/libraryWork";
+import { filterLibraryContent, filterLibraryWork, getLibraryWorkTab, libraryWorkCount, paginateLibraryWork, searchLibraryWork, sortLibraryWork } from "../client/src/lib/libraryWork";
 
 const entries = [
   { id: 1, lifecycleStatus: "reviewed", feedbackOutcome: "saved_for_later" },
@@ -48,5 +48,12 @@ describe("Library work-state classification", () => {
     expect(filterLibraryContent(sortable, "carousel").map(entry => entry.id)).toEqual([2]);
     expect(sortLibraryWork(sortable, "recent").map(entry => entry.id)).toEqual([1, 4, 2]);
     expect(sortLibraryWork(sortable, "title_asc").map(entry => entry.id)).toEqual([2, 4, 1]);
+  });
+
+  it("paginates large work collections and clamps out-of-range pages", () => {
+    const entries = Array.from({ length: 19 }, (_, index) => ({ id: index + 1 }));
+    expect(paginateLibraryWork(entries, 1).items.map(entry => entry.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(paginateLibraryWork(entries, 2).items.map(entry => entry.id)).toEqual([10, 11, 12, 13, 14, 15, 16, 17, 18]);
+    expect(paginateLibraryWork(entries, 9)).toMatchObject({ currentPage: 3, totalPages: 3, totalItems: 19, items: [{ id: 19 }] });
   });
 });

@@ -165,3 +165,4 @@
 - [x] Add correction-aware regeneration for product flyers, including a concise owner correction request when text, price, brand detail, or product fidelity is wrong.
 - [x] Preserve product truth, required saved facts, owner review, and existing educational-card generation while validating full-flyer outputs.
 - [x] Run one controlled live server-side GPT Image 2 request through the configured OpenAI API account and record the connection result.
+- [x] Correct the product-flyer download action so it downloads the image file without opening it in the active app tab.

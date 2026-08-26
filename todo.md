@@ -279,3 +279,4 @@
 - [x] Approve the scope for applying the Navy-and-Blue theme to the live ViraSquare experience.
 - [x] Apply the approved Navy, Electric Blue, White, and Soft Gray theme across the live ViraSquare interface without changing workflow or generated content output.
 - [x] Verify, checkpoint, and synchronize the theme-only rollout after desktop and mobile review.
+- [x] Refine Today’s Navy-and-Blue visual hierarchy, including primary-action treatment, without changing Daily Brief, planning, or alternative-content behavior.

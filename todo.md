@@ -265,3 +265,12 @@
 - [x] Add a safeguarded Empty Trash action that permanently removes all archived products while preserving historical content output.
 - [x] Explain the daily automatic expiry schedule in the Archive interface.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved archive countdown and manual-empty refinement.
+- [x] Define an approval-only Bold Momentum visual system for ViraSquare without changing the live app.
+- [x] Prepare static Bold Momentum examples for Today, My Products, and mobile home for owner review.
+- [x] Prepare approval-only refined-colour mockups using Deep Forest, Soft Chartreuse, Terracotta, and Warm Ivory.
+- [x] Prepare approval-only Cobalt Blue plus Coral and Royal Purple plus Tangerine visual mockup comparisons.
+- [x] Prepare approval-only mobile Today and My Products comparisons for the Cobalt Blue and Royal Purple directions.
+- [x] Diagnose the rejected colour-only mockups and define a distinct ViraSquare design language before generating more examples.
+- [x] Prepare approval-only ViraSquare Studio mockups for Today and My Products on desktop and mobile.
+- [x] Review the Deep Navy, Electric Blue, and White visual direction and define an approval-only proof using ViraSquare’s real interface.
+- [x] Build and review a private Navy-and-Electric-Blue proof of the real Today and My Products interfaces without replacing the live design.

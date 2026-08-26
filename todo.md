@@ -247,3 +247,6 @@
 - [x] Add compact visible Make product post and Preview actions to each mobile product row while retaining row-tap editing and delete controls.
 - [x] Validate, checkpoint, and synchronize the approved mobile product-action visibility refinement.
 - [ ] Mobile product-action acceptance test: confirm each saved product exposes visible Make product post and Preview actions without opening edit details first.
+- [x] Add a product-specific confirmation dialog before deletion, with a safe Cancel default and a distinct final Delete product action.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-deletion safeguard.
+- [ ] Product-deletion acceptance test: open the confirmation for a real product, verify Cancel leaves it untouched, and only use Delete product when intentionally removing a disposable test product.

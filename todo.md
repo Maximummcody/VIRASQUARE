@@ -240,3 +240,7 @@
 - [x] Add a restrained accessible attention cue to the product-post suggestion and a no-cost sample-flyer preview for hover, focus, and mobile tap.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-catalogue density and preview refinement.
 - [ ] Product catalogue acceptance test: review multiple real products on desktop and mobile, open the flyer preview by hover or tap, and confirm no flyer is generated until Make product post is chosen.
+- [x] Make the product-flyer sample preview button-only with a clear close action, removing competing hover behavior.
+- [x] Make the Add product control switch clearly to a close-form control with a distinct close icon while the product form is open.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-interaction correction.
+- [ ] Product interaction acceptance test: open and close the static flyer preview by button, then open and close the product form to confirm the Add product control changes state clearly.

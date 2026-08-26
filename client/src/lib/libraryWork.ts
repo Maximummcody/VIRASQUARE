@@ -18,3 +18,17 @@ export function filterLibraryWork<T extends LibraryWorkEntry>(entries: T[], tab:
 export function libraryWorkCount<T extends LibraryWorkEntry>(entries: T[], tab: LibraryWorkTab) {
   return filterLibraryWork(entries, tab).length;
 }
+
+export function getLibraryWorkTab(entry: LibraryWorkEntry): LibraryWorkTab | null {
+  if (isSavedDraft(entry)) return "drafts";
+  if (entry.lifecycleStatus === "posted") return "posted";
+  if (entry.lifecycleStatus === "archived") return "archived";
+  if (entry.lifecycleStatus === "planned") return null;
+  return "ready";
+}
+
+export function searchLibraryWork<T extends LibraryWorkEntry & { title?: string | null; brief?: string | null; entryType?: string | null }>(entries: T[], query: string) {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  if (!normalizedQuery) return entries;
+  return entries.filter(entry => [entry.title, entry.brief, entry.entryType === "product_education" ? "product education" : ""].some(value => value?.toLocaleLowerCase().includes(normalizedQuery)));
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterLibraryWork, libraryWorkCount } from "../client/src/lib/libraryWork";
+import { filterLibraryWork, getLibraryWorkTab, libraryWorkCount, searchLibraryWork } from "../client/src/lib/libraryWork";
 
 const entries = [
   { id: 1, lifecycleStatus: "reviewed", feedbackOutcome: "saved_for_later" },
@@ -21,5 +21,18 @@ describe("Library work-state classification", () => {
     expect(libraryWorkCount([...entries], "ready")).toBe(1);
     expect(libraryWorkCount([...entries], "posted")).toBe(1);
     expect(libraryWorkCount([...entries], "archived")).toBe(1);
+  });
+
+  it("searches titles, briefs, and product-education work across Library states", () => {
+    const searchable = [
+      { ...entries[0], title: "Silver handbag post", brief: "A selling caption" },
+      { ...entries[1], title: "Handbag colour guide", brief: "Product education for buyers", entryType: "product_education" },
+      { ...entries[3], title: "Watch post", brief: "A style angle" },
+    ];
+
+    expect(searchLibraryWork(searchable, "handbag").map(entry => entry.id)).toEqual([1, 2]);
+    expect(searchLibraryWork(searchable, "education").map(entry => entry.id)).toEqual([2]);
+    expect(getLibraryWorkTab(entries[0])).toBe("drafts");
+    expect(getLibraryWorkTab(entries[2])).toBeNull();
   });
 });

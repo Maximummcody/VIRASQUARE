@@ -185,3 +185,8 @@
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library organization update.
 - [ ] Drafts and Library acceptance test: save one real generated post, confirm the success message and Drafts tab entry, then review Ready to post, Posted, and Archived views.
 - [x] Add accessible information icons with concise hover and tap explanations for Drafts, Ready to post, Posted, and Archived Library tabs.
+- [x] Replace the crowded per-tab information icons with one compact Library help control that explains all work states.
+- [x] Add a search field that filters posts within the selected Library tab by title, brief, or product education label.
+- [x] Improve each Library empty state with a clear, friendly explanation and next step.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library usability refinement.
+- [ ] Library usability acceptance test: confirm the compact help control, cross-tab search, and an empty tab message are clear with real saved work.

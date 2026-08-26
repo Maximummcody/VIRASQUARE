@@ -281,3 +281,7 @@
 - [x] Verify, checkpoint, and synchronize the theme-only rollout after desktop and mobile review.
 - [x] Refine Today’s Navy-and-Blue visual hierarchy, including primary-action treatment, without changing Daily Brief, planning, or alternative-content behavior.
 - [x] Fix Make something different so it reliably opens the existing Your alternative workflow rather than navigating to Calendar or another view.
+- [x] Add one quiet cross-section Resume work cue that helps owners return to relevant active work without competing with Today.
+- [x] Standardize friendly, actionable empty states across the remaining workspace sections.
+- [x] Add mobile pull-to-refresh to My Products, Library, and Calendar without affecting desktop interaction or workflow.
+- [x] Verify, checkpoint, and synchronize the approved cross-section usability refinements.

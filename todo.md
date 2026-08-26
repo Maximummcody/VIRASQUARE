@@ -250,3 +250,7 @@
 - [x] Add a product-specific confirmation dialog before deletion, with a safe Cancel default and a distinct final Delete product action.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-deletion safeguard.
 - [ ] Product-deletion acceptance test: open the confirmation for a real product, verify Cancel leaves it untouched, and only use Delete product when intentionally removing a disposable test product.
+- [x] Show an explicit successful-deletion toast after a product has been deliberately deleted.
+- [x] Add responsive My Products loading skeletons while saved product rows and cards are being fetched.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved product-page feedback refinement.
+- [ ] Product feedback acceptance test: confirm the deletion success message after intentional deletion of a disposable product and observe the skeleton during a product-list refresh.

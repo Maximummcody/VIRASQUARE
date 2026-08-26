@@ -215,3 +215,6 @@
 - [x] Replace oversized mobile My Products cards with a compact product-management list while preserving the desktop card layout and product workflows.
 - [x] Validate, checkpoint, and synchronize the approved mobile-only product-list refinement.
 - [ ] Mobile My Products acceptance test: review several real saved products, open one for editing, and confirm the compact rows remain readable while desktop cards stay unchanged.
+- [x] Define eight professional carousel visual systems with explicit typography, colour, layout, content-fit, and selection rules for owner approval.
+- [x] Create approval-only comparative static examples for Editorial Guide and Action Path systems using two different fictional posts.
+- [ ] Obtain approval for the visual-system library before changing the current Card Engine.

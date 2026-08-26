@@ -88,3 +88,5 @@ No Group 3 learning, social analytics, publishing, scheduling, or colour-system 
 The implemented Daily Brief was reviewed at a 375 px mobile viewport and a 1280 px desktop viewport. On mobile, the Daily Brief stacks into a clear action-first sequence above the two-day weekly preview and the existing alternative-idea flow. On desktop, the action and Weekly Momentum form a composed two-column decision area above the existing seven-day weekly board.
 
 The validated rest-day state now says **“Your weekly rhythm is ready”** rather than implying that an action is due today. The mobile-only bottom navigation and desktop top navigation remain unchanged by the Daily Brief itself.
+
+The follow-up interaction polish was reviewed at desktop and mobile widths. The current date now has a visible **Today** marker, a softened green surface, a stronger border, and restrained elevation in the weekly board. The primary action and secondary alternative action have hover, focus, and press feedback, while the weekly-momentum bar expands over a short transition and respects reduced-motion settings.

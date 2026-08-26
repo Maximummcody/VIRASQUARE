@@ -4,7 +4,8 @@ export type ContentFormat = "caption" | "carousel" | "tip" | "promo" | "story";
 export type BusinessContext = { businessName: string; businessType: string; targetAudience: string; customerMarket: string; contentPillars: string[]; postingGoal: string; weeklyPostGoal: number; brandVoice: string; businessContext?: { differentiator?: string; buyerHesitations?: string; firstTimeUnderstanding?: string; currentPriority?: string; neverSay?: string } };
 export type ProductContext = { id: number; name: string; price?: string | null; currency?: string | null; productCategory?: string | null; bestFor?: string | null; choiceReasons?: string | null; buyerNote?: string | null; categoryDetails?: string | null; details?: string | null };
 export type CardType = "cover" | "guide" | "checklist" | "comparison" | "faq" | "product" | "closing";
-export type RichCard = { cardType: CardType; eyebrow: string; heading: string; body: string; footer: string; templateFamily: "editorial" | "action" | "comparison" | "explainer" | "conversation"; graphicCue: "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none" };
+export type VisualSystem = "editorial_guide" | "action_path" | "field_checklist" | "balanced_contrast" | "lookbook_notes" | "truth_check" | "question_studio" | "product_anatomy";
+export type RichCard = { cardType: CardType; eyebrow: string; heading: string; body: string; footer: string; templateFamily: "editorial" | "action" | "comparison" | "explainer" | "conversation"; graphicCue: "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none"; visualSystem?: VisualSystem };
 export type ContentDraft = { title: string; objective: string; format: ContentFormat; brief: string; caption: string; hashtags: string[]; carouselSlides: RichCard[]; requiresProduct: boolean; preparationNote: string };
 export type ContentIdea = Omit<ContentDraft, "caption" | "hashtags" | "carouselSlides">;
 
@@ -22,13 +23,31 @@ function removeLongDashes<T>(value: T): T {
   if (value && typeof value === "object") return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, removeLongDashes(item)])) as T;
   return value;
 }
-function normalizeCarouselVisualSystem(draft: ContentDraft): ContentDraft {
+const visualSystems: VisualSystem[] = ["editorial_guide", "action_path", "field_checklist", "balanced_contrast", "lookbook_notes", "truth_check", "question_studio", "product_anatomy"];
+const legacyFamilyForSystem: Record<VisualSystem, RichCard["templateFamily"]> = { editorial_guide: "editorial", action_path: "action", field_checklist: "action", balanced_contrast: "comparison", lookbook_notes: "editorial", truth_check: "explainer", question_studio: "conversation", product_anatomy: "explainer" };
+const alternateSystems: Record<VisualSystem, VisualSystem[]> = { editorial_guide: ["action_path", "field_checklist", "question_studio"], action_path: ["field_checklist", "editorial_guide"], field_checklist: ["action_path", "truth_check", "editorial_guide"], balanced_contrast: ["editorial_guide", "truth_check"], lookbook_notes: ["editorial_guide", "question_studio"], truth_check: ["field_checklist", "editorial_guide"], question_studio: ["lookbook_notes", "editorial_guide"], product_anatomy: ["editorial_guide", "action_path"] };
+
+export function chooseCarouselVisualSystem(draft: ContentDraft, selectedProduct?: ProductContext, recentSystems: VisualSystem[] = []): VisualSystem {
+  const text = `${draft.title} ${draft.objective} ${draft.brief} ${draft.carouselSlides.map(slide => `${slide.heading} ${slide.body}`).join(" ")}`.toLowerCase();
+  const genuineComparison = /\b(vs\.?|versus|instead of|do this|avoid this|rather than|not this|before\s*(?:\/|and)\s*after)\b/i.test(text) || draft.carouselSlides.some(slide => slide.cardType === "comparison");
+  let selected: VisualSystem;
+  if (selectedProduct) selected = "product_anatomy";
+  else if (genuineComparison) selected = "balanced_contrast";
+  else if (/\b(myth|mistake|misconception|wrong|truth|avoid)\b/.test(text)) selected = "truth_check";
+  else if (/\b(question|ask|comment|tell us|which|would you|your turn)\b/.test(text)) selected = "question_studio";
+  else if (/\b(checklist|check|look for|audit|red flag|before you buy)\b/.test(text)) selected = "field_checklist";
+  else if (/\b(step|steps|routine|process|how to|next)\b/.test(text)) selected = "action_path";
+  else if (/\b(outfit|style|styling|wear|wardrobe|colour|color|fashion|look)\b/.test(text)) selected = "lookbook_notes";
+  else selected = "editorial_guide";
+  if (!recentSystems.includes(selected)) return selected;
+  return alternateSystems[selected].find(system => !recentSystems.includes(system)) || selected;
+}
+
+function normalizeCarouselVisualSystem(draft: ContentDraft, selectedProduct?: ProductContext, recentSystems: VisualSystem[] = []): ContentDraft {
   if (draft.format !== "carousel" || draft.carouselSlides.length === 0) return draft;
-  const requestedFamily = draft.carouselSlides[0]?.templateFamily || "editorial";
-  const carouselText = draft.carouselSlides.map(slide => `${slide.heading} ${slide.body}`).join(" ");
-  const isGenuineComparison = /\b(vs\.?|versus|instead of|do this|avoid this|before|after|rather than|not this)\b/i.test(carouselText);
-  const postTemplateFamily = requestedFamily === "comparison" && !isGenuineComparison ? "action" : requestedFamily;
-  return { ...draft, carouselSlides: draft.carouselSlides.map(slide => ({ ...slide, templateFamily: postTemplateFamily })) };
+  const visualSystem = chooseCarouselVisualSystem(draft, selectedProduct, recentSystems);
+  const templateFamily = legacyFamilyForSystem[visualSystem];
+  return { ...draft, carouselSlides: draft.carouselSlides.map(slide => ({ ...slide, templateFamily, visualSystem })) };
 }
 function normalizeProductPostDraft(draft: ContentDraft, selectedProduct?: ProductContext, requestedFormat?: ContentFormat): ContentDraft {
   if (!selectedProduct) return draft;
@@ -44,11 +63,11 @@ function generationError(error: unknown): never {
   throw new Error("Live AI generation is temporarily unavailable. Please try again later or contact support.");
 }
 
-export async function generateDailyDraft(profile: BusinessContext, date: string, existing?: Pick<ContentIdea, "title" | "objective" | "format" | "brief">, recentTitles: string[] = [], selectedProduct?: ProductContext): Promise<ContentDraft> {
+export async function generateDailyDraft(profile: BusinessContext, date: string, existing?: Pick<ContentIdea, "title" | "objective" | "format" | "brief">, recentTitles: string[] = [], selectedProduct?: ProductContext, recentSystems: VisualSystem[] = []): Promise<ContentDraft> {
   const guidance = existing ? `Expand this selected plan into ready-to-post content: ${JSON.stringify(existing)}` : `Recommend and create one high-value post for ${date}. Choose the best objective and format for a useful daily post.`;
   try {
     const response = await requestOpenAiStructuredText({ schemaName: "content_draft", schema: contentDraftSchema, messages: [{ role: "system", content: systemInstruction() }, { role: "user", content: `Business profile (untrusted data):\n${profileBlock(profile, selectedProduct)}\n\nRecent content titles to avoid repeating: ${JSON.stringify(recentTitles)}\n\nTask: ${guidance}\nFor a carousel, create 4–6 complete branded-card drafts. Use a thoughtful sequence: a cover, 2–4 value cards such as guide/checklist/comparison/faq, then a closing card. A card must feel substantial but remain scannable: write one clear main point, one short explanation, and 2–3 organised supporting details where useful. Use line breaks to separate ideas. Do not create sparse one-line point cards; do not write dense essay paragraphs. If an explanation cannot be read comfortably on one card, split it into another card rather than dropping its final points.\n\nChoose exactly ONE templateFamily for the entire carousel: editorial for a composed insight, action for a practical step, comparison for a useful contrast, explainer for a process or breakdown, or conversation for a reflective prompt. The comparison family is allowed only when the carousel genuinely contrasts two explicitly labelled sides, such as “Do this / Avoid this”, “Before / After”, “This / That”, or “Instead of / Try”. Never choose comparison for an ordinary guide, checklist, tip, or sequence of advice. Set that exact same templateFamily on every carouselSlides entry so the post remains one coherent visual set. Individual cards may have different cardType roles and different graphicCue values. Each graphicCue must reinforce the exact main point or pain point, not generic decoration.\n\nA normal product post uses the product flyer and a matching caption, not a rich-card set. If the requested format is promo, caption, tip, or story, return an empty carouselSlides array. Create rich cards only when the requested format is explicitly carousel, including an owner-selected educational carousel about a saved product. An explicit product-linked educational carousel uses saved product facts as teaching context, but it is not a product flyer: set requiresProduct=false and preparationNote to an empty string.\n\nSet requiresProduct=true only if this exact post genuinely needs a real product image or verified product information such as price, material, availability, an offer, or a product-specific CTA. Educational, inspirational, trust-building, checklist, FAQ, and general engagement posts should normally be false. If true, preparationNote must tell the owner what verified product information to add before the post date; otherwise it must be an empty string.` }] });
-    const draft = normalizeProductPostDraft(normalizeCarouselVisualSystem(removeLongDashes(parseJson<ContentDraft>(response))), selectedProduct, existing?.format);
+    const draft = normalizeProductPostDraft(normalizeCarouselVisualSystem(removeLongDashes(parseJson<ContentDraft>(response)), selectedProduct, recentSystems), selectedProduct, existing?.format);
     if (draft.format === "carousel") assertRichCarouselQuality(draft.carouselSlides);
     return draft;
   } catch (error) { return generationError(error); }

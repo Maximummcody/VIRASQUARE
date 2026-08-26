@@ -10,6 +10,7 @@ export type ProductFlyerComposition = "spotlight" | "editorial_split" | "detail_
 export type ProductFlyerDirection = "clean_retail" | "price_spotlight" | "editorial_feature" | "fashion_campaign" | "beauty_story" | "gift_occasion";
 type TemplateFamily = "editorial" | "action" | "comparison" | "explainer" | "conversation";
 type GraphicCue = "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none";
+export type VisualSystem = "editorial_guide" | "action_path" | "field_checklist" | "balanced_contrast" | "lookbook_notes" | "truth_check" | "question_studio" | "product_anatomy";
 
 export type VisualSlideDraft = {
   cardType: "cover" | "guide" | "checklist" | "comparison" | "faq" | "product" | "closing";
@@ -19,6 +20,7 @@ export type VisualSlideDraft = {
   footer: string;
   templateFamily?: TemplateFamily;
   graphicCue?: GraphicCue;
+  visualSystem?: VisualSystem;
 };
 export type RenderedVisual = { assetKey: string; assetUrl: string; sourceMode: "product" | "ai_product" | "generated" | "template" };
 
@@ -121,8 +123,36 @@ function conversationCard(brand: Brand, draft: VisualSlideDraft, number: number,
   const colors = palette(brand); const title = wrappedLines(draft.heading, 23).slice(0, 4); const bodyY = 670;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.ink}"/><circle cx="180" cy="165" r="190" fill="${colors.accent}" opacity=".92"/><circle cx="940" cy="1180" r="250" fill="#ffffff" opacity=".07"/>${headerSvg(brand, draft, number, total, colors, true)}<rect x="120" y="210" width="122" height="122" rx="61" fill="${colors.accent}"/>${cueSvg(draft.graphicCue || "confidence", 151, 241, 60, colors)}${centeredRows(title, 540, 490, 67, "#F7FAED", 700, 1.08)}<rect x="210" y="${bodyY - 52}" width="660" height="1" fill="#ffffff" fill-opacity=".25"/>${centeredRows(wrappedLines(draft.body, 52), 540, bodyY, 29, "#DEE8D8", 400, 1.36)}${footerSvg(brand, draft, colors, 1230, true)}</svg>`;
 }
-function richCardSvg({ brand, draft, number, total, postTemplateFamily }: { brand: Brand; draft: VisualSlideDraft; number: number; total: number; postTemplateFamily?: TemplateFamily }) {
+function fieldChecklistCard(brand: Brand, draft: VisualSlideDraft, number: number, total: number) {
+  const colors = palette(brand); const title = wrappedLines(draft.heading, 23).slice(0, 3); const checks = wrappedLines(draft.body, 40).slice(0, 5);
+  const rows = checks.map((line, index) => `<rect x="144" y="${580 + index * 94}" width="792" height="74" rx="22" fill="${index % 2 ? "#F3F6EF" : colors.paper}"/><circle cx="184" cy="${617 + index * 94}" r="18" fill="${colors.accent}"/><text x="184" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="${colors.ink}">✓</text>${textRows([line], 228, 630 + index * 94, 32, colors.ink, 400, 1.25, "Arial, sans-serif")}`).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#F4F7F0"/><rect x="58" y="58" width="964" height="1234" rx="58" fill="${colors.paper}"/>${headerSvg(brand, draft, number, total, colors)}<rect x="120" y="202" width="840" height="260" rx="38" fill="${colors.accent}" opacity=".72"/><text x="160" y="260" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2.4" fill="${colors.ink}">FIELD CHECKLIST</text>${textRows(title, 160, 348, 55, colors.ink)}${rows}${footerSvg(brand, draft, colors, 1190)}</svg>`;
+}
+function lookbookNotesCard(brand: Brand, draft: VisualSlideDraft, number: number, total: number) {
+  const colors = palette(brand); const title = wrappedLines(draft.heading, 19).slice(0, 4); const notes = wrappedLines(draft.body, 40).slice(0, 4);
+  const noteRows = notes.map((line, index) => `<circle cx="154" cy="${744 + index * 78}" r="9" fill="${colors.accent}"/>${textRows([line], 184, 756 + index * 78, 32, "#E7EFE1", 400, 1.3, "Arial, sans-serif")}`).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.ink}"/><rect x="58" y="58" width="964" height="1234" rx="58" fill="#203025" stroke="#ffffff" stroke-opacity=".16"/>${headerSvg(brand, draft, number, total, colors, true)}<rect x="120" y="200" width="188" height="44" rx="22" fill="${colors.accent}"/><text x="214" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.8" fill="${colors.ink}">LOOKBOOK NOTE</text><circle cx="844" cy="360" r="178" fill="${colors.accent}" opacity=".22"/><path d="M760 548C840 428 900 490 948 330" fill="none" stroke="${colors.accent}" stroke-width="12" stroke-linecap="round"/>${textRows(title, 120, 398, 66, "#FFFEFA", 700, 1.05)}<rect x="120" y="650" width="840" height="430" rx="34" fill="#ffffff" fill-opacity=".08"/>${noteRows}${footerSvg(brand, draft, colors, 1190, true)}</svg>`;
+}
+function truthCheckCard(brand: Brand, draft: VisualSlideDraft, number: number, total: number) {
+  const colors = palette(brand); const title = wrappedLines(draft.heading, 23).slice(0, 3); const body = wrappedLines(draft.body, 41).slice(0, 5);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.soft}"/><rect x="58" y="58" width="964" height="1234" rx="58" fill="${colors.paper}"/>${headerSvg(brand, draft, number, total, colors)}<rect x="120" y="198" width="840" height="130" rx="30" fill="#EEE4D6"/><text x="160" y="278" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="2.4" fill="${colors.ink}">COMMON ASSUMPTION</text>${textRows(title, 120, 450, 58, colors.ink)}<rect x="120" y="650" width="840" height="350" rx="34" fill="${colors.accent}" opacity=".58"/><text x="160" y="728" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="2.4" fill="${colors.ink}">WHAT HELPS INSTEAD</text>${bodySvg(body.join("\n"), 160, 800, 48, 310, colors)}${footerSvg(brand, draft, colors, 1190)}</svg>`;
+}
+function productAnatomyCard(brand: Brand, draft: VisualSlideDraft, number: number, total: number) {
+  const colors = palette(brand); const title = wrappedLines(draft.heading, 22).slice(0, 3); const facts = wrappedLines(draft.body, 39).slice(0, 4);
+  const factRows = facts.map((line, index) => `<path d="M154 ${638 + index * 94}h42" stroke="${colors.sage}" stroke-width="8" stroke-linecap="round"/>${textRows([line], 224, 653 + index * 94, 32, colors.body, 400, 1.25, "Arial, sans-serif")}`).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#F4F7F0"/><rect x="58" y="58" width="964" height="1234" rx="58" fill="${colors.paper}"/>${headerSvg(brand, draft, number, total, colors)}<rect x="120" y="198" width="840" height="300" rx="42" fill="${colors.ink}"/><text x="160" y="272" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2.2" fill="${colors.accent}">PRODUCT ANATOMY</text>${textRows(title, 160, 366, 56, "#FFFEFA", 700, 1.08)}<rect x="120" y="560" width="840" height="480" rx="34" fill="#F2F6ED"/>${factRows}${footerSvg(brand, draft, colors, 1190)}</svg>`;
+}
+function richCardSvg({ brand, draft, number, total, postTemplateFamily, postVisualSystem }: { brand: Brand; draft: VisualSlideDraft; number: number; total: number; postTemplateFamily?: TemplateFamily; postVisualSystem?: VisualSystem }) {
   assertRichCardFits(draft, number - 1);
+  const visualSystem = postVisualSystem || draft.visualSystem;
+  if (visualSystem === "field_checklist") return fieldChecklistCard(brand, draft, number, total);
+  if (visualSystem === "lookbook_notes") return lookbookNotesCard(brand, draft, number, total);
+  if (visualSystem === "truth_check") return truthCheckCard(brand, draft, number, total);
+  if (visualSystem === "product_anatomy") return productAnatomyCard(brand, draft, number, total);
+  if (visualSystem === "action_path") return actionCard(brand, draft, number, total);
+  if (visualSystem === "balanced_contrast") return comparisonCard(brand, draft, number, total);
+  if (visualSystem === "question_studio") return conversationCard(brand, draft, number, total);
+  if (visualSystem === "editorial_guide") return editorialCard(brand, draft, number, total);
   const family = postTemplateFamily || resolvedTemplateFamily(draft);
   if (family === "action") return actionCard(brand, draft, number, total);
   if (family === "comparison") return comparisonCard(brand, draft, number, total);
@@ -131,7 +161,7 @@ function richCardSvg({ brand, draft, number, total, postTemplateFamily }: { bran
   return editorialCard(brand, draft, number, total);
 }
 
-export function buildRichCardSvg(brand: Brand, draft: VisualSlideDraft, slideNumber = 1, totalSlides = 1, postTemplateFamily?: TemplateFamily) { return richCardSvg({ brand, draft, number: slideNumber, total: totalSlides, postTemplateFamily }); }
+export function buildRichCardSvg(brand: Brand, draft: VisualSlideDraft, slideNumber = 1, totalSlides = 1, postTemplateFamily?: TemplateFamily, postVisualSystem?: VisualSystem) { return richCardSvg({ brand, draft, number: slideNumber, total: totalSlides, postTemplateFamily, postVisualSystem }); }
 
 async function imageFromKey(storageKey: string) { const url = await storageGetSignedUrl(storageKey); const response = await fetch(url); if (!response.ok) throw new Error("The product image could not be read from storage."); const buffer = Buffer.from(await response.arrayBuffer()); const rawMime = response.headers.get("content-type")?.split(";")[0] || "image/jpeg"; const mime: "image/png" | "image/jpeg" | "image/webp" = rawMime === "image/png" || rawMime === "image/webp" || rawMime === "image/jpeg" ? rawMime : "image/jpeg"; return { buffer, mime, dataUri: `data:${mime};base64,${buffer.toString("base64")}` }; }
 async function dataUriFromKey(storageKey: string) { return (await imageFromKey(storageKey)).dataUri; }
@@ -261,4 +291,4 @@ export async function renderProductPostCard({ brand, product, mode, correction }
 
 async function withBrandLogo(brand: Brand) { if (!brand.brandLogoKey) return brand; try { return { ...brand, brandLogoDataUri: await dataUriFromKey(brand.brandLogoKey) }; } catch { return brand; } }
 export async function renderProductVisual({ brand, product }: { brand: Brand; product: ProductSource; heading: string; supporting: string }) { const [image, renderedBrand] = await Promise.all([dataUriFromKey(product.imageKey), withBrandLogo(brand)]); const visual = await renderSvg(buildProductFlyerSvg(renderedBrand, product, image, "standard"), `product-${Date.now()}`); return { ...visual, sourceMode: "product" as const }; }
-export async function renderCarouselSlide({ brand, draft, slideNumber, totalSlides, product, useProduct, postTemplateFamily }: { brand: Brand; draft: VisualSlideDraft; slideNumber: number; totalSlides: number; product?: ProductSource; useProduct?: boolean; postTemplateFamily?: TemplateFamily }) { const renderedBrand = await withBrandLogo(brand); if (product && useProduct && draft.cardType === "product") { const image = await dataUriFromKey(product.imageKey); const visual = await renderSvg(buildProductFlyerSvg(renderedBrand, product, image, "standard"), `card-product-${Date.now()}-${slideNumber}`); return { ...visual, sourceMode: "product" as const }; } const family = postTemplateFamily || resolvedTemplateFamily(draft); return renderSvg(buildRichCardSvg(renderedBrand, draft, slideNumber, totalSlides, family), `card-${key(family)}-${Date.now()}-${slideNumber}`); }
+export async function renderCarouselSlide({ brand, draft, slideNumber, totalSlides, product, useProduct, postTemplateFamily, postVisualSystem }: { brand: Brand; draft: VisualSlideDraft; slideNumber: number; totalSlides: number; product?: ProductSource; useProduct?: boolean; postTemplateFamily?: TemplateFamily; postVisualSystem?: VisualSystem }) { const renderedBrand = await withBrandLogo(brand); if (product && useProduct && draft.cardType === "product") { const image = await dataUriFromKey(product.imageKey); const visual = await renderSvg(buildProductFlyerSvg(renderedBrand, product, image, "standard"), `card-product-${Date.now()}-${slideNumber}`); return { ...visual, sourceMode: "product" as const }; } const family = postTemplateFamily || resolvedTemplateFamily(draft); const system = postVisualSystem || draft.visualSystem; return renderSvg(buildRichCardSvg(renderedBrand, draft, slideNumber, totalSlides, family, system), `card-${key(system || family)}-${Date.now()}-${slideNumber}`); }

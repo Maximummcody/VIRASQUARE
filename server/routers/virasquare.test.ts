@@ -65,7 +65,7 @@ describe("ViraSquare protected procedures", () => {
     database.createContentItem.mockResolvedValue({ id: 55, userId: 72, profileId: 7, plannedFor: "2026-08-11", title: "A refreshed daily post", objective: "Engagement", format: "caption", brief: "A new audience-aware direction.", caption: "A fresh caption", hashtags: JSON.stringify(["#fresh"]), carouselSlides: JSON.stringify([]), status: "planned", completedAt: null, createdAt: new Date(), updatedAt: new Date() });
     await viraSquareRouter.createCaller(context(72)).saveProfile({ businessName: "Clarity Studio", businessType: "Brand strategist", targetAudience: "Small business founders", contentPillars: ["Educate", "Build trust"], postingGoal: "Build authority", weeklyPostGoal: 4, brandVoice: "Clear and kind", refreshFrom: "2026-08-11" });
     expect(database.removePlannedContentFromDate).toHaveBeenCalledWith(72, "2026-08-11");
-    expect(ai.generateDailyDraft).toHaveBeenCalledWith(expect.objectContaining({ businessName: "Clarity Studio" }), "2026-08-11", undefined, []);
+    expect(ai.generateDailyDraft).toHaveBeenCalledWith(expect.objectContaining({ businessName: "Clarity Studio" }), "2026-08-11", undefined, [], undefined, []);
     expect(database.createContentItem).toHaveBeenCalledWith(expect.objectContaining({ userId: 72, plannedFor: "2026-08-11", title: "A refreshed daily post" }));
   });
 

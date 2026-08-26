@@ -5,7 +5,7 @@ const openAi = vi.hoisted(() => ({ requestOpenAiStructuredText: vi.fn() }));
 
 vi.mock("./openaiProvider", () => openAi);
 
-import { generateDailyDraft, generateIdeas, generateWeeklyPlan } from "./contentAi";
+import { chooseCarouselVisualSystem, generateDailyDraft, generateIdeas, generateWeeklyPlan } from "./contentAi";
 
 const profile = {
   businessName: "Clarity Studio",
@@ -76,6 +76,7 @@ describe("ViraSquare live AI availability", () => {
     expect(draft.format).toBe("carousel");
     expect(draft.carouselSlides).toHaveLength(4);
     expect(draft.requiresProduct).toBe(false);
+    expect(new Set(draft.carouselSlides.map(item => item.visualSystem))).toEqual(new Set(["product_anatomy"]));
   });
 
   it("carries the customer market and complete-card rendering contract into a Luna content request", async () => {
@@ -103,7 +104,8 @@ describe("ViraSquare live AI availability", () => {
     openAi.requestOpenAiStructuredText.mockResolvedValueOnce(JSON.stringify({ title: "One coherent carousel", objective: "Education", format: "carousel", brief: "A useful local style guide.", caption: "A caption.", hashtags: [], requiresProduct: false, preparationNote: "", carouselSlides: [slide("cover", "comparison"), slide("guide", "action"), slide("checklist", "editorial"), slide("closing", "conversation")] }));
 
     const draft = await generateDailyDraft(profile, "2026-08-24");
-    expect(new Set(draft.carouselSlides.map(item => item.templateFamily))).toEqual(new Set(["action"]));
+    expect(new Set(draft.carouselSlides.map(item => item.templateFamily))).toEqual(new Set(["editorial"]));
+    expect(new Set(draft.carouselSlides.map(item => item.visualSystem))).toEqual(new Set(["lookbook_notes"]));
   });
 
   it("retains the comparison visual system only when carousel content contains a genuine contrast", async () => {
@@ -113,6 +115,18 @@ describe("ViraSquare live AI availability", () => {
 
     const draft = await generateDailyDraft(profile, "2026-08-24");
     expect(new Set(draft.carouselSlides.map(item => item.templateFamily))).toEqual(new Set(["comparison"]));
+    expect(new Set(draft.carouselSlides.map(item => item.visualSystem))).toEqual(new Set(["balanced_contrast"]));
+  });
+
+  it("selects a content-fit visual system and avoids a recently used eligible system", () => {
+    const actionDraft = { title: "Three steps for a calmer evening routine", objective: "Education", format: "carousel" as const, brief: "A practical sequence for everyday customers.", caption: "", hashtags: [], requiresProduct: false, preparationNote: "", carouselSlides: [] };
+    const checklistDraft = { ...actionDraft, title: "What to check before you buy", brief: "A buying checklist with practical red flags." };
+    const questionDraft = { ...actionDraft, title: "Which style feels most like you?", brief: "Ask customers to share their preference." };
+
+    expect(chooseCarouselVisualSystem(actionDraft)).toBe("action_path");
+    expect(chooseCarouselVisualSystem(actionDraft, undefined, ["action_path"])).toBe("field_checklist");
+    expect(chooseCarouselVisualSystem(checklistDraft)).toBe("field_checklist");
+    expect(chooseCarouselVisualSystem(questionDraft)).toBe("question_studio");
   });
 
   it("removes long dashes from generated copy before it reaches the ViraSquare workspace", async () => {

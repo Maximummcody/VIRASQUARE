@@ -45,6 +45,21 @@ describe("ViraSquare Card Engine", () => {
     expect(comparisonRoleInSameSystem).not.toContain("TRY THIS");
   });
 
+  it("renders the approved visual systems with distinct professional geometry while keeping each system coherent", () => {
+    const draft = { cardType: "guide" as const, eyebrow: "PRACTICAL STYLE", heading: "Choose one useful starting point", body: "Start with the small action that works for your ordinary routine, then keep the next decision simple and practical.", footer: "Save this useful guide" };
+    const editorial = buildRichCardSvg(brand, draft, 2, 5, undefined, "editorial_guide");
+    const checklist = buildRichCardSvg(brand, { ...draft, cardType: "checklist" }, 2, 5, undefined, "field_checklist");
+    const lookbook = buildRichCardSvg(brand, draft, 2, 5, undefined, "lookbook_notes");
+    const anatomy = buildRichCardSvg(brand, draft, 2, 5, undefined, "product_anatomy");
+
+    expect(editorial).toContain('width="840" height="470"');
+    expect(checklist).toContain("FIELD CHECKLIST");
+    expect(checklist).toContain("✓");
+    expect(lookbook).toContain("LOOKBOOK NOTE");
+    expect(anatomy).toContain("PRODUCT ANATOMY");
+    expect(new Set([editorial, checklist, lookbook, anatomy]).size).toBe(4);
+  });
+
   it("keeps a long explainer heading inside its protected title lane beside the graphic badge", () => {
     const svg = buildRichCardSvg(brand, {
       cardType: "faq",

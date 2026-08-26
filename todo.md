@@ -217,4 +217,8 @@
 - [ ] Mobile My Products acceptance test: review several real saved products, open one for editing, and confirm the compact rows remain readable while desktop cards stay unchanged.
 - [x] Define eight professional carousel visual systems with explicit typography, colour, layout, content-fit, and selection rules for owner approval.
 - [x] Create approval-only comparative static examples for Editorial Guide and Action Path systems using two different fictional posts.
-- [ ] Obtain approval for the visual-system library before changing the current Card Engine.
+- [x] Obtain approval for the visual-system library before changing the current Card Engine.
+- [x] Implement the approved eight-system visual library for newly generated educational carousels, including content-job selection and post-level coherence.
+- [x] Add a safe recent-system repeat-control rule without changing saved visual outputs or product-content workflows.
+- [x] Add visual, fit, truth, and variation regression coverage; validate, checkpoint, and synchronize the approved Card Engine visual-library upgrade.
+- [ ] Visual-system acceptance test: generate several real educational carousels with different content jobs, then confirm the selected system is coherent, readable, varied across posts, and truthful to the saved brand and product facts.

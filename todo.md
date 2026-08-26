@@ -212,3 +212,5 @@
 - [x] Add regression coverage, validate desktop and mobile, checkpoint, and synchronize the approved Daily Brief without changing navigation, Calendar, Library, product workflows, or saved content.
 - [ ] Daily Brief acceptance test: review no-plan, rest-day, planned-post, ready-post, and completed-post states with real owner data, then confirm the weekly momentum wording feels accurate.
 - [x] Make today visually distinct in the Daily Brief weekly view and refine factual momentum and primary-action feedback without changing workflow destinations.
+- [ ] Replace oversized mobile My Products cards with a compact product-management list while preserving the desktop card layout and product workflows.
+- [ ] Validate, checkpoint, and synchronize the approved mobile-only product-list refinement.

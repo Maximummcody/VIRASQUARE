@@ -76,3 +76,57 @@
   button, a { transition: transform 160ms cubic-bezier(.23,1,.32,1), background-color 160ms cubic-bezier(.23,1,.32,1), border-color 160ms cubic-bezier(.23,1,.32,1), color 160ms cubic-bezier(.23,1,.32,1), box-shadow 160ms cubic-bezier(.23,1,.32,1); }
   button:active { transform: scale(.975); }
 }
+
+/* Private review-only theme. It deliberately preserves WorkspaceShell composition and behaviors. */
+.navy-proof { background: #F5F7FA !important; color: #111827 !important; }
+.navy-proof [class*="bg-[#f7f7f2]"] { background-color: #F5F7FA !important; }
+.navy-proof [class*="bg-[#fffefa]"],
+.navy-proof [class*="bg-[#fbfcf8]"],
+.navy-proof [class*="bg-[#fbfcf9]"] { background-color: #FFFFFF !important; }
+.navy-proof [class*="bg-[#263327]"],
+.navy-proof [class*="bg-[#3b4b3b]"] { background-color: #0B1220 !important; }
+.navy-proof [class*="bg-[#eaf2ca]"] { background-color: #2563EB !important; color: #FFFFFF !important; }
+.navy-proof [class*="bg-[#e7f1d6]"],
+.navy-proof [class*="bg-[#eef4ea]"],
+.navy-proof [class*="bg-[#eef5e9]"],
+.navy-proof [class*="bg-[#f1f8ed]"],
+.navy-proof [class*="bg-[#f4f8f1]"],
+.navy-proof [class*="bg-[#f5f9f2]"],
+.navy-proof [class*="bg-[#f5faf1]"],
+.navy-proof [class*="bg-[#f6faf2]"] { background-color: #EFF6FF !important; }
+.navy-proof [class*="bg-[#e5efdf]"],
+.navy-proof [class*="bg-[#e7eee2]"] { background-color: #DBEAFE !important; }
+.navy-proof [class*="bg-[#6f9560]"],
+.navy-proof [class*="bg-[#71955e]"],
+.navy-proof [class*="bg-[#75965f]"] { background-color: #2563EB !important; }
+.navy-proof [class*="text-[#263327]"],
+.navy-proof [class*="text-[#334b32]"],
+.navy-proof [class*="text-[#405142]"],
+.navy-proof [class*="text-[#45623e]"],
+.navy-proof [class*="text-[#475347]"],
+.navy-proof [class*="text-[#4b5c49]"] { color: #111827 !important; }
+.navy-proof [class*="text-[#75965f]"],
+.navy-proof [class*="text-[#527542]"],
+.navy-proof [class*="text-[#587052]"],
+.navy-proof [class*="text-[#5d8152]"],
+.navy-proof [class*="text-[#537344]"],
+.navy-proof [class*="text-[#45663d]"] { color: #2563EB !important; }
+.navy-proof [class*="text-[#ecf8c5]"],
+.navy-proof [class*="text-[#eaf2ca]"],
+.navy-proof [class*="text-[#f7faed]"] { color: #FFFFFF !important; }
+.navy-proof [class*="text-[#cce1b8]"],
+.navy-proof [class*="text-[#c7d4c1]"] { color: #93C5FD !important; }
+.navy-proof [class*="text-[#d6e0d1]"],
+.navy-proof [class*="text-[#d5e0ce]"],
+.navy-proof [class*="text-[#e3ecdc]"] { color: #DBEAFE !important; }
+.navy-proof [class*="border-[#d4e3cc]"],
+.navy-proof [class*="border-[#dce5d8]"],
+.navy-proof [class*="border-[#dce8d5]"],
+.navy-proof [class*="border-[#dfe8da]"],
+.navy-proof [class*="border-[#e2e8de]"],
+.navy-proof [class*="border-[#e4eadf]"],
+.navy-proof [class*="border-[#e0e8dc]"] { border-color: #DCE6F2 !important; }
+.navy-proof [class*="border-[#6f9560]"],
+.navy-proof [class*="border-[#a8c496]"] { border-color: #2563EB !important; }
+.navy-proof [class*="ring-[#d9e9d0]"] { --tw-ring-color: #BFDBFE !important; }
+.navy-proof [class*="shadow-[0_-8px_24px_rgba(38,51,39"] { box-shadow: 0 -8px 24px rgba(15,23,42,.08) !important; }

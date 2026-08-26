@@ -179,3 +179,8 @@
 - [ ] Product-content flow acceptance test: create a normal product flyer, confirm no rich-card set appears, then create one separate product-linked educational carousel and confirm it does not replace the original product post or Calendar entry.
 - [x] Reorder completed product-review sections so the flyer appears before correction, selling-package, education, and feedback tools without changing their behavior.
 - [x] Add an explicit Save to Drafts action that keeps a generated post, flyer, and selling package available in Library while preserving Archive as a separate action.
+- [x] Add immediate visual feedback when an owner saves a generated post to Drafts.
+- [x] Add a dedicated Drafts tab in Library that shows explicitly saved draft work.
+- [x] Reorganize the crowded mixed Library into clear Drafts, Ready to post, Posted, and Archived views without removing content records.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library organization update.
+- [ ] Drafts and Library acceptance test: save one real generated post, confirm the success message and Drafts tab entry, then review Ready to post, Posted, and Archived views.

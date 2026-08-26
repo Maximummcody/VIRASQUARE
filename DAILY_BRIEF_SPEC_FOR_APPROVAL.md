@@ -90,3 +90,5 @@ The implemented Daily Brief was reviewed at a 375 px mobile viewport and a 1280 
 The validated rest-day state now says **“Your weekly rhythm is ready”** rather than implying that an action is due today. The mobile-only bottom navigation and desktop top navigation remain unchanged by the Daily Brief itself.
 
 The follow-up interaction polish was reviewed at desktop and mobile widths. The current date now has a visible **Today** marker, a softened green surface, a stronger border, and restrained elevation in the weekly board. The primary action and secondary alternative action have hover, focus, and press feedback, while the weekly-momentum bar expands over a short transition and respects reduced-motion settings.
+
+The weekly time-state refinement was reviewed on mobile. The current card now has one calm **Today · weekday** label instead of competing current-day labels. Mobile shows today and the next two upcoming dates, while desktop retains the complete seven-day board. Past dates remain quiet history, and future rest days use planning language rather than implying an action is due today. Lifecycle status and workflow destinations remain unchanged.

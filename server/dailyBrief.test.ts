@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDailyBriefState, getWeeklyMomentum } from "../client/src/lib/dailyBrief";
+import { getDailyBriefState, getWeeklyDateState, getWeeklyMomentum, mobileWeeklyDates } from "../client/src/lib/dailyBrief";
 
 describe("Daily Brief", () => {
   it("chooses a truthful action without inferring external results", () => {
@@ -14,5 +14,12 @@ describe("Daily Brief", () => {
     expect(getWeeklyMomentum({ hasActivePlan: true, completedCount: 2, weeklyGoal: 4 })).toMatchObject({ title: "2 of 4 planned posts completed", percentage: 50 });
     expect(getWeeklyMomentum({ hasActivePlan: true, completedCount: 5, weeklyGoal: 4 })).toMatchObject({ title: "This week's rhythm is complete", percentage: 100 });
     expect(getWeeklyMomentum({ hasActivePlan: false, completedCount: 0, weeklyGoal: 3 }).title).toBe("Set your weekly rhythm");
+  });
+
+  it("keeps past dates quiet, gives today one state, and shows today plus two upcoming dates on mobile", () => {
+    expect(getWeeklyDateState("2026-08-25", "2026-08-26")).toBe("past");
+    expect(getWeeklyDateState("2026-08-26", "2026-08-26")).toBe("today");
+    expect(getWeeklyDateState("2026-08-27", "2026-08-26")).toBe("future");
+    expect(mobileWeeklyDates(["2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30"], "2026-08-26")).toEqual(["2026-08-26", "2026-08-27", "2026-08-28"]);
   });
 });

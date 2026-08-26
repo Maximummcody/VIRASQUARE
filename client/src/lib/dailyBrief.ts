@@ -5,6 +5,7 @@ export type DailyBriefItem = {
 };
 
 export type DailyBriefAction = "prepare_week" | "create_today" | "prepare_product" | "open_ready" | "view_week";
+export type WeeklyDateState = "past" | "today" | "future";
 
 export type DailyBriefState = {
   eyebrow: string;
@@ -68,4 +69,13 @@ export function getWeeklyMomentum(input: { hasActivePlan: boolean; completedCoun
   if (completedCount >= goal) return { title: "This week's rhythm is complete", detail: "You can still create something extra if it serves your business.", completedCount, goal, percentage: 100 };
   if (completedCount > 0) return { title: `${completedCount} of ${goal} planned posts completed`, detail: "Your plan is moving forward at your pace.", completedCount, goal, percentage };
   return { title: "Your weekly rhythm is ready", detail: "Your next planned move will be ready when its day arrives.", completedCount, goal, percentage: 0 };
+}
+
+export function getWeeklyDateState(date: string, today: string): WeeklyDateState {
+  if (date === today) return "today";
+  return date < today ? "past" : "future";
+}
+
+export function mobileWeeklyDates(dates: string[], today: string) {
+  return dates.filter(date => date >= today).slice(0, 3);
 }

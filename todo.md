@@ -280,3 +280,4 @@
 - [x] Apply the approved Navy, Electric Blue, White, and Soft Gray theme across the live ViraSquare interface without changing workflow or generated content output.
 - [x] Verify, checkpoint, and synchronize the theme-only rollout after desktop and mobile review.
 - [x] Refine Today’s Navy-and-Blue visual hierarchy, including primary-action treatment, without changing Daily Brief, planning, or alternative-content behavior.
+- [x] Fix Make something different so it reliably opens the existing Your alternative workflow rather than navigating to Calendar or another view.

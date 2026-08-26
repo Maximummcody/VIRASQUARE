@@ -190,3 +190,6 @@
 - [x] Improve each Library empty state with a clear, friendly explanation and next step.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library usability refinement.
 - [ ] Library usability acceptance test: confirm the compact help control, cross-tab search, and an empty tab message are clear with real saved work.
+- [x] Add compact filtering and sorting controls beside Library search without changing saved work or work-state tabs.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved Library filtering and sorting controls.
+- [ ] Library organization acceptance test: use search, one content filter, and two sort orders with real saved work to confirm the controls feel clear.

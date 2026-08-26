@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterLibraryWork, getLibraryWorkTab, libraryWorkCount, searchLibraryWork } from "../client/src/lib/libraryWork";
+import { filterLibraryContent, filterLibraryWork, getLibraryWorkTab, libraryWorkCount, searchLibraryWork, sortLibraryWork } from "../client/src/lib/libraryWork";
 
 const entries = [
   { id: 1, lifecycleStatus: "reviewed", feedbackOutcome: "saved_for_later" },
@@ -34,5 +34,19 @@ describe("Library work-state classification", () => {
     expect(searchLibraryWork(searchable, "education").map(entry => entry.id)).toEqual([2]);
     expect(getLibraryWorkTab(entries[0])).toBe("drafts");
     expect(getLibraryWorkTab(entries[2])).toBeNull();
+  });
+
+  it("filters content type and sorts saved work without changing its lifecycle state", () => {
+    const sortable = [
+      { ...entries[0], title: "Zara product", brief: "A flyer", format: "promo", updatedAt: "2026-08-03" },
+      { ...entries[1], title: "Ada carousel", brief: "A guide", format: "carousel", entryType: "product_education", updatedAt: "2026-08-01" },
+      { ...entries[3], title: "Bella caption", brief: "A caption", format: "caption", updatedAt: "2026-08-02" },
+    ];
+
+    expect(filterLibraryContent(sortable, "product").map(entry => entry.id)).toEqual([1]);
+    expect(filterLibraryContent(sortable, "education").map(entry => entry.id)).toEqual([2]);
+    expect(filterLibraryContent(sortable, "carousel").map(entry => entry.id)).toEqual([2]);
+    expect(sortLibraryWork(sortable, "recent").map(entry => entry.id)).toEqual([1, 4, 2]);
+    expect(sortLibraryWork(sortable, "title_asc").map(entry => entry.id)).toEqual([2, 4, 1]);
   });
 });

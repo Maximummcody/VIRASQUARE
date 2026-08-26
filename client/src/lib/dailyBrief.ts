@@ -79,3 +79,7 @@ export function getWeeklyDateState(date: string, today: string): WeeklyDateState
 export function mobileWeeklyDates(dates: string[], today: string) {
   return dates.filter(date => date >= today).slice(0, 3);
 }
+
+export function shouldShowJumpToToday(isTodayVisible: boolean) {
+  return !isTodayVisible;
+}

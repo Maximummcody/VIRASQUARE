@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDailyBriefState, getWeeklyDateState, getWeeklyMomentum, mobileWeeklyDates } from "../client/src/lib/dailyBrief";
+import { getDailyBriefState, getWeeklyDateState, getWeeklyMomentum, mobileWeeklyDates, shouldShowJumpToToday } from "../client/src/lib/dailyBrief";
 
 describe("Daily Brief", () => {
   it("chooses a truthful action without inferring external results", () => {
@@ -21,5 +21,10 @@ describe("Daily Brief", () => {
     expect(getWeeklyDateState("2026-08-26", "2026-08-26")).toBe("today");
     expect(getWeeklyDateState("2026-08-27", "2026-08-26")).toBe("future");
     expect(mobileWeeklyDates(["2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30"], "2026-08-26")).toEqual(["2026-08-26", "2026-08-27", "2026-08-28"]);
+  });
+
+  it("shows the contextual return action only when the current date is out of view", () => {
+    expect(shouldShowJumpToToday(true)).toBe(false);
+    expect(shouldShowJumpToToday(false)).toBe(true);
   });
 });

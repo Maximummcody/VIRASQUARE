@@ -223,3 +223,4 @@
 - [x] Add visual, fit, truth, and variation regression coverage; validate, checkpoint, and synchronize the approved Card Engine visual-library upgrade.
 - [ ] Visual-system acceptance test: generate several real educational carousels with different content jobs, then confirm the selected system is coherent, readable, varied across posts, and truthful to the saved brand and product facts.
 - [x] Refine Daily Brief weekly cards into clear past, today, and future visual states, with one calm Today label and no status or workflow changes.
+- [x] Add a contextual Calendar Jump to today control that appears only away from the current date and preserves plan data and post statuses.

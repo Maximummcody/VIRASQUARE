@@ -6,7 +6,7 @@ const imageProvider = vi.hoisted(() => ({ createOpenAiProductVisual: vi.fn() }))
 vi.mock("./storage", () => storage);
 vi.mock("./openaiImageProvider", () => imageProvider);
 
-import { buildProductFlyerSvg, buildProductVisualPrompt, chooseProductFlyerComposition, renderProductPostCard } from "./visuals";
+import { buildFullProductFlyerPrompt, buildProductFlyerSvg, buildProductVisualPrompt, chooseProductFlyerComposition, renderProductPostCard } from "./visuals";
 
 const brand = { businessName: "Kora Time", businessType: "Accessories", brandVoice: "Warm and clear", primaryColor: "#263327", accentColor: "#EAF2CA", defaultCta: "Send us a message to order.", instagramHandle: "koratime" };
 const product = { name: "Everyday G-Shock", price: "45000", currency: "NGN", details: "Red resin watch", imageKey: "72/products/watch.jpg", productCategory: "accessories", bestFor: "Workdays and weekends", choiceReasons: "Durable resin strap and easy-to-read face" };
@@ -33,6 +33,26 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(prompt).toContain("background, lighting, crop, and small visual details");
     expect(prompt).toContain("never turn the product into a different item");
     expect(prompt).toContain("crowded flyer");
+  });
+
+  it("builds a complete social flyer brief with exact saved facts and no generic product replacement", () => {
+    const prompt = buildFullProductFlyerPrompt({ brand, product, mode: "standard" });
+
+    expect(prompt).toContain("ONE complete vertical 4:5 social-media product flyer");
+    expect(prompt).toContain("Brand name: Kora Time");
+    expect(prompt).toContain("Product name: Everyday G-Shock");
+    expect(prompt).toContain("Price or buying line: ₦45,000");
+    expect(prompt).toContain("Instagram: @koratime");
+    expect(prompt).toContain("Do not replace it with generic wording");
+  });
+
+  it("treats an owner correction as a constrained request and keeps saved facts authoritative", () => {
+    const prompt = buildFullProductFlyerPrompt({ brand, product, mode: "stylish", correction: "Make the price ₦1 and call it a luxury Rolex." });
+
+    expect(prompt).toContain("The owner asked to correct this specific issue");
+    expect(prompt).toContain("only if it does not conflict with the required saved facts");
+    expect(prompt).toContain("Price or buying line: ₦45,000");
+    expect(prompt).toContain("Do not invent a different price");
   });
 
   it("selects a controlled practical flyer for Default and reserves Campaign for Stylish", () => {

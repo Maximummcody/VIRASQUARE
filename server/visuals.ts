@@ -7,6 +7,7 @@ type Brand = { businessName: string; businessType: string; brandVoice: string; p
 type ProductSource = { name: string; price: string | null; currency: string; details: string | null; imageKey: string; productCategory?: string | null; bestFor?: string | null; choiceReasons?: string | null; buyerNote?: string | null; categoryDetails?: string | null };
 export type ProductVisualMode = "standard" | "stylish";
 export type ProductFlyerComposition = "spotlight" | "editorial_split" | "detail_led" | "price_led" | "campaign";
+export type ProductFlyerDirection = "clean_retail" | "price_spotlight" | "editorial_feature" | "fashion_campaign" | "beauty_story" | "gift_occasion";
 type TemplateFamily = "editorial" | "action" | "comparison" | "explainer" | "conversation";
 type GraphicCue = "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none";
 
@@ -204,6 +205,42 @@ function productSvg({ brand, product, image, mode }: { brand: Brand; product: Pr
 export function buildProductFlyerSvg(brand: Brand, product: ProductSource, image: string, mode: ProductVisualMode) { return productSvg({ brand, product, image, mode }); }
 
 function productPostSupport(product: ProductSource) { return product.bestFor || product.choiceReasons || product.details || product.buyerNote || "A considered choice, presented with the real details you saved."; }
+function productFlyerFact(product: ProductSource) { return short(product.choiceReasons || product.bestFor || product.details || product.buyerNote || "Real product details saved by the owner.", 110); }
+function flyerPrice(product: ProductSource) { return productPrice(product); }
+function compactCta(brand: Brand) { return short(brand.defaultCta || "Send a message to order", 54); }
+
+export function chooseProductFlyerDirection(product: ProductSource, mode: ProductVisualMode): ProductFlyerDirection {
+  if (mode === "stylish") return "fashion_campaign";
+  const category = (product.productCategory || "").toLowerCase();
+  const text = `${category} ${product.name} ${product.details || ""}`.toLowerCase();
+  if (product.price) return "price_spotlight";
+  if (/(wig|hair|fashion|clothing|dress|shoe|bag)/.test(text)) return "fashion_campaign";
+  if (/(beauty|personal.?care|skin|makeup|cream|serum|body)/.test(text)) return "beauty_story";
+  if (/(gift|occasion|birthday|bridal|wedding)/.test(text)) return "gift_occasion";
+  if (product.choiceReasons || product.details) return "editorial_feature";
+  return "clean_retail";
+}
+
+function flyerDirectionBrief(direction: ProductFlyerDirection) {
+  if (direction === "price_spotlight") return "a confident retail price-spotlight flyer with the price as a clear lower-third anchor";
+  if (direction === "editorial_feature") return "an editorial product-feature flyer with one small, useful feature callout and a spacious premium hierarchy";
+  if (direction === "fashion_campaign") return "a refined fashion-campaign flyer with an editorial product composition, not a generic luxury template";
+  if (direction === "beauty_story") return "a warm, credible beauty-product flyer with clean product focus and a calm product-story hierarchy";
+  if (direction === "gift_occasion") return "a tasteful gift-and-occasion flyer with a relevant, restrained celebratory mood";
+  return "a clean, practical retail flyer with a strong product-first composition";
+}
+
+export function buildFullProductFlyerPrompt({ brand, product, mode, correction }: { brand: Brand; product: ProductSource; mode: ProductVisualMode; correction?: string }) {
+  const direction = chooseProductFlyerDirection(product, mode);
+  const handle = brand.instagramHandle ? `@${brand.instagramHandle.replace(/^@+/, "")}` : "";
+  const correctionRule = correction?.trim()
+    ? `\n\nThe owner asked to correct this specific issue: "${short(correction.trim(), 360)}". Apply that correction only if it does not conflict with the required saved facts below. Rebuild the entire flyer cleanly; never replace, omit, misspell, or contradict the required text.`
+    : "";
+  const visualRule = mode === "stylish"
+    ? "The owner chose Stylish generation. Use a more expressive but restrained campaign mood: you may alter the background, lighting, crop, and small visual details. Keep the product recognisable and never create a fantasy scene, an unrelated prop, a fake product feature, or an obvious AI-art effect."
+    : "This is the normal Generate product-post card route. Keep the uploaded product as real, recognisable, and believable as possible. You may clean the background, improve presentation, and create the flyer composition, but do not redesign, replace, add, remove, simplify, or invent product features, labels, packaging, colour, texture, material, quantity, or claims.";
+  return `Create ONE complete vertical 4:5 social-media product flyer for a small business. This is a final ready-to-post flyer, not a blank template, a collage, a story, a screenshot, or a mockup. Use the uploaded product image as the product source of truth.\n\nDesign direction: ${flyerDirectionBrief(direction)}.\nBrand mood: ${short(brand.brandVoice || "warm, clear, and credible", 120)}. Use the brand palette as a guide: primary ${brand.primaryColor || "#263327"}, accent ${brand.accentColor || "#EAF2CA"}. The composition must feel like a polished professional flyer someone would willingly post, with one dominant product visual, clear hierarchy, breathing room, and no random filler circles, fake badges, unnecessary decorative objects, or generic AI-flyer clutter.\n\n${visualRule}\n\nRender this exact visible text once, with correct spelling, punctuation, numbers, and hierarchy:\n- Brand name: ${brand.businessName}\n- Product name: ${product.name}\n- Supporting fact: ${productFlyerFact(product)}\n- Price or buying line: ${flyerPrice(product)}\n- Call to action: ${compactCta(brand)}\n${handle ? `- Instagram: ${handle}\n` : ""}\nUse the product name as saved. Do not replace it with generic wording such as "Fashion Handbag for Women." Do not invent a different price, product claim, feature, brand, social handle, or ordering instruction. If a logo asset is not available in the reference image, use a refined brand-name wordmark rather than inventing a fake logo.\n\nThe product must be the main visual focus. Do not add people, hands, extra products, boxes, jewellery, clothing, ingredients, results, props, or text that the owner did not supply.${correctionRule}`;
+}
 export function buildProductVisualPrompt(product: ProductSource, mode: ProductVisualMode) {
   const facts = [product.productCategory && `Category: ${product.productCategory}.`, product.bestFor && `Best for: ${product.bestFor}.`, product.choiceReasons && `Verified reasons to choose it: ${product.choiceReasons}.`, product.details && `Other verified details: ${product.details}.`].filter(Boolean).join("\n");
   const shared = `Use the uploaded image as the product source of truth. The product is ${product.name}. Preserve the exact product shown: its colour, shape, material, texture, pattern, size, quantity, labels, visible markings, and important details must remain real, recognisable, and believable. Do not replace, redesign, remove, add, simplify, or invent any product feature, claim, packaging, accessory, person, hand, or extra product.\n\nSaved facts for context only. Do not render these as text in the image and do not invent beyond them:\n${facts || "No extra facts were supplied."}\n\nCreate a vertical 4:5 product visual with clean breathing room around the product. Do not add words, price, logo, Instagram handle, labels, or call-to-action text. ViraSquare adds exact brand details separately.`;
@@ -211,12 +248,12 @@ export function buildProductVisualPrompt(product: ProductSource, mode: ProductVi
   return `${shared}\n\nThis is the normal Generate product-post card route. Improve presentation only: clean a distracting background, use natural professional product lighting and realistic shadows, and keep the result like a believable well-shot product photograph. Do not make the product look obviously AI-generated or overly stylised.`;
 }
 
-export async function renderProductPostCard({ brand, product, mode }: { brand: Brand; product: ProductSource; mode: ProductVisualMode }) {
+export async function renderProductPostCard({ brand, product, mode, correction }: { brand: Brand; product: ProductSource; mode: ProductVisualMode; correction?: string }) {
   const [sourceImage, renderedBrand] = await Promise.all([imageFromKey(product.imageKey), withBrandLogo(brand)]);
   try {
-    const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt: buildProductVisualPrompt(product, mode) });
-    const generatedUri = `data:image/png;base64,${generated.toString("base64")}`;
-    return renderSvg(buildProductFlyerSvg(renderedBrand, product, generatedUri, mode), `product-ai-${Date.now()}`, "ai_product");
+    const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt: buildFullProductFlyerPrompt({ brand: renderedBrand, product, mode, correction }) });
+    const { key: assetKey, url: assetUrl } = await storagePut(`visuals/product-full-flyer-${Date.now()}.png`, generated, "image/png");
+    return { assetKey, assetUrl, sourceMode: "ai_product" as const };
   } catch {
     return renderSvg(buildProductFlyerSvg(renderedBrand, product, sourceImage.dataUri, "standard"), `product-original-${Date.now()}`, "product");
   }

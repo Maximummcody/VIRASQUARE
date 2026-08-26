@@ -40,6 +40,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
   const [deliverable, setDeliverable] = useState<any>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [stylishGeneration, setStylishGeneration] = useState(false);
+  const [correction, setCorrection] = useState("");
 
   useEffect(() => {
     if (item.productId) setSelectedProductId(item.productId);
@@ -77,7 +78,8 @@ export function VisualMaker({ item }: { item: ContentItem }) {
   const regenerate = trpc.virasquare.regenerateVisualSlide.useMutation({
     onSuccess: value => {
       setDeliverable(value);
-      toast.success("That slide has been refreshed.");
+      setCorrection("");
+      toast.success("Your product flyer has been regenerated.");
     },
     onError: error => {
       setProblem(error.message);
@@ -161,7 +163,7 @@ export function VisualMaker({ item }: { item: ContentItem }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-[#344738]">Generate product-post card</p>
-          <p className="mt-1 max-w-xl text-xs leading-5 text-[#748174]">{selected ? `ViraSquare will keep ${selected.name} believable, then add the exact saved price and brand details in its controlled card layout.` : item.preparationNote || "Choose a real product above first."}</p>
+          <p className="mt-1 max-w-xl text-xs leading-5 text-[#748174]">{selected ? `ViraSquare will use ${selected.name}, your saved facts, and your brand details to create one complete ready-to-post flyer.` : item.preparationNote || "Choose a real product above first."}</p>
         </div>
         <Button type="button" disabled={!canMakeProductPost || makeVisual.isPending} onClick={() => beginVisual("single_post")} className="shrink-0 rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{makeVisual.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}{stylishGeneration ? "Generate stylish card" : "Generate product card"}</Button>
       </div>
@@ -178,7 +180,8 @@ export function VisualMaker({ item }: { item: ContentItem }) {
         <div><p className="eyebrow">YOUR READY-TO-POST VISUALS</p><h4 className="mt-1 font-serif text-xl text-[#2e3c2e]">Review each slide before you post.</h4></div>
         <div className="flex items-center gap-2"><Button onClick={() => { setProblem(null); exportVisualSet.mutate({ deliverableId: deliverable.id }); }} disabled={exportVisualSet.isPending} variant="outline" className="rounded-xl border-[#b7cda9] bg-white text-[#43663a] hover:bg-[#eef6e9]">{exportVisualSet.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download full set</Button><Sparkles className="h-5 w-5 text-[#71975f]" /></div>
       </div>
-      {deliverable.type === "single_post" && <div className={cn("mt-4 rounded-xl border p-3 text-xs leading-5", deliverable.slides[0]?.sourceMode === "product" ? "border-[#d4e5c9] bg-[#f4faef] text-[#527044]" : "border-[#e2eadc] bg-[#f8fbf5] text-[#657563]")}>{deliverable.slides[0]?.sourceMode === "product" ? "ViraSquare kept your original uploaded product photo in this card because the AI version was not available or did not pass safely." : deliverable.generationMode === "stylish" ? "Stylish generation was used for this card. The final price and brand details remain controlled by ViraSquare." : "Your product visual was made from your real uploaded product photo and the facts you saved."}</div>}
+      {deliverable.type === "single_post" && <div className={cn("mt-4 rounded-xl border p-3 text-xs leading-5", deliverable.slides[0]?.sourceMode === "product" ? "border-[#d4e5c9] bg-[#f4faef] text-[#527044]" : "border-[#e2eadc] bg-[#f8fbf5] text-[#657563]")}>{deliverable.slides[0]?.sourceMode === "product" ? "ViraSquare kept your original uploaded product photo in this card because the AI flyer was not available. You can try again or make a different version." : deliverable.generationMode === "stylish" ? "Stylish generation was used for this complete product flyer. Review the product, wording, price, and brand details before you post." : "Your complete product flyer was made from your saved product, brand, and product facts. Review every important detail before you post."}</div>}
+      {deliverable.type === "single_post" && <div className="mt-4 rounded-xl border border-[#dce8d5] bg-white p-3"><div className="flex flex-col gap-3 sm:flex-row sm:items-end"><div className="min-w-0 flex-1"><Label htmlFor="flyer-correction" className="text-sm font-semibold text-[#405142]">Need something corrected?</Label><p className="mt-1 text-xs leading-5 text-[#748174]">Tell ViraSquare one clear issue, such as a misspelt name, wrong price, missing Instagram, or product detail that must stay true.</p><Textarea id="flyer-correction" value={correction} onChange={event => setCorrection(event.target.value)} placeholder="For example: Keep the price exactly as ₦35,000 and spell the product name correctly." className="mt-2 min-h-20 resize-none" /></div><Button onClick={() => { const firstSlide = deliverable.slides[0]; if (!correction.trim()) { setProblem("Tell ViraSquare what needs correcting first."); return; } setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: firstSlide.slideNumber, correction: correction.trim() }); }} disabled={regenerate.isPending || correction.trim().length < 3} className="shrink-0 rounded-xl bg-[#263327] hover:bg-[#3a4d3b]">{regenerate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}Fix and regenerate</Button></div></div>}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">{deliverable.slides.map((slide: any) => <article key={slide.id ?? slide.slideNumber} className="overflow-hidden rounded-2xl border border-[#e0e8dd] bg-white"><div className="aspect-[4/5] bg-[#edf2e8]">{slide.assetUrl ? <img src={slide.assetUrl} alt={`Visual slide ${slide.slideNumber}`} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm text-[#789075]">Preparing slide…</div>}</div><div className="flex items-center justify-between gap-2 p-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-[#759166]">{deliverable.type === "single_post" ? "PRODUCT POST" : `Slide ${slide.slideNumber}`}</p><p className="mt-1 line-clamp-1 text-sm font-semibold text-[#405142]">{slide.heading}</p></div><div className="flex gap-1"><Button title={deliverable.type === "single_post" ? "Generate another version" : "Refresh this slide"} onClick={() => { setProblem(null); regenerate.mutate({ deliverableId: deliverable.id, slideNumber: slide.slideNumber }); }} disabled={regenerate.isPending} size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><RefreshCw className={cn("h-4 w-4", regenerate.isPending && "animate-spin")} /></Button>{slide.assetUrl && <Button asChild title="Download slide" size="icon" variant="ghost" className="h-8 w-8 text-[#537a45]"><a href={slide.assetUrl} download={`virasquare-${slide.slideNumber}.png`}><Download className="h-4 w-4" /></a></Button>}</div></div></article>)}</div>
     </div>}
   </section>;

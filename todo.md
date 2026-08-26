@@ -151,11 +151,17 @@
 - [x] Group 1.3: Build the optional Stylish generation route with clear pre-generation disclosure, restrained prompts, and owner choice.
 - [x] Group 1.4: Add product-truth checks, safe original-photo fallback, stored product-visual records, and review/regeneration controls.
 - [x] Group 1.5: Add focused tests and complete Group 1 validation without changing educational-card generation or existing posts.
-- [ ] Group 1 acceptance test: use an OpenAI-verified account to create both a default and Stylish product-post card with a real saved product, then review product truth and fallback messaging.
+- [ ] Group 1 acceptance test: use an OpenAI-verified account to create both a default and Stylish full product flyer with a real saved product, then review product truth, text accuracy, and fallback messaging.
 - [x] Review and, only after approval, refine the Group 1 product-card composition so it feels like a polished brand flyer without obvious AI imagery or unnecessary decorative elements.
 - [x] Define and, only after approval, implement a flexible product-flyer composition system rather than applying one fixed product template to every product card.
 - [x] Preserve and document the distinct default and Stylish product-visual paths inside any future flexible flyer system before implementation.
 - [x] Replace the fixed Group 1 product-card template with controlled Product Spotlight, Editorial Split, Detail-led, Price-led, and Stylish Campaign flyer compositions.
 - [x] Select flyer composition from product image shape, saved product facts, category, and generation mode without changing educational-card generation.
 - [x] Preserve exact ViraSquare product facts and branding in all flyer compositions, and add visual plus automated regression coverage before release.
+- [x] Re-evaluate the product-flyer renderer against a post-ready social-flyer quality standard before retaining or replacing the controlled composition approach.
+- [x] Define an industry-aware high-quality product-flyer generation approach that delivers visual variety without losing real product and factual accuracy.
+- [x] Replace the controlled product-flyer renderer with GPT Image 2 full-flyer generation using saved product, business, brand, and industry-aware creative-direction data.
+- [x] Add a small product-flyer direction library so ViraSquare chooses a suitable social-flyer brief rather than relying on one template.
+- [x] Add correction-aware regeneration for product flyers, including a concise owner correction request when text, price, brand detail, or product fidelity is wrong.
+- [x] Preserve product truth, required saved facts, owner review, and existing educational-card generation while validating full-flyer outputs.
 - [x] Run one controlled live server-side GPT Image 2 request through the configured OpenAI API account and record the connection result.

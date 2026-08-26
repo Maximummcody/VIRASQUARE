@@ -148,3 +148,64 @@
 :is(.navy-proof, .virasquare-theme) [class*="border-[#a8c493]"] { border-color: #2563EB !important; }
 :is(.navy-proof, .virasquare-theme) [class*="ring-[#d9e9d0]"] { --tw-ring-color: #BFDBFE !important; }
 :is(.navy-proof, .virasquare-theme) [class*="shadow-[0_-8px_24px_rgba(38,51,39"] { box-shadow: 0 -8px 24px rgba(15,23,42,.08) !important; }
+
+/* Completion pass: legacy workspace accents that sit inside Calendar, My Products, Library, Brand, forms, and sheets. */
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f1f6ee]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#eef7e9]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f3f8ef]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f5f8f2]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#edf2ea]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#edf3e9]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e7f1e1]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e8f1e2]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e0efd8]"] { background-color: #EFF6FF !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#fff0d0]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#fffdf4]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e8ebfb]"] { background-color: #F8FAFC !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#4a6845]"] { background-color: #173A7A !important; }
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#637261]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#6f7b6f]"] { background-color: #0B1220 !important; color: #FFFFFF !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="text-[#4e7745]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#557447]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#557445]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#5b7f50]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#5b7853]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#668160]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#66845d]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#719761]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#71955e]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#61745f]"] { color: #1D4ED8 !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="text-[#6c776b]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#697669]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#6f806d]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#718071]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#71836c]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#738072]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#788676]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#789176]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#806531]"] { color: #64748B !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="text-[#55639a]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#394979]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#48653f]"] { color: #1D4ED8 !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="border-[#cfe0c7]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#cedec7]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#cbdcc4]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#cbd9c4]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#c5d8bc]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#d5e2cf]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#d5e0d0]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#d6e2d0]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#dbe6d6]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#d8e5d1]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#d9e9d0]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#e1e8dc]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#e3eadf]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#edf2ea]"] { border-color: #BFDBFE !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="focus-visible:ring-[#89aa7b]"] { --tw-ring-color: #60A5FA !important; }

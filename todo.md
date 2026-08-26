@@ -285,3 +285,6 @@
 - [x] Standardize friendly, actionable empty states across the remaining workspace sections.
 - [x] Add mobile pull-to-refresh to My Products, Library, and Calendar without affecting desktop interaction or workflow.
 - [x] Verify, checkpoint, and synchronize the approved cross-section usability refinements.
+- [x] Audit and replace remaining legacy green, cream, gray, and muted-action styling across Calendar, My Products, Library, Brand, and supporting states.
+- [x] Complete the Navy-and-Electric-Blue theme across backgrounds, surfaces, tabs, forms, summary panels, product cards, and primary actions without changing workflows.
+- [x] Verify, checkpoint, and synchronize the completed visual-theme audit on desktop and mobile.

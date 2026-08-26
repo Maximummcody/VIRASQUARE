@@ -209,3 +209,58 @@
 :is(.navy-proof, .virasquare-theme) [class*="border-[#edf2ea]"] { border-color: #BFDBFE !important; }
 
 :is(.navy-proof, .virasquare-theme) [class*="focus-visible:ring-[#89aa7b]"] { --tw-ring-color: #60A5FA !important; }
+
+/* Final shared-screen mapping: onboarding, profile editing, account sheets, review controls, and non-generated supporting UI. */
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e7f0bf]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e7f1d6]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#e8f1df]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#eaf3e4]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#ecf4e7]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#eff4c9]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f0f4ed]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f1f5ed]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f4f7f1]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f6f8f2]"],
+:is(.navy-proof, .virasquare-theme) [class*="bg-[#f6faf2]"] { background-color: #EFF6FF !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="text-[#70945e]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#436536]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#476c3d]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#4d773e]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#527643]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#699657]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#6f965d]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#72905e]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#789866]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#789968]"] { color: #2563EB !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="text-[#39453a]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#3b4b3d]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#3c4b3e]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#404d41]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#4f5f50]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#546152]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#5d695d]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#60715f]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#647063]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#667165]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#667265]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#697468]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#727d71]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#748073]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#748074]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#778176]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#879187]"],
+:is(.navy-proof, .virasquare-theme) [class*="text-[#98a097]"] { color: #64748B !important; }
+
+:is(.navy-proof, .virasquare-theme) [class*="border-[#789866]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#a8c496]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#b5c8aa]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#bdd3b4]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#c9d9c1]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#d9e1d5]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#dbe4d6]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#dfe5db]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#dfe6da]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#e4e9df]"],
+:is(.navy-proof, .virasquare-theme) [class*="border-[#e4e9e0]"] { border-color: #BFDBFE !important; }

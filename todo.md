@@ -288,3 +288,5 @@
 - [x] Audit and replace remaining legacy green, cream, gray, and muted-action styling across Calendar, My Products, Library, Brand, and supporting states.
 - [x] Complete the Navy-and-Electric-Blue theme across backgrounds, surfaces, tabs, forms, summary panels, product cards, and primary actions without changing workflows.
 - [x] Verify, checkpoint, and synchronize the completed visual-theme audit on desktop and mobile.
+- [x] Audit and complete Navy-and-Electric-Blue consistency across onboarding, dialogs, product review, Brand forms, and supporting interface states while preserving generated output colours.
+- [x] Verify, checkpoint, and synchronize the final cross-screen interface consistency sweep.

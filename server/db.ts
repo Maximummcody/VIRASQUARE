@@ -332,6 +332,15 @@ export async function permanentlyDeleteExpiredProducts(now = new Date()) {
   return expired.length;
 }
 
+export async function permanentlyDeleteArchivedProductsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const archived = await db.select({ id: products.id }).from(products).where(and(eq(products.userId, userId), eq(products.archiveStatus, "archived")));
+  if (archived.length === 0) return 0;
+  await db.delete(products).where(and(eq(products.userId, userId), eq(products.archiveStatus, "archived")));
+  return archived.length;
+}
+
 const PRODUCT_ARCHIVE_EXPIRY_JOB_KEY = "product-archive-expiry";
 
 export async function getProductArchiveExpiryJobByTaskUid(taskUid: string) {

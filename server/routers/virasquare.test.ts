@@ -17,6 +17,7 @@ const database = vi.hoisted(() => ({
   listArchivedProductsByUserId: vi.fn(),
   archiveProduct: vi.fn(),
   restoreArchivedProduct: vi.fn(),
+  permanentlyDeleteArchivedProductsByUserId: vi.fn(),
   getVisualDeliverableById: vi.fn(),
   getProductSellingPackage: vi.fn(),
   upsertProductSellingPackage: vi.fn(),
@@ -71,6 +72,13 @@ describe("ViraSquare protected procedures", () => {
     expect(database.restoreArchivedProduct).toHaveBeenCalledWith(72, 19);
     expect(listed).toEqual([archived]);
     expect(result).toMatchObject({ id: 19, archiveStatus: "active" });
+  });
+
+  it("empties only the caller’s archived products and reports the permanent removal count", async () => {
+    database.permanentlyDeleteArchivedProductsByUserId.mockResolvedValue(2);
+
+    await expect(viraSquareRouter.createCaller(context(72)).emptyArchivedProducts()).resolves.toEqual({ deletedCount: 2 });
+    expect(database.permanentlyDeleteArchivedProductsByUserId).toHaveBeenCalledWith(72);
   });
 
   it("does not attach an archived product to newly selected content", async () => {

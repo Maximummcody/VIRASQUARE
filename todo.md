@@ -261,3 +261,7 @@
 - [x] Preserve existing flyers, posts, selling packages, downloads, Library history, and planned content when a product is archived or permanently removed.
 - [x] Add a deployed, idempotent daily automatic cleanup that permanently removes products after their 30-day archive window.
 - [x] Add regression coverage, validate, checkpoint, and synchronize the approved archive-retention system.
+- [x] Show each archived product’s exact remaining recovery days in My Products.
+- [x] Add a safeguarded Empty Trash action that permanently removes all archived products while preserving historical content output.
+- [x] Explain the daily automatic expiry schedule in the Archive interface.
+- [x] Add regression coverage, validate, checkpoint, and synchronize the approved archive countdown and manual-empty refinement.

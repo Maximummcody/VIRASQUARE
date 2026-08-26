@@ -35,7 +35,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <div className="virasquare-theme"><Router /></div>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -308,3 +308,7 @@
 - [x] Add mobile pull-to-refresh to Today using the existing safe top-level refresh pattern.
 - [x] Keep pull-to-refresh limited to Today, Calendar, My Products, and Library; do not add it to Brand forms, review screens, correction fields, or pop-ups.
 - [x] Verify, checkpoint, and synchronize the expanded mobile home-screen refresh behavior.
+- [x] Mobile refresh acceptance test: confirm pull-to-refresh feels natural on Today from the phone home-screen experience.
+- [x] Review final mobile touch gestures, targets, and protected interaction zones; recommend only safe high-value refinements before any implementation.
+- [x] Add installable ViraSquare home-screen metadata, a branded icon, Navy browser chrome, and standalone mobile launch behavior without changing normal app workflows.
+- [x] Verify, checkpoint, and synchronize the mobile home-screen polish package.

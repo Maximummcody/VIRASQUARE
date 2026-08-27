@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "ViraSquare",
+  "short_name": "ViraSquare",
+  "description": "Your daily content partner for thoughtful small-business marketing.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F8FBFF",
+  "theme_color": "#0B1220",
+  "icons": [
+    {
+      "src": "/manus-storage/virasquare-icon-192_a113be22.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/manus-storage/virasquare-icon-512_3c0d9348.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

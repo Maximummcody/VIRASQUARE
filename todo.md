@@ -312,5 +312,8 @@
 - [x] Review final mobile touch gestures, targets, and protected interaction zones; recommend only safe high-value refinements before any implementation.
 - [x] Add installable ViraSquare home-screen metadata, a branded icon, Navy browser chrome, and standalone mobile launch behavior without changing normal app workflows.
 - [x] Verify, checkpoint, and synchronize the mobile home-screen polish package.
-- [ ] Clarify required ViraSquare logo, app-icon, favicon, and supporting brand assets before Group 4 and finalization.
-- [ ] Check and resolve the reported post-checkpoint deployment-status warning before continuing implementation.
+- [x] Clarify required ViraSquare logo, app-icon, favicon, and supporting brand assets before Group 4 and finalization.
+- [x] Check and resolve the reported post-checkpoint deployment-status warning before continuing implementation.
+- [x] Define an original vector-first ViraSquare logo system that avoids generic AI-art styling and scales across website, icon, favicon, social, and Meta surfaces.
+- [x] Prepare approval-only original ViraSquare logo directions and concise brand-copy options before changing live identity assets.
+- [x] Define the Brand and Trust Foundation required for Group 4, including public-facing brand copy and future legal/support requirements.

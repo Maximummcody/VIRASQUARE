@@ -334,3 +334,4 @@
 - [x] Build the approved public landing-page value story, including factual product-flow demonstrations, a practical sign-in-oriented footer, and no implied analytics or invented social proof.
 - [x] Add accessible, restrained landing-page motion and responsive polish without changing the existing sign-in path or authenticated workspace workflows.
 - [x] Add focused landing-page coverage, run full verification, visually review desktop and mobile, checkpoint, and synchronize the approved public-page upgrade.
+- [x] Define an approval-only, truthful visual-demonstration layer for the public landing page so key product value is shown rather than only described, without fake outputs or clutter.

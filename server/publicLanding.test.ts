@@ -17,6 +17,18 @@ describe("public landing page", () => {
     expect(home).toContain("<PublicLanding onStart={() => startLogin()} />");
   });
 
+  it("uses labelled fictional visual demonstrations instead of ungrounded product or customer claims", () => {
+    const demos = readFileSync(resolve(projectRoot, "client/src/components/LandingDemos.tsx"), "utf8");
+
+    expect(landing).toContain("<SavedProductDemo />");
+    expect(landing).toContain("<ReadyFlyerDemo />");
+    expect(landing).toContain("<ContentFormatPreview kind={content.kind} />");
+    expect(demos).toContain("EXAMPLE PRODUCT");
+    expect(demos).toContain("EXAMPLE FLYER");
+    expect(demos).toContain("EXAMPLE FORMAT");
+    expect(demos).toContain("Everyday Watch");
+  });
+
   it("labels illustrative workspace content and does not introduce fake testimonials or analytics claims", () => {
     expect(landing).toContain("EXAMPLE WORKSPACE");
     expect(landing).toContain("Not your data");

@@ -1,4 +1,5 @@
 import { ViraSquareLogo } from "@/components/ViraSquareLogo";
+import { ContentFormatPreview, ReadyFlyerDemo, SavedProductDemo } from "@/components/LandingDemos";
 import { ArrowRight, CalendarDays, CheckCircle2, FileImage, Layers3, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
 
 type PublicLandingProps = {
@@ -27,10 +28,10 @@ const steps = [
 ];
 
 const contentTypes = [
-  { eyebrow: "PRODUCT POST", title: "A flyer grounded in your real product", accent: "bg-[#2563EB]" },
-  { eyebrow: "EDUCATIONAL CONTENT", title: "A clear carousel that teaches one useful point", accent: "bg-[#60A5FA]" },
-  { eyebrow: "TRUST BUILDING", title: "A steady way to show what your business knows", accent: "bg-[#0B1220]" },
-];
+  { eyebrow: "PRODUCT POST", title: "A flyer grounded in your real product", accent: "bg-[#2563EB]", kind: "product" },
+  { eyebrow: "EDUCATIONAL CONTENT", title: "A clear carousel that teaches one useful point", accent: "bg-[#60A5FA]", kind: "education" },
+  { eyebrow: "TRUST BUILDING", title: "A steady way to show what your business knows", accent: "bg-[#0B1220]", kind: "trust" },
+] as const;
 
 export function PublicLanding({ onStart }: PublicLandingProps) {
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -108,7 +109,7 @@ export function PublicLanding({ onStart }: PublicLandingProps) {
         <div className="mx-auto grid max-w-[1120px] gap-12 lg:grid-cols-[.88fr_1.12fr] lg:items-center">
           <div className="vs-reveal"><p className="text-[11px] font-bold tracking-[.15em] text-[#93C5FD]">PRODUCT POSTS, WITHOUT GUESSING</p><h2 className="mt-4 max-w-lg font-serif text-4xl leading-[.98] tracking-[-.045em] sm:text-5xl">Turn what you sell into content you can confidently use.</h2><p className="mt-6 max-w-lg text-base leading-7 text-[#BFDBFE]">Save a real product once. When you choose to make a product post, ViraSquare keeps those saved facts at the centre and gives you a fuller selling set, not just a random idea.</p><button type="button" onClick={onStart} className="mt-8 inline-flex h-12 items-center rounded-2xl bg-white px-5 text-sm font-bold text-[#0B1220] hover:bg-[#EFF6FF]">Make a product post <ArrowRight className="ml-2 h-4 w-4" /></button></div>
           <div className="vs-reveal vs-delay-one grid gap-3 sm:grid-cols-[.82fr_1.18fr]">
-            <article className="rounded-[1.7rem] border border-white/10 bg-white/[.07] p-4"><p className="text-[10px] font-bold tracking-[.14em] text-[#93C5FD]">WHAT YOU SAVE</p><div className="mt-5 rounded-2xl bg-[#EFF6FF] p-4 text-[#0B1220]"><div className="grid aspect-[4/3] place-items-center rounded-xl border border-[#BFDBFE] bg-white"><FileImage className="h-9 w-9 text-[#2563EB]" /></div><p className="mt-4 font-serif text-xl">Your real product</p><p className="mt-1 text-xs leading-5 text-[#64748B]">Photo, name, price, and details you have confirmed.</p></div></article>
+            <article className="rounded-[1.7rem] border border-white/10 bg-white/[.07] p-4"><p className="text-[10px] font-bold tracking-[.14em] text-[#93C5FD]">WHAT YOU SAVE</p><div className="mt-4"><SavedProductDemo /><div className="demo-flow-arrow flex items-center gap-2 py-3 text-[9px] font-bold uppercase tracking-[.11em] text-[#93C5FD]"><span className="h-px flex-1 bg-[#60A5FA]/60" />Becomes ready<span className="h-px flex-1 bg-[#60A5FA]/60" /></div><ReadyFlyerDemo /></div><p className="mt-4 text-xs leading-5 text-[#BFDBFE]">An example of the format, grounded in details an owner has confirmed.</p></article>
             <article className="rounded-[1.7rem] bg-white p-5 text-[#0B1220]"><p className="text-[10px] font-bold tracking-[.14em] text-[#2563EB]">WHAT YOU GET</p><h3 className="mt-3 font-serif text-3xl leading-tight">One post. A fuller selling package.</h3><div className="mt-6 grid gap-3">{[["Post-ready flyer", "A full visual built around your product."], ["Matching caption", "Words that fit the product you saved."], ["Buyer reply help", "A concise response for customer questions."], ["Next selling angle", "A different way to talk about the same product later."]].map(([title, detail]) => <div key={title} className="flex gap-3 rounded-xl bg-[#F5F7FA] p-3"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#DBEAFE] text-[#1D4ED8]"><CheckCircle2 className="h-3.5 w-3.5" /></span><div><p className="text-sm font-bold">{title}</p><p className="mt-0.5 text-xs leading-5 text-[#64748B]">{detail}</p></div></div>)}</div></article>
           </div>
         </div>
@@ -118,7 +119,7 @@ export function PublicLanding({ onStart }: PublicLandingProps) {
         <div className="mx-auto max-w-[1120px]">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-xl"><p className="eyebrow">MORE THAN ONE KIND OF POST</p><h2 className="mt-3 font-serif text-4xl leading-[.98] tracking-[-.045em] text-[#0B1220] sm:text-5xl">Create a content rhythm people can feel.</h2></div><p className="max-w-sm text-sm leading-6 text-[#64748B]">Stay useful, show the product when it matters, and give customers more reasons to trust what you know.</p></div>
           <div className="mt-12 grid gap-4 lg:grid-cols-3">
-            {contentTypes.map((content, index) => <article key={content.eyebrow} className={`vs-reveal vs-delay-${index + 1} group min-h-64 overflow-hidden rounded-[1.8rem] border border-[#DCE6F2] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,.05)]`}><div className={`h-2.5 w-14 rounded-full ${content.accent}`} /><p className="mt-8 text-[10px] font-bold tracking-[.14em] text-[#2563EB]">{content.eyebrow}</p><h3 className="mt-3 max-w-xs font-serif text-3xl leading-tight text-[#0B1220]">{content.title}</h3><div className="mt-8 flex items-center gap-2 text-xs font-bold text-[#1D4ED8]"><span className="h-px w-8 bg-[#60A5FA]" /> Planned with intention</div></article>)}
+            {contentTypes.map((content, index) => <article key={content.eyebrow} className={`vs-reveal vs-delay-${index + 1} group flex min-h-[390px] flex-col overflow-hidden rounded-[1.8rem] border border-[#DCE6F2] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,.05)]`}><div className={`h-2.5 w-14 rounded-full ${content.accent}`} /><p className="mt-7 text-[10px] font-bold tracking-[.14em] text-[#2563EB]">{content.eyebrow}</p><h3 className="mt-3 max-w-xs font-serif text-3xl leading-tight text-[#0B1220]">{content.title}</h3><div className="mt-6"><ContentFormatPreview kind={content.kind} /></div><div className="mt-auto pt-5 flex items-center gap-2 text-xs font-bold text-[#1D4ED8]"><span className="h-px w-8 bg-[#60A5FA]" /> Example format</div></article>)}
           </div>
         </div>
       </section>

@@ -335,3 +335,6 @@
 - [x] Add accessible, restrained landing-page motion and responsive polish without changing the existing sign-in path or authenticated workspace workflows.
 - [x] Add focused landing-page coverage, run full verification, visually review desktop and mobile, checkpoint, and synchronize the approved public-page upgrade.
 - [x] Define an approval-only, truthful visual-demonstration layer for the public landing page so key product value is shown rather than only described, without fake outputs or clutter.
+- [x] Add a clearly labelled fictional product-to-post visual demonstration to the existing public product-value section without replacing the current selling-package explanation.
+- [x] Add compact, varied content-format visual previews to the existing Product post, Educational content, and Trust building cards without changing their copy or page order.
+- [x] Add responsive, reduced-motion-safe visual demonstration movement; test, verify, checkpoint, and synchronize the approved landing-page visual upgrade.

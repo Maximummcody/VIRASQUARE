@@ -342,3 +342,4 @@
 - [x] Replace the watch-specific landing demo with one labelled fictional practical beauty-product flyer and broad category cues, preserving the existing product-selling-package explanation.
 - [x] Add a compact abstract Direction-to-Visual-to-Reply graphic in the existing final invitation’s unused space without adding a new section or clutter.
 - [x] Test, visually verify, checkpoint, and synchronize the restrained landing-page visual refinement.
+- [x] Define an approval-only refinement for the landing hero, primary action, shared flow-card alignment, content-format examples, and downstream spacing based on owner feedback, without adding clutter or changing core product flows.

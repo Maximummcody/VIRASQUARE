@@ -53,3 +53,5 @@ The user-shared glossy V-and-square board is a direction reference only, not a f
 ## Core Mark refinement review
 
 Two approval-only, original flat-vector refinements were prepared on 27 August 2026. **Signal Square** uses a navy rounded-square field, a high-contrast V, and one detached electric-blue square. It is the clearer icon candidate and remains legible as a standalone mark. **Integrated Square** uses an electric-blue rounded-square container with a V and integrated square detail. It expresses the V-and-square concept more literally but has more small elements and needs further simplification before favicon use. Both concepts are intentionally flat and avoid the glossy rendering, decorative gradients, or AI-art treatment in the user-shared reference board.
+
+An additional approval-only **light Signal V** refinement uses Electric Blue as the leading icon field, White as the open surface, and Navy only for structure. This responds to the concern that the first Signal Square version made the navy field feel too dominant. It is a comparison treatment only; no live logo, app icon, or favicon has changed.

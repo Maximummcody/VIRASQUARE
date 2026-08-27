@@ -321,3 +321,6 @@
 - [ ] Evaluate the user-shared V-and-square logo concept, select the original geometric direction, and define an appropriate similarity-review process before any live brand change.
 - [ ] Prepare approval-only original flat-vector ViraSquare Core Mark refinements with a restrained signal square and an integrated square container.
 - [x] Prepare approval-only original flat-vector ViraSquare Core Mark refinements with a restrained signal square and an integrated square container.
+- [x] Render and deliver a clear labelled PNG comparison board for the two approval-only Core Mark refinements.
+- [ ] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
+- [x] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.

@@ -338,3 +338,4 @@
 - [x] Add a clearly labelled fictional product-to-post visual demonstration to the existing public product-value section without replacing the current selling-package explanation.
 - [x] Add compact, varied content-format visual previews to the existing Product post, Educational content, and Trust building cards without changing their copy or page order.
 - [x] Add responsive, reduced-motion-safe visual demonstration movement; test, verify, checkpoint, and synchronize the approved landing-page visual upgrade.
+- [x] Define an approval-only refinement that uses a broader practical product demonstration and an optional final-invitation graphic without narrowing or confusing ViraSquare’s offer.

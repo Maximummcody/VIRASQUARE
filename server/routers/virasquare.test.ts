@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "../_core/context";
 
 const database = vi.hoisted(() => ({
@@ -9,6 +9,7 @@ const database = vi.hoisted(() => ({
   replaceContentForDate: vi.fn(),
   getContentItemById: vi.fn(),
   getRecentContentItems: vi.fn(),
+  listOwnerConfirmedFeedback: vi.fn(),
   createContentItem: vi.fn(),
   createProduct: vi.fn(),
   addProductMedia: vi.fn(),
@@ -47,6 +48,11 @@ function context(userId: number | null): TrpcContext {
 }
 
 describe("ViraSquare protected procedures", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    database.listOwnerConfirmedFeedback.mockResolvedValue([]);
+  });
+
   it("archives only an available owner product and returns its recovery deadline", async () => {
     const active = { id: 19, userId: 72, name: "Classic watch", archiveStatus: "active" };
     const archived = { ...active, archiveStatus: "archived", archiveExpiresAt: new Date("2026-09-25T12:00:00Z") };
@@ -201,6 +207,20 @@ describe("ViraSquare protected procedures", () => {
     expect(ideas[0]?.title).toBe("A helpful carousel");
   });
 
+  it("passes only owner-confirmed learning signals into future idea generation", async () => {
+    database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, userId: 72, businessName: "Clarity Studio", businessType: "Brand strategist", targetAudience: "Small business founders", contentPillars: JSON.stringify(["Educate", "Build trust"]), postingGoal: "Build authority", weeklyPostGoal: 4, brandVoice: "Clear and kind", isOnboarded: true });
+    database.getRecentContentItems.mockResolvedValue([]);
+    database.listOwnerConfirmedFeedback.mockResolvedValue([
+      { id: 91, title: "A clear delivery answer", objective: "Build trust", format: "caption", outcome: "conversations", postedAt: new Date(), note: null },
+      { id: 92, title: "No confirmed outcome", objective: "Engagement", format: "carousel", outcome: "not_set", postedAt: new Date(), note: null },
+    ]);
+    ai.generateIdeas.mockResolvedValue([]);
+
+    await viraSquareRouter.createCaller(context(72)).generateIdeas({ format: "caption", objective: "Build trust", topic: "Delivery confidence" });
+
+    expect(ai.generateIdeas).toHaveBeenCalledWith(expect.objectContaining({ ownerConfirmedLearning: [{ title: "A clear delivery answer", objective: "Build trust", format: "caption", outcome: "conversations" }] }), "caption", [], expect.any(Object));
+  });
+
   it("requires a selected product for product-post format even when a different objective is supplied", async () => {
     database.getBusinessProfileByUserId.mockResolvedValue({ id: 7, userId: 72, businessName: "Clarity Studio", businessType: "Brand strategist", targetAudience: "Small business founders", contentPillars: JSON.stringify(["Educate", "Build trust"]), postingGoal: "Build authority", weeklyPostGoal: 4, brandVoice: "Clear and kind", isOnboarded: true });
 
@@ -280,5 +300,23 @@ describe("ViraSquare protected procedures", () => {
     database.getContentItemById.mockResolvedValue({ id: 86, userId: 72, productId: null });
 
     await expect(viraSquareRouter.createCaller(context(72)).saveProductEducationIdea({ sourceItemId: 86, title: "A product guide", brief: "A separate educational angle." })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+  });
+
+  it("records optional owner feedback only after a post is marked as posted", async () => {
+    database.getContentItemById.mockResolvedValue({ id: 88, userId: 72, profileId: 7, plannedFor: "2026-08-11", title: "An honest product answer", objective: "Build trust", format: "caption", brief: "Answer a question.", caption: "A helpful answer", hashtags: null, carouselSlides: null, requiresProduct: false, preparationNote: null, status: "completed", lifecycleStatus: "posted", feedbackOutcome: "not_set", createdAt: new Date(), updatedAt: new Date() });
+    database.updateContentLifecycle.mockResolvedValue({ id: 88, userId: 72, profileId: 7, plannedFor: "2026-08-11", title: "An honest product answer", objective: "Build trust", format: "caption", brief: "Answer a question.", caption: "A helpful answer", hashtags: null, carouselSlides: null, requiresProduct: false, preparationNote: null, status: "completed", lifecycleStatus: "posted", feedbackOutcome: "profile_visits", createdAt: new Date(), updatedAt: new Date() });
+
+    const result = await viraSquareRouter.createCaller(context(72)).recordPostFeedback({ itemId: 88, outcome: "profile_visits" });
+
+    expect(database.updateContentLifecycle).toHaveBeenCalledWith(72, 88, "posted", { outcome: "profile_visits", note: undefined });
+    expect(database.recordContentActivity).toHaveBeenCalledWith(expect.objectContaining({ userId: 72, contentItemId: 88, eventType: "feedback", metadata: expect.stringContaining("ownerConfirmed") }));
+    expect(result.feedbackOutcome).toBe("profile_visits");
+  });
+
+  it("refuses optional feedback before the owner has marked the post as posted", async () => {
+    database.getContentItemById.mockResolvedValue({ id: 89, userId: 72, profileId: 7, plannedFor: "2026-08-11", title: "A draft", objective: "Build trust", format: "caption", brief: "A draft.", caption: "Draft", hashtags: null, carouselSlides: null, requiresProduct: false, preparationNote: null, status: "planned", lifecycleStatus: "reviewed", feedbackOutcome: "not_set", createdAt: new Date(), updatedAt: new Date() });
+
+    await expect(viraSquareRouter.createCaller(context(72)).recordPostFeedback({ itemId: 89, outcome: "nothing_yet" })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    expect(database.updateContentLifecycle).not.toHaveBeenCalled();
   });
 });

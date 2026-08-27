@@ -292,3 +292,11 @@
 - [x] Verify, checkpoint, and synchronize the final cross-screen interface consistency sweep.
 - [x] Add scalable My Products search, result feedback, and a non-competing responsive catalogue toolbar without changing product workflows.
 - [x] Test, checkpoint, and synchronize the improved My Products catalogue on desktop and mobile.
+- [ ] Audit and apply only low-risk current-product polish for remaining scalability, hierarchy, and responsive usability gaps without starting a new Group.
+- [ ] Verify, checkpoint, and synchronize the bounded current-product polish outcome.
+- [x] Guide and record a concise real-owner acceptance pass for product flyer, selling package, Library, Daily Brief, and mobile product flows.
+- [x] Prepare an approval-only mockup of the refined optional What worked? feedback moment within the existing post-review flow.
+- [x] Group 3: Define and apply safe business-memory rules using saved business context, products, brand details, recent plan, and owner-confirmed post outcomes only.
+- [x] Group 3: Refine the existing optional post-outcome controls into a clearer What worked? feedback moment without forced responses or invented social analytics.
+- [x] Group 3: Add one calm feedback-informed next-best action without changing plans, posts, products, or generated output automatically.
+- [x] Group 3: Add regression coverage, validate responsive behavior, checkpoint, and synchronize the approved foundation.

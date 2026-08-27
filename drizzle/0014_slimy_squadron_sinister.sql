@@ -1,0 +1,1 @@
+ALTER TABLE `content_items` MODIFY COLUMN `feedbackOutcome` enum('not_set','conversations','orders','engagement','profile_visits','nothing_yet','saved_for_later') NOT NULL DEFAULT 'not_set';

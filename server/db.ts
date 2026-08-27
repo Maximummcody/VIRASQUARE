@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   businessProfiles,
@@ -156,6 +156,24 @@ export async function getRecentContentItems(userId: number, limit = 12) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(contentItems).where(eq(contentItems.userId, userId)).orderBy(desc(contentItems.createdAt)).limit(limit);
+}
+
+export async function listOwnerConfirmedFeedback(userId: number, limit = 8) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: contentItems.id,
+    title: contentItems.title,
+    objective: contentItems.objective,
+    format: contentItems.format,
+    outcome: contentItems.feedbackOutcome,
+    postedAt: contentItems.postedAt,
+    note: contentItems.feedbackNote,
+  }).from(contentItems).where(and(
+    eq(contentItems.userId, userId),
+    eq(contentItems.lifecycleStatus, "posted"),
+    inArray(contentItems.feedbackOutcome, ["conversations", "orders", "engagement", "profile_visits"]),
+  )).orderBy(desc(contentItems.postedAt)).limit(limit);
 }
 
 export async function getCompletedContentDates(userId: number) {

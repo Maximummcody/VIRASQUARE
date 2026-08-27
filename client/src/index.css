@@ -91,6 +91,8 @@
   .public-landing .demo-flow-arrow { animation: demo-appear .55s cubic-bezier(.23,1,.32,1) .45s both; }
   .public-landing .demo-content-preview { transition: transform 220ms cubic-bezier(.23,1,.32,1), box-shadow 220ms cubic-bezier(.23,1,.32,1); }
   .public-landing .group:hover .demo-content-preview { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(37,99,235,.13); }
+  .public-landing .content-system-card { animation: content-system-float 5.2s ease-in-out infinite; }
+  .public-landing .content-system-card-main { animation-delay: -1.7s; }
 }
 
 @keyframes vs-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -100,6 +102,7 @@
 @keyframes demo-pulse { 0%, 100% { transform: scale(.96); opacity: .5; } 50% { transform: scale(1.04); opacity: .9; } }
 @keyframes demo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 @keyframes demo-appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes content-system-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
 @media (max-width: 639px) {
   main > div > section.pt-5 > section > div[class*="xl:grid-cols-7"] > article:nth-child(n + 3) { display: none; }

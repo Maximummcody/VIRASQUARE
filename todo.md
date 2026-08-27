@@ -339,3 +339,6 @@
 - [x] Add compact, varied content-format visual previews to the existing Product post, Educational content, and Trust building cards without changing their copy or page order.
 - [x] Add responsive, reduced-motion-safe visual demonstration movement; test, verify, checkpoint, and synchronize the approved landing-page visual upgrade.
 - [x] Define an approval-only refinement that uses a broader practical product demonstration and an optional final-invitation graphic without narrowing or confusing ViraSquare’s offer.
+- [x] Replace the watch-specific landing demo with one labelled fictional practical beauty-product flyer and broad category cues, preserving the existing product-selling-package explanation.
+- [x] Add a compact abstract Direction-to-Visual-to-Reply graphic in the existing final invitation’s unused space without adding a new section or clutter.
+- [x] Test, visually verify, checkpoint, and synchronize the restrained landing-page visual refinement.

@@ -23,10 +23,12 @@ describe("public landing page", () => {
     expect(landing).toContain("<SavedProductDemo />");
     expect(landing).toContain("<ReadyFlyerDemo />");
     expect(landing).toContain("<ContentFormatPreview kind={content.kind} />");
-    expect(demos).toContain("EXAMPLE PRODUCT");
-    expect(demos).toContain("EXAMPLE FLYER");
-    expect(demos).toContain("EXAMPLE FORMAT");
-    expect(demos).toContain("Everyday Watch");
+    expect(demos).toContain("ILLUSTRATIVE SAMPLE");
+    expect(demos).toContain("ILLUSTRATIVE FLYER");
+    expect(demos).toContain("ILLUSTRATIVE FORMAT");
+    expect(demos).toContain("Everyday Glow Oil");
+    expect(landing).toContain("<ContentSystemGraphic />");
+    expect(landing).toContain("For products you sell, services you offer");
   });
 
   it("labels illustrative workspace content and does not introduce fake testimonials or analytics claims", () => {

@@ -29,3 +29,15 @@ The waited mobile capture loaded successfully. The first two ordered tiles show 
 The next two ordered tiles preserve the handoff from the example workspace to the problem statement and content-flow section. The example workspace steps remain readable at mobile width, and the surrounding long-form content has stable margins and line lengths with no visible collision or cut-off.
 
 The fifth and sixth ordered tiles show the stacked mobile content-flow cards. Each maintains clear typography, adequate padding, and readable progress treatment. The capture ends before the product demonstration section; desktop review remains the visual evidence for the new demonstration composition, while the responsive component structure stacks it below this flow on phones.
+
+## Practical visual refinement review — 27 August 2026
+
+The public desktop review confirms that the product demonstration now uses the fictional Nura Everyday Glow Oil sample rather than a watch-specific example. The added scope line and restrained category cues make clear that ViraSquare supports products, services, and business expertise rather than one product category. The selling-package panel remains unchanged and readable beside the example visual.
+
+The final Electric Blue invitation now uses its previously unused right side for a compact three-card Direction, Ready Visual, and Buyer Reply composition. The graphic is visually subordinate to the final invitation and its two existing sign-in actions; it does not add a section, customer claim, or extra call to action. The browser Preview-mode notice shown beneath the footer is platform-provided and not part of ViraSquare.
+
+At 390 px width, the product-value section remains cleanly stacked: the broader scope line and category cues appear before the primary product-post action, while the illustrative Everyday Glow Oil card and the beginning of its flyer remain fully within the dark section with clear margins. No category chip or product visual clips horizontally.
+
+The first focused lower mobile crop continued through the completed illustrative flyer and the original selling-package panel. Both ordered tiles remain readable and properly contained, but the crop began too early to serve as visual evidence for the final-invitation graphic. A final-region crop is required for that separate check.
+
+The corrected mobile crop confirms the new illustrative beauty-product format remains clean at 390 px width inside the content-type card. Its product image, headline, price zone, and illustrative-format label are legible and contained. The crop still precedes the final invitation; the desktop public review remains the direct visual evidence that the invitation graphic is balanced beside, rather than competing with, its closing copy and actions.

@@ -29,6 +29,9 @@ describe("public landing page", () => {
     expect(demos).toContain("Everyday Glow Oil");
     expect(landing).toContain("<ContentSystemGraphic />");
     expect(landing).toContain("For products you sell, services you offer");
+    expect(landing).toContain("<HeroProductTaskCue onStart={onStart} />");
+    expect(demos).toContain("MAKE THIS POST");
+    expect(landing).toContain("One saved product, three useful content formats.");
   });
 
   it("labels illustrative workspace content and does not introduce fake testimonials or analytics claims", () => {

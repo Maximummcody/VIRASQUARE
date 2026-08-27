@@ -1,5 +1,5 @@
 import { ViraSquareLogo } from "@/components/ViraSquareLogo";
-import { ContentFormatPreview, ContentSystemGraphic, ReadyFlyerDemo, SavedProductDemo } from "@/components/LandingDemos";
+import { ContentFormatPreview, ContentSystemGraphic, HeroProductTaskCue, ReadyFlyerDemo, SavedProductDemo } from "@/components/LandingDemos";
 import { ArrowRight, CalendarDays, CheckCircle2, FileImage, Layers3, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
 
 type PublicLandingProps = {
@@ -78,7 +78,7 @@ export function PublicLanding({ onStart }: PublicLandingProps) {
                   <div className="flex items-center justify-between gap-3"><p className="text-[10px] font-bold tracking-[.14em] text-[#93C5FD]">EXAMPLE WORKSPACE</p><span className="rounded-full border border-white/15 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.1em] text-[#BFDBFE]">Not your data</span></div>
                   <p className="mt-8 text-sm text-[#BFDBFE]">Your focus today</p>
                   <h2 className="mt-1 font-serif text-4xl">Build trust</h2>
-                  <div className="mt-7 rounded-2xl border border-white/10 bg-white/[.09] p-4"><p className="text-[10px] font-bold tracking-[.12em] text-[#93C5FD]">TODAY’S DIRECTION</p><p className="mt-2 text-sm leading-6 text-white">Share one common mistake your customers can avoid.</p></div>
+                  <div className="mt-7 rounded-2xl border border-white/10 bg-white/[.09] p-4"><p className="text-[10px] font-bold tracking-[.12em] text-[#93C5FD]">TODAY’S DIRECTION</p><p className="mt-2 text-sm leading-6 text-white">Share one common mistake your customers can avoid.</p><HeroProductTaskCue onStart={onStart} /></div>
                 </div>
                 <div className="grid gap-2 pt-4 sm:grid-cols-3">
                   {[["01", "Choose a direction"], ["02", "Make it useful"], ["03", "Keep moving"]].map(([number, label], index) => <div key={number} className="relative rounded-2xl bg-[#EFF6FF] p-3"><p className="text-[10px] font-bold tracking-[.12em] text-[#2563EB]">{number}</p><p className="mt-4 text-xs font-bold leading-5 text-[#0B1220]">{label}</p>{index < 2 && <span className="absolute right-0 top-1/2 hidden translate-x-1/2 rounded-full bg-white p-1 text-[#2563EB] shadow-sm sm:grid"><ArrowRight className="h-3 w-3" /></span>}</div>)}
@@ -89,10 +89,10 @@ export function PublicLanding({ onStart }: PublicLandingProps) {
         </div>
       </section>
 
-      <section className="border-y border-[#DCE6F2] bg-white px-5 py-7 sm:px-8 lg:px-12">
-        <div className="mx-auto flex max-w-[1120px] flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-2xl font-serif text-2xl leading-tight text-[#0B1220] sm:text-3xl">You should not have to start from a blank page every time you want to post.</p>
-          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-[#EFF6FF] px-3 py-2 text-xs font-bold text-[#1D4ED8]"><CheckCircle2 className="h-4 w-4" /> Direction first. Then real work.</span>
+      <section className="border-y border-[#BFDBFE] bg-[#EFF6FF] px-5 py-10 sm:px-8 sm:py-12 lg:px-12">
+        <div className="mx-auto grid max-w-[1120px] gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div><p className="eyebrow">A CLEARER START</p><p className="mt-2 max-w-2xl font-serif text-2xl leading-tight text-[#0B1220] sm:text-3xl">You should not have to start from a blank page every time you want to post.</p></div>
+          <button type="button" onClick={() => scrollTo("how-it-works")} className="inline-flex h-11 w-fit items-center justify-center rounded-xl bg-[#0B1220] px-4 text-sm font-bold text-white shadow-[0_10px_20px_rgba(15,23,42,.14)] hover:bg-[#17233A]">See how it works <ArrowRight className="ml-2 h-4 w-4" /></button>
         </div>
       </section>
 
@@ -100,7 +100,7 @@ export function PublicLanding({ onStart }: PublicLandingProps) {
         <div className="mx-auto max-w-[1120px]">
           <div className="max-w-2xl"><p className="eyebrow">HOW VIRASQUARE HELPS</p><h2 className="mt-3 font-serif text-4xl leading-[.98] tracking-[-.045em] text-[#0B1220] sm:text-5xl">Your content, in one clear flow.</h2><p className="mt-5 text-base leading-7 text-[#64748B]">Instead of jumping between blank notes, ideas, and last-minute posts, ViraSquare helps you move from a useful direction to something you can confidently use.</p></div>
           <div className="mt-12 grid gap-4 lg:grid-cols-3">
-            {steps.map((step, index) => { const Icon = step.icon; return <article key={step.number} className={`vs-reveal vs-delay-${index + 1} relative overflow-hidden rounded-[1.8rem] border border-[#DCE6F2] bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,.05)]`}><div className="flex items-center justify-between"><span className="text-[11px] font-bold tracking-[.14em] text-[#2563EB]">{step.number}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]"><Icon className="h-5 w-5" /></span></div><h3 className="mt-10 font-serif text-3xl leading-tight text-[#0B1220]">{step.title}</h3><p className="mt-4 text-sm leading-7 text-[#64748B]">{step.detail}</p><div className="mt-8 h-1.5 w-full overflow-hidden rounded-full bg-[#EFF6FF]"><span className="block h-full rounded-full bg-[#2563EB]" style={{ width: `${42 + index * 22}%` }} /></div></article>; })}
+            {steps.map((step, index) => { const Icon = step.icon; return <article key={step.number} className={`vs-reveal vs-delay-${index + 1} relative flex min-h-[355px] flex-col overflow-hidden rounded-[1.8rem] border border-[#DCE6F2] bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,.05)]`}><div className="flex items-center justify-between"><span className="text-[11px] font-bold tracking-[.14em] text-[#2563EB]">{step.number}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]"><Icon className="h-5 w-5" /></span></div><h3 className="mt-10 font-serif text-3xl leading-tight text-[#0B1220]">{step.title}</h3><p className="mt-4 text-sm leading-7 text-[#64748B]">{step.detail}</p><div className="mt-auto pt-8"><div className="flex items-center justify-between text-[9px] font-bold tracking-[.12em] text-[#2563EB]"><span>STEP {index + 1}</span><span>OF 3</span></div><div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#EFF6FF]"><span className="block h-full w-full rounded-full bg-[#2563EB]" /></div></div></article>; })}
           </div>
         </div>
       </section>
@@ -117,7 +117,7 @@ export function PublicLanding({ onStart }: PublicLandingProps) {
 
       <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-[1120px]">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-xl"><p className="eyebrow">MORE THAN ONE KIND OF POST</p><h2 className="mt-3 font-serif text-4xl leading-[.98] tracking-[-.045em] text-[#0B1220] sm:text-5xl">Create a content rhythm people can feel.</h2></div><p className="max-w-sm text-sm leading-6 text-[#64748B]">Stay useful, show the product when it matters, and give customers more reasons to trust what you know.</p></div>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-xl"><p className="eyebrow">MORE THAN ONE KIND OF POST</p><h2 className="mt-3 font-serif text-4xl leading-[.98] tracking-[-.045em] text-[#0B1220] sm:text-5xl">Create a content rhythm people can feel.</h2></div><div className="max-w-sm"><p className="text-sm leading-6 text-[#64748B]">Stay useful, show the product when it matters, and give customers more reasons to trust what you know.</p><p className="mt-3 text-xs font-bold leading-5 text-[#1D4ED8]">One saved product, three useful content formats.</p></div></div>
           <div className="mt-12 grid gap-4 lg:grid-cols-3">
             {contentTypes.map((content, index) => <article key={content.eyebrow} className={`vs-reveal vs-delay-${index + 1} group flex min-h-[390px] flex-col overflow-hidden rounded-[1.8rem] border border-[#DCE6F2] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,.05)]`}><div className={`h-2.5 w-14 rounded-full ${content.accent}`} /><p className="mt-7 text-[10px] font-bold tracking-[.14em] text-[#2563EB]">{content.eyebrow}</p><h3 className="mt-3 max-w-xs font-serif text-3xl leading-tight text-[#0B1220]">{content.title}</h3><div className="mt-6"><ContentFormatPreview kind={content.kind} /></div><div className="mt-auto pt-5 flex items-center gap-2 text-xs font-bold text-[#1D4ED8]"><span className="h-px w-8 bg-[#60A5FA]" /> Example format</div></article>)}
           </div>

@@ -41,3 +41,15 @@ At 390 px width, the product-value section remains cleanly stacked: the broader 
 The first focused lower mobile crop continued through the completed illustrative flyer and the original selling-package panel. Both ordered tiles remain readable and properly contained, but the crop began too early to serve as visual evidence for the final-invitation graphic. A final-region crop is required for that separate check.
 
 The corrected mobile crop confirms the new illustrative beauty-product format remains clean at 390 px width inside the content-type card. Its product image, headline, price zone, and illustrative-format label are legible and contained. The crop still precedes the final invitation; the desktop public review remains the direct visual evidence that the invitation graphic is balanced beside, rather than competing with, its closing copy and actions.
+
+## Landing clarity refinement review — 27 August 2026
+
+The public desktop browser review confirms that the hero workspace now reads as an active illustrative task rather than an unexplained mock screen. The Nura Oil product-post cue sits inside the existing Today’s Direction card and makes the following action clear without creating another panel.
+
+The former thin problem-statement strip is now a substantial soft-blue decision bridge with a single dark See how it works action. Its action points to the existing workflow section, rather than creating a new route or competing registration path.
+
+The three workflow cards now use a shared bottom anchor: identical full-width Electric Blue rails, consistent Step n of 3 labels, and the same baseline. This removes the unequal-progress appearance and confirms that the lines communicate a process rather than performance data.
+
+The public product-section review confirms that the Nura Oil sample is reused coherently: the saved product and illustrative flyer remain beside the unchanged selling-package list, while the next content-format section explicitly states that one saved product can become three useful content formats. The Preview-mode notice shown below the page is platform-provided and not part of the public ViraSquare design.
+
+At 390 px width, the refined public hero remains uncluttered: the Light Signal V header, Sign in control, core message, both existing actions, and factual value cues retain a comfortable single-column hierarchy. The stronger decision bridge follows below the hero and does not crowd the primary entry actions. The temporary bottom notice in the capture is browser Preview-mode chrome, not ViraSquare page content.

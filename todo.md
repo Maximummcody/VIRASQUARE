@@ -343,3 +343,7 @@
 - [x] Add a compact abstract Direction-to-Visual-to-Reply graphic in the existing final invitation’s unused space without adding a new section or clutter.
 - [x] Test, visually verify, checkpoint, and synchronize the restrained landing-page visual refinement.
 - [x] Define an approval-only refinement for the landing hero, primary action, shared flow-card alignment, content-format examples, and downstream spacing based on owner feedback, without adding clutter or changing core product flows.
+- [x] Make the public hero workspace show an active illustrative Nura Oil product-post task cue without changing the real sign-in action or adding a new panel.
+- [x] Replace the thin public post-blank-page band with a stronger single-action decision bridge that preserves the existing workflow section destination.
+- [x] Align the three public content-flow rails precisely and reuse the illustrative Nura Oil across product, educational, and trust content-format cards without customer claims.
+- [x] Test, visually verify, checkpoint, and synchronize the owner-approved contained public landing-page clarity refinement.

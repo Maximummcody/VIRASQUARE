@@ -28,11 +28,17 @@ export function SavedProductDemo() {
     <div className="demo-saved-product relative overflow-hidden rounded-2xl border border-[#BFDBFE] bg-white p-3 shadow-[0_12px_28px_rgba(37,99,235,.12)]">
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#DBEAFE]" />
       <div className="relative flex items-center justify-between gap-2"><span className="rounded-full bg-[#EFF6FF] px-2 py-1 text-[8px] font-bold tracking-[.11em] text-[#1D4ED8]">ILLUSTRATIVE SAMPLE</span><span className="text-[9px] font-bold text-[#64748B]">SAVED</span></div>
-      <div className="relative mt-3 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl bg-[radial-gradient(circle_at_30%_25%,#FFFFFF_0%,#FFF7F0_43%,#DBEAFE_100%)]">
-        <div className="demo-product-orbit absolute h-32 w-32 rounded-full border border-[#93C5FD]/60" />
-        <div className="relative h-32 w-32 drop-shadow-[0_14px_14px_rgba(15,23,42,.18)]"><GlowOilIllustration /></div>
-      </div>
+      <div className="relative mt-3 grid aspect-[16/10] place-items-center overflow-hidden rounded-xl bg-[radial-gradient(circle_at_30%_25%,#FFFFFF_0%,#FFF7F0_43%,#DBEAFE_100%)]"><div className="demo-product-orbit absolute h-32 w-32 rounded-full border border-[#93C5FD]/60" /><div className="relative h-32 w-32 drop-shadow-[0_14px_14px_rgba(15,23,42,.18)]"><GlowOilIllustration /></div></div>
       <div className="relative mt-3 flex items-end justify-between gap-3"><div><p className="font-serif text-lg leading-tight text-[#0B1220]">Everyday Glow Oil</p><p className="mt-1 text-[10px] text-[#64748B]">Photo, price, and key details</p></div><span className="rounded-lg bg-[#0B1220] px-2 py-1.5 text-[10px] font-bold text-white">₦8,500</span></div>
+    </div>
+  );
+}
+
+export function HeroProductTaskCue({ onStart }: { onStart: () => void }) {
+  return (
+    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[.08] p-3.5">
+      <div className="flex items-center gap-3"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#F8D8C2]/15 p-1"><GlowOilIllustration dark /></div><div className="min-w-0 flex-1"><p className="text-[9px] font-bold tracking-[.13em] text-[#93C5FD]">ILLUSTRATIVE PRODUCT POST</p><p className="mt-1 text-sm font-semibold leading-5 text-white">Turn saved Nura Oil details into a post.</p></div></div>
+      <button type="button" onClick={onStart} className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-2.5 py-1.5 text-[9px] font-bold tracking-[.08em] text-white hover:bg-[#3B82F6]">MAKE THIS POST <ArrowRight className="h-3 w-3" /></button>
     </div>
   );
 }
@@ -40,8 +46,7 @@ export function SavedProductDemo() {
 export function ReadyFlyerDemo() {
   return (
     <div className="demo-ready-flyer relative isolate overflow-hidden rounded-xl bg-[#321A2A] p-3 text-white shadow-[0_12px_24px_rgba(15,23,42,.15)]">
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full border-[14px] border-[#F4B98E] opacity-80" />
-      <div className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-[#E48C64]/40 blur-xl" />
+      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full border-[14px] border-[#F4B98E] opacity-80" /><div className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-[#E48C64]/40 blur-xl" />
       <div className="relative flex items-center justify-between"><span className="rounded-full bg-white/10 px-2 py-1 text-[7px] font-bold tracking-[.13em] text-[#F8D8C2]">ILLUSTRATIVE FLYER</span><Sparkles className="h-3.5 w-3.5 text-[#F4B98E]" /></div>
       <div className="relative mt-2 grid grid-cols-[.68fr_1fr] items-center gap-2"><div className="h-[78px]"><GlowOilIllustration dark /></div><div><p className="font-serif text-[1.45rem] leading-[.84] tracking-[-.04em]">Glow in your everyday.</p><p className="mt-2 text-[8px] leading-3 text-[#F8D8C2]">Lightweight care for soft, naturally radiant skin.</p><span className="mt-2 inline-block rounded bg-[#E48C64] px-2 py-1 text-[8px] font-bold text-[#2A1B27]">₦8,500</span></div></div>
       <div className="relative mt-1.5 flex items-center justify-between border-t border-white/15 pt-2"><span className="text-[8px] text-[#F8D8C2]">NURA BEAUTY</span><span className="text-[8px] font-bold text-white">Example format</span></div>
@@ -57,10 +62,10 @@ export function ContentFormatPreview({ kind }: ContentPreviewProps) {
   }
 
   if (kind === "education") {
-    return <div className="demo-content-preview relative flex h-[126px] items-end gap-2 overflow-hidden rounded-xl bg-[#EFF6FF] p-3"><span className="absolute left-3 top-3 text-[8px] font-bold tracking-[.12em] text-[#2563EB]">ILLUSTRATIVE FORMAT</span>{[["01", "Start here"], ["02", "Keep it clear"], ["03", "Use it today"]].map(([number, label], index) => <div key={number} className="relative flex h-[68px] flex-1 flex-col justify-between rounded-lg border border-white bg-white p-2 shadow-[0_6px_12px_rgba(37,99,235,.10)]" style={{ transform: `translateY(${index === 1 ? -8 : index === 2 ? -2 : 0}px)` }}><span className="text-[8px] font-bold text-[#2563EB]">{number}</span><span className="font-serif text-[11px] leading-3 text-[#0B1220]">{label}</span></div>)}</div>;
+    return <div className="demo-content-preview relative h-[140px] overflow-hidden rounded-xl bg-[#EFF6FF] p-3"><span className="absolute left-3 top-3 text-[8px] font-bold tracking-[.12em] text-[#2563EB]">ILLUSTRATIVE FORMAT</span><div className="mt-8 flex items-end gap-2">{[["01", "What makes a facial oil useful?"], ["02", "When to apply it"], ["03", "A simple routine"]].map(([number, label], index) => <div key={number} className="relative flex h-[82px] flex-1 flex-col justify-between overflow-hidden rounded-lg border border-white bg-white p-2 shadow-[0_6px_12px_rgba(37,99,235,.10)]" style={{ transform: `translateY(${index === 1 ? -8 : index === 2 ? -2 : 0}px)` }}><span className="text-[8px] font-bold text-[#2563EB]">{number}</span>{index === 0 && <div className="absolute -right-2 -bottom-2 h-11 w-11 opacity-90"><GlowOilIllustration /></div>}<span className="relative z-10 max-w-[5rem] font-serif text-[10px] leading-3 text-[#0B1220]">{label}</span></div>)}</div></div>;
   }
 
-  return <div className="demo-content-preview relative overflow-hidden rounded-xl border border-[#DCE6F2] bg-white p-3"><span className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-[#EFF6FF] text-[#2563EB]"><CheckCircle2 className="h-4 w-4" /></span><p className="text-[8px] font-bold tracking-[.12em] text-[#2563EB]">ILLUSTRATIVE FORMAT</p><p className="mt-3 max-w-[13rem] font-serif text-xl leading-tight text-[#0B1220]">What customers should know before they choose.</p><div className="mt-3 flex gap-1.5"><span className="h-1.5 w-12 rounded-full bg-[#2563EB]" /><span className="h-1.5 w-7 rounded-full bg-[#BFDBFE]" /><span className="h-1.5 w-10 rounded-full bg-[#DBEAFE]" /></div></div>;
+  return <div className="demo-content-preview relative overflow-hidden rounded-xl border border-[#DCE6F2] bg-white p-3"><span className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-[#EFF6FF] text-[#2563EB]"><CheckCircle2 className="h-4 w-4" /></span><p className="text-[8px] font-bold tracking-[.12em] text-[#2563EB]">ILLUSTRATIVE FORMAT</p><div className="mt-3 flex items-center gap-2"><div className="h-14 w-14 shrink-0 rounded-xl bg-[#321A2A] p-1"><GlowOilIllustration dark /></div><p className="max-w-[10rem] font-serif text-lg leading-tight text-[#0B1220]">What customers should know before they choose.</p></div><div className="mt-3 flex gap-1.5"><span className="h-1.5 w-12 rounded-full bg-[#2563EB]" /><span className="h-1.5 w-7 rounded-full bg-[#BFDBFE]" /><span className="h-1.5 w-10 rounded-full bg-[#DBEAFE]" /></div></div>;
 }
 
 export function ContentSystemGraphic() {

@@ -318,3 +318,6 @@
 - [x] Prepare approval-only original ViraSquare logo directions and concise brand-copy options before changing live identity assets.
 - [x] Define the Brand and Trust Foundation required for Group 4, including public-facing brand copy and future legal/support requirements.
 - [x] Prepare and deliver a concise project summary of completed ViraSquare work, active decisions, deferred work, and recommended next steps.
+- [ ] Evaluate the user-shared V-and-square logo concept, select the original geometric direction, and define an appropriate similarity-review process before any live brand change.
+- [ ] Prepare approval-only original flat-vector ViraSquare Core Mark refinements with a restrained signal square and an integrated square container.
+- [x] Prepare approval-only original flat-vector ViraSquare Core Mark refinements with a restrained signal square and an integrated square container.

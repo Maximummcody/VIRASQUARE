@@ -39,3 +39,17 @@ Meta's current Instagram app setup documentation says that a business verified c
 ## Important legal note
 
 The chosen logo concept should undergo a professional trademark and availability review in the markets ViraSquare will serve before public launch. This document is not legal advice.
+
+## Trademark similarity-review note
+
+The user-shared glossy V-and-square board is a direction reference only, not a final asset. Before selecting a final ViraSquare mark, review the proposed wordmark and the prominent visual elements separately, including the V shape, square/container relationship, any detached square element, and the product/service categories. The USPTO explains that a useful clearance search looks for marks that may be identical or similar in wording or design and may create customer confusion. It identifies design elements through six-digit design search codes and says similarity can include visual appearance, sound, meaning, or overall commercial impression. This internal review should reduce obvious risk only; a qualified trademark professional should review any final filing or launch-critical decision.
+
+| Source | URL |
+|---|---|
+| USPTO: Search our trademark database | https://www.uspto.gov/trademarks/search |
+| USPTO: Design search codes | https://www.uspto.gov/trademarks/search/design-search-codes |
+| USPTO Trademark Search | https://tmsearch.uspto.gov/ |
+
+## Core Mark refinement review
+
+Two approval-only, original flat-vector refinements were prepared on 27 August 2026. **Signal Square** uses a navy rounded-square field, a high-contrast V, and one detached electric-blue square. It is the clearer icon candidate and remains legible as a standalone mark. **Integrated Square** uses an electric-blue rounded-square container with a V and integrated square detail. It expresses the V-and-square concept more literally but has more small elements and needs further simplification before favicon use. Both concepts are intentionally flat and avoid the glossy rendering, decorative gradients, or AI-art treatment in the user-shared reference board.

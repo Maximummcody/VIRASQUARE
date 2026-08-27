@@ -7,8 +7,11 @@ import superjson from "superjson";
 import App from "./App";
 import { startLogin } from "./const";
 import "./index.css";
+import { VIRA_QUERY_DEFAULTS } from "./lib/queryDefaults";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: VIRA_QUERY_DEFAULTS,
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

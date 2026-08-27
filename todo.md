@@ -301,3 +301,7 @@
 - [x] Group 3: Add one calm feedback-informed next-best action without changing plans, posts, products, or generated output automatically.
 - [x] Group 3: Add regression coverage, validate responsive behavior, checkpoint, and synchronize the approved foundation.
 - [x] Group 3 acceptance test: confirm the optional What worked? feedback is clear, non-intrusive, and treated only as owner-confirmed learning for future suggestions.
+- [x] Assess and prioritize only the highest-value current-product polish and differentiation opportunities before approving another implementation change.
+- [x] Perform a low-risk speed and reliability pass across ViraSquare without changing current workflows, content quality rules, or visual system.
+- [x] Preserve all existing content quality, product truth, flyer detail, selling-package value, visual output, and workflow behavior throughout the speed and reliability pass.
+- [x] Verify, checkpoint, and synchronize the approved speed and reliability improvements.

@@ -325,3 +325,7 @@
 - [ ] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
 - [x] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
 - [x] Complete the public landing page Navy-and-Electric-Blue theme mapping while preserving its message, layout, sign-in path, and product promise.
+- [x] Prepare and deliver an approval-only comparison of the light Signal V alongside a stronger blue-field and white-V refinement, with no live identity change.
+- [x] Create the final Light Signal V vector asset suite, including the restrained Navy-and-Electric-Blue ViraSquare wordmark and small-icon variants.
+- [x] Apply the owner-approved Light Signal V identity across public and authenticated ViraSquare logo, icon, favicon, and home-screen surfaces without changing workflows or user-generated output colours.
+- [ ] Add focused branding metadata coverage, verify responsive identity treatments, checkpoint, and synchronize the approved identity rollout.

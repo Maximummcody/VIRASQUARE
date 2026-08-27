@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const projectRoot = resolve(import.meta.dirname, "..");
 
 describe("ViraSquare home-screen metadata", () => {
-  it("defines a standalone Navy web app with the ViraSquare icon sizes", () => {
+  it("defines a standalone Navy web app with the approved Light Signal V icon sizes", () => {
     const manifest = JSON.parse(readFileSync(resolve(projectRoot, "client/public/manifest.webmanifest"), "utf8"));
 
     expect(manifest).toMatchObject({
@@ -18,8 +18,8 @@ describe("ViraSquare home-screen metadata", () => {
       theme_color: "#0B1220",
     });
     expect(manifest.icons).toEqual(expect.arrayContaining([
-      expect.objectContaining({ sizes: "192x192", type: "image/png" }),
-      expect.objectContaining({ sizes: "512x512", type: "image/png" }),
+      expect.objectContaining({ sizes: "192x192", type: "image/png", src: "/manus-storage/virasquare-signal-v-192_ba3ee526.png" }),
+      expect.objectContaining({ sizes: "512x512", type: "image/png", src: "/manus-storage/virasquare-signal-v-512_3e42297f.png" }),
     ]));
   });
 
@@ -30,6 +30,8 @@ describe("ViraSquare home-screen metadata", () => {
     expect(html).toContain('<link rel="manifest" href="/manifest.webmanifest" />');
     expect(html).toContain('name="apple-mobile-web-app-capable" content="yes"');
     expect(html).toContain('name="apple-mobile-web-app-title" content="ViraSquare"');
+    expect(html).toContain('/manus-storage/virasquare-signal-v-32_18a6dba6.png');
+    expect(html).toContain('/manus-storage/virasquare-signal-v-180_93d7f086.png');
     expect(html).toContain('rel="apple-touch-icon" sizes="180x180"');
   });
 });

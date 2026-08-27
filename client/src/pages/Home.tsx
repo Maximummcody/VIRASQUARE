@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ViraSquareLogo } from "@/components/ViraSquareLogo";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,7 @@ const defaultProfile: ProfileForm = { businessName: "", businessType: "", busine
 const CATEGORY_OPTIONS: Array<{ value: ProfileForm["businessCategory"]; label: string; hint: string }> = [{ value: "fashion", label: "Fashion", hint: "Clothes, shoes, bags, and style" }, { value: "accessories", label: "Accessories", hint: "Watches, jewellery, and finishing touches" }, { value: "beauty", label: "Beauty", hint: "Makeup, hair, and beauty products" }, { value: "personal_care", label: "Personal care", hint: "Skincare, wellness, and daily care" }, { value: "other", label: "Something else", hint: "Tell us about your business" }];
 
 function iso(date = new Date()) { const offset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() - offset).toISOString().slice(0, 10); }
-function Logo({ small = false }: { small?: boolean }) { return <div className="flex items-center gap-2.5"><div className={cn("grid place-items-center rounded-[14px] bg-[#0B1220] text-white shadow-sm", small ? "h-8 w-8" : "h-10 w-10")}><span className={cn("font-serif italic", small ? "text-base" : "text-xl")}>v</span></div><span className={cn("font-semibold tracking-[-.04em] text-[#0B1220]", small ? "text-base" : "text-lg")}>virasquare</span></div>; }
+function Logo({ small = false }: { small?: boolean }) { return <ViraSquareLogo small={small} />; }
 function Loading() { return <div className="grid min-h-screen place-items-center bg-[#F5F7FA]"><div className="flex flex-col items-center gap-4"><Logo /><Loader2 className="h-5 w-5 animate-spin text-[#2563EB]" /></div></div>; }
 function Chip({ children, active, onClick }: { children: React.ReactNode; active?: boolean; onClick: () => void }) { return <button type="button" onClick={onClick} className={cn("shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors", active ? "border-[#789866] bg-[#e8f1df] text-[#436536]" : "border-[#dde4d8] bg-white text-[#6b766a] hover:border-[#acbda4]")}>{active && <Check className="mr-1 inline h-3 w-3" />}{children}</button>; }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <div className="grid gap-2"><Label className="text-sm font-semibold text-[#404d41]">{label}</Label>{children}</div>; }

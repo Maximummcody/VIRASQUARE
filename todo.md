@@ -330,3 +330,4 @@
 - [x] Apply the owner-approved Light Signal V identity across public and authenticated ViraSquare logo, icon, favicon, and home-screen surfaces without changing workflows or user-generated output colours.
 - [x] Add focused branding metadata coverage, verify responsive identity treatments, checkpoint, and synchronize the approved identity rollout.
 - [ ] Verify the published Light Signal V identity on the public domain and correct any release or asset-cache mismatch without changing the approved design.
+- [x] Create an approval-only public landing-page strategy that expands ViraSquare’s value presentation, defines a sign-in-oriented footer, and specifies calm purposeful motion before any live redesign.

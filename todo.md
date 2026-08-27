@@ -300,3 +300,4 @@
 - [x] Group 3: Refine the existing optional post-outcome controls into a clearer What worked? feedback moment without forced responses or invented social analytics.
 - [x] Group 3: Add one calm feedback-informed next-best action without changing plans, posts, products, or generated output automatically.
 - [x] Group 3: Add regression coverage, validate responsive behavior, checkpoint, and synchronize the approved foundation.
+- [x] Group 3 acceptance test: confirm the optional What worked? feedback is clear, non-intrusive, and treated only as owner-confirmed learning for future suggestions.

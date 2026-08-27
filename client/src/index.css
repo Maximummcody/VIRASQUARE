@@ -65,7 +65,10 @@
   .font-serif { font-family: "DM Serif Display", Georgia, serif; }
   .eyebrow { font-size: .67rem; line-height: 1rem; font-weight: 700; letter-spacing: .15em; color: #2563EB; }
   .tag { display: inline-flex; align-items: center; gap: .5rem; border: 1px solid #BFDBFE; border-radius: 9999px; background: rgba(255,255,255,.76); padding: .4rem .7rem; font-size: .7rem; font-weight: 700; letter-spacing: .06em; color: #1D4ED8; box-shadow: 0 2px 5px rgba(15,23,42,.04); }
-  .soft-orb { position: absolute; border-radius: 9999px; filter: blur(10px); pointer-events: none; }
+.soft-orb { position: absolute; border-radius: 9999px; filter: blur(10px); pointer-events: none; }
+.landing-theme { background: radial-gradient(circle at 92% 34%, rgba(219,234,254,.78), transparent 23rem), linear-gradient(135deg, #F8FAFC 0%, #F5F7FA 58%, #EFF6FF 100%); }
+.landing-theme .soft-orb { opacity: .75; filter: blur(24px); }
+.landing-theme .landing-preview { box-shadow: 0 26px 70px rgba(37,99,235,.14); }
 }
 
 @media (max-width: 639px) {

@@ -324,3 +324,4 @@
 - [x] Render and deliver a clear labelled PNG comparison board for the two approval-only Core Mark refinements.
 - [ ] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
 - [x] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
+- [x] Complete the public landing page Navy-and-Electric-Blue theme mapping while preserving its message, layout, sign-in path, and product promise.

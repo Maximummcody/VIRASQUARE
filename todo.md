@@ -305,3 +305,6 @@
 - [x] Perform a low-risk speed and reliability pass across ViraSquare without changing current workflows, content quality rules, or visual system.
 - [x] Preserve all existing content quality, product truth, flyer detail, selling-package value, visual output, and workflow behavior throughout the speed and reliability pass.
 - [x] Verify, checkpoint, and synchronize the approved speed and reliability improvements.
+- [x] Add mobile pull-to-refresh to Today using the existing safe top-level refresh pattern.
+- [x] Keep pull-to-refresh limited to Today, Calendar, My Products, and Library; do not add it to Brand forms, review screens, correction fields, or pop-ups.
+- [x] Verify, checkpoint, and synchronize the expanded mobile home-screen refresh behavior.

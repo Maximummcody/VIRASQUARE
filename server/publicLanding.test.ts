@@ -32,6 +32,8 @@ describe("public landing page", () => {
     expect(landing).toContain("<HeroProductTaskCue onStart={onStart} />");
     expect(demos).toContain("MAKE THIS POST");
     expect(landing).toContain("One saved product, three useful content formats.");
+    expect(demos).toContain("Understand its purpose");
+    expect(demos).toContain("absolute -bottom-4 -right-3 h-12 w-12 rounded-full bg-[#DBEAFE]");
   });
 
   it("labels illustrative workspace content and does not introduce fake testimonials or analytics claims", () => {

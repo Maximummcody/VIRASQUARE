@@ -347,3 +347,5 @@
 - [x] Replace the thin public post-blank-page band with a stronger single-action decision bridge that preserves the existing workflow section destination.
 - [x] Align the three public content-flow rails precisely and reuse the illustrative Nura Oil across product, educational, and trust content-format cards without customer claims.
 - [x] Test, visually verify, checkpoint, and synchronize the owner-approved contained public landing-page clarity refinement.
+- [x] Remove the cramped oil illustration from the public educational-content carousel sample and replace it with restrained faded learning cues, preserving the Product Post and Trust Building sample visuals.
+- [x] Test, visually verify, checkpoint, and synchronize the contained educational-carousel cleanup.

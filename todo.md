@@ -349,3 +349,5 @@
 - [x] Test, visually verify, checkpoint, and synchronize the owner-approved contained public landing-page clarity refinement.
 - [x] Remove the cramped oil illustration from the public educational-content carousel sample and replace it with restrained faded learning cues, preserving the Product Post and Trust Building sample visuals.
 - [x] Test, visually verify, checkpoint, and synchronize the contained educational-carousel cleanup.
+- [x] Apply the official ViraSquare slogan, “Know what to post. Create. Grow.”, only in the public footer, onboarding welcome, and browser/share metadata while preserving the existing hero headline and workspace UI.
+- [x] Add focused slogan-placement coverage, verify the public and onboarding treatments, checkpoint, and synchronize the approved slogan rollout.

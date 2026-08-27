@@ -7,6 +7,7 @@ const projectRoot = resolve(import.meta.dirname, "..");
 describe("public landing page", () => {
   const landing = readFileSync(resolve(projectRoot, "client/src/components/PublicLanding.tsx"), "utf8");
   const home = readFileSync(resolve(projectRoot, "client/src/pages/Home.tsx"), "utf8");
+  const publicHtml = readFileSync(resolve(projectRoot, "client/index.html"), "utf8");
 
   it("presents real ViraSquare value and retains the established sign-in entry", () => {
     expect(landing).toContain("Your content, in one clear flow.");
@@ -48,5 +49,13 @@ describe("public landing page", () => {
     expect(landing).toContain("Public pages are being prepared accurately for launch.");
     expect(landing).toContain("A branded support contact is being prepared for launch.");
     expect(landing).toContain("EXPLORE SERVICES");
+  });
+
+  it("places the official slogan only in the approved brand touchpoints", () => {
+    expect(landing).toContain("Know what to post. Create. Grow.");
+    expect(home).toContain("KNOW WHAT TO POST. CREATE. GROW.");
+    expect(publicHtml).toContain("ViraSquare — Know what to post. Create. Grow.");
+    expect(publicHtml).toContain('property="og:title"');
+    expect(landing).toContain("Know what to post.<br /><em");
   });
 });

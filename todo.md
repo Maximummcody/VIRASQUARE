@@ -352,3 +352,4 @@
 - [x] Apply the official ViraSquare slogan, “Know what to post. Create. Grow.”, only in the public footer, onboarding welcome, and browser/share metadata while preserving the existing hero headline and workspace UI.
 - [x] Add focused slogan-placement coverage, verify the public and onboarding treatments, checkpoint, and synchronize the approved slogan rollout.
 - [x] Assess the current Manus-based public sign-in experience and define an approval-only launch-ready customer authentication direction before changing account access.
+- [x] Prepare an approval-only Group 4 plan for secure Instagram and Facebook publishing, calendar scheduling, token protection, failure handling, and the owner’s Meta setup requirements before any implementation begins.

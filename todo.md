@@ -331,3 +331,6 @@
 - [x] Add focused branding metadata coverage, verify responsive identity treatments, checkpoint, and synchronize the approved identity rollout.
 - [ ] Verify the published Light Signal V identity on the public domain and correct any release or asset-cache mismatch without changing the approved design.
 - [x] Create an approval-only public landing-page strategy that expands ViraSquare’s value presentation, defines a sign-in-oriented footer, and specifies calm purposeful motion before any live redesign.
+- [x] Build the approved public landing-page value story, including factual product-flow demonstrations, a practical sign-in-oriented footer, and no implied analytics or invented social proof.
+- [x] Add accessible, restrained landing-page motion and responsive polish without changing the existing sign-in path or authenticated workspace workflows.
+- [x] Add focused landing-page coverage, run full verification, visually review desktop and mobile, checkpoint, and synchronize the approved public-page upgrade.

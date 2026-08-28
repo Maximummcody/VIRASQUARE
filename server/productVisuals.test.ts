@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import sharp from "sharp";
 
 const storage = vi.hoisted(() => ({ storageGetSignedUrl: vi.fn(), storagePut: vi.fn() }));
 const imageProvider = vi.hoisted(() => ({ createOpenAiProductVisual: vi.fn() }));
@@ -7,6 +6,7 @@ const imageProvider = vi.hoisted(() => ({ createOpenAiProductVisual: vi.fn() }))
 vi.mock("./storage", () => storage);
 vi.mock("./openaiImageProvider", () => imageProvider);
 
+import sharp from "sharp";
 import { buildFullProductFlyerPrompt, buildProductFlyerSvg, buildProductVisualPrompt, chooseProductFlyerComposition, prepareEnhancedFlyerForInstagram, renderProductPostCard } from "./visuals";
 
 const brand = { businessName: "Kora Time", businessType: "Accessories", brandVoice: "Warm and clear", primaryColor: "#263327", accentColor: "#EAF2CA", defaultCta: "Send us a message to order.", instagramHandle: "koratime" };
@@ -28,7 +28,7 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(prompt).toContain("normal Generate product-post card route");
   });
 
-  it("allows only restrained creative treatment in the optional AI-enhanced flyer", () => {
+  it("allows only restrained creative treatment in Stylish generation", () => {
     const prompt = buildProductVisualPrompt(product, "stylish");
     expect(prompt).toContain("owner chose the optional AI-enhanced flyer");
     expect(prompt).toContain("background, lighting, crop, and small visual details");
@@ -56,10 +56,10 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(prompt).toContain("Do not invent a different price");
   });
 
-  it("selects a controlled practical flyer for Default and reserves Campaign for Stylish", () => {
-    expect(chooseProductFlyerComposition(product, "standard")).toBe("detail_led");
+  it("selects the product-first real-photo flyer for Default and reserves Campaign for AI-enhanced", () => {
+    expect(chooseProductFlyerComposition(product, "standard")).toBe("photo_feature");
     expect(chooseProductFlyerComposition(product, "stylish")).toBe("campaign");
-    expect(chooseProductFlyerComposition({ ...product, details: null, bestFor: null, choiceReasons: null, price: null, productCategory: "other" }, "standard")).toBe("spotlight");
+    expect(chooseProductFlyerComposition({ ...product, details: null, bestFor: null, choiceReasons: null, price: null, productCategory: "other" }, "standard")).toBe("photo_feature");
   });
 
   it("keeps exact saved product and brand facts inside controlled flyer layouts", () => {
@@ -70,35 +70,38 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(defaultSvg).toContain("Everyday G-Shock");
     expect(defaultSvg).toContain("₦45,000");
     expect(defaultSvg).toContain("@koratime");
-    expect(defaultSvg).toContain("WHY CHOOSE IT");
+    expect(defaultSvg).toContain("REAL PRODUCT • READY TO POST");
     expect(stylishSvg).toContain("STYLED PRODUCT VISUAL");
     expect(stylishSvg).toContain("Everyday G-Shock");
   });
 
-  it("uses the original product photo by default without requesting a generative image edit", async () => {
+  it("keeps the original product photo when GPT Image 2 is unavailable", async () => {
+    imageProvider.createOpenAiProductVisual.mockRejectedValue(new Error("Unavailable"));
+
     const visual = await renderProductPostCard({ brand, product, mode: "standard" });
 
     expect(visual.sourceMode).toBe("product");
-    expect(imageProvider.createOpenAiProductVisual).not.toHaveBeenCalled();
     expect(storage.storagePut).toHaveBeenCalledWith(expect.stringContaining("product-original-"), expect.any(Uint8Array), "image/png");
   });
 
-  it("prepares an AI-enhanced flyer as one strict 1080 by 1350 Instagram image", async () => {
-    const sample = await sharp({ create: { width: 1024, height: 1536, channels: 4, background: "#ffffff" } }).png().toBuffer();
-    const prepared = await prepareEnhancedFlyerForInstagram(sample);
-    const metadata = await sharp(prepared).metadata();
-    expect(metadata.width).toBe(1080);
-    expect(metadata.height).toBe(1350);
-  });
-
-  it("stores an AI-enhanced product visual only after the provider returns a usable image", async () => {
-    const sample = await sharp({ create: { width: 1024, height: 1536, channels: 4, background: "#ffffff" } }).png().toBuffer();
-    imageProvider.createOpenAiProductVisual.mockResolvedValue(sample);
+  it("stores an AI product visual only after the provider returns an image", async () => {
+    imageProvider.createOpenAiProductVisual.mockResolvedValue(await sharp({ create: { width: 1024, height: 1536, channels: 4, background: "#2563eb" } }).png().toBuffer());
 
     const visual = await renderProductPostCard({ brand, product, mode: "stylish" });
 
     expect(visual.sourceMode).toBe("ai_product");
-    expect(imageProvider.createOpenAiProductVisual).toHaveBeenCalledWith(expect.objectContaining({ prompt: expect.stringContaining("optional AI-enhanced flyer") }));
-    expect(storage.storagePut).toHaveBeenCalledWith(expect.stringContaining("product-full-flyer-"), expect.any(Uint8Array), "image/png");
+    expect(imageProvider.createOpenAiProductVisual).toHaveBeenCalledWith(expect.objectContaining({ prompt: expect.stringContaining("owner chose the optional AI-enhanced flyer") }));
+  });
+
+  it("places the complete tall AI-enhanced flyer inside one 1080 by 1350 image without destructive cropping", async () => {
+    const source = await sharp(Buffer.from('<svg width="1024" height="1536"><rect width="1024" height="1536" fill="#ffffff"/><rect width="1024" height="154" fill="#ef4444"/><rect y="1382" width="1024" height="154" fill="#2563eb"/></svg>')).png().toBuffer();
+    const prepared = await prepareEnhancedFlyerForInstagram(source);
+    const metadata = await sharp(prepared).metadata();
+    const topPixel = await sharp(prepared).extract({ left: 540, top: 45, width: 1, height: 1 }).raw().toBuffer();
+    const bottomPixel = await sharp(prepared).extract({ left: 540, top: 1305, width: 1, height: 1 }).raw().toBuffer();
+
+    expect(metadata).toMatchObject({ width: 1080, height: 1350 });
+    expect(topPixel[0]).toBeGreaterThan(topPixel[2]);
+    expect(bottomPixel[2]).toBeGreaterThan(bottomPixel[0]);
   });
 });

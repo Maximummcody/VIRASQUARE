@@ -85,6 +85,7 @@ export const contentItems = mysqlTable("content_items", {
   brief: text("brief").notNull(),
   caption: text("caption"),
   hashtags: text("hashtags"),
+  publishCaptionReviewedAt: timestamp("publishCaptionReviewedAt"),
   carouselSlides: text("carouselSlides"),
   requiresProduct: boolean("requiresProduct").notNull().default(false),
   preparationNote: varchar("preparationNote", { length: 280 }),

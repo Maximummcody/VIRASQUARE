@@ -235,6 +235,22 @@ export async function updateContentLifecycle(userId: number, itemId: number, lif
   return getContentItemById(userId, itemId);
 }
 
+/** Seeds the generated product selling package as the resettable publish-caption baseline. */
+export async function initializeProductPostPublishCaption(userId: number, itemId: number, caption: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(contentItems).set({ caption, hashtags: "[]", publishCaptionReviewedAt: null, updatedAt: new Date() }).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
+  return getContentItemById(userId, itemId);
+}
+
+/** Saves only an owner's final reviewed product-post caption and optional hashtags. */
+export async function updateProductPostPublishCaption(userId: number, itemId: number, caption: string, hashtags: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(contentItems).set({ caption, hashtags, publishCaptionReviewedAt: new Date(), updatedAt: new Date() }).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
+  return getContentItemById(userId, itemId);
+}
+
 export async function attachProductToContent(userId: number, itemId: number, productId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
@@ -319,8 +335,7 @@ export async function consumeSocialOAuthSession(state: string, now = new Date())
   if (!session) return undefined;
   const result = await db.update(socialOAuthSessions).set({ consumedAt: now }).where(and(eq(socialOAuthSessions.id, session.id), isNull(socialOAuthSessions.consumedAt)));
   const affectedRows = Number((result as unknown as [{ affectedRows?: number }])[0]?.affectedRows || 0);
-  if (affectedRows !== 1) return undefined;
-  return { ...session, consumedAt: now };
+  return affectedRows === 1 ? { ...session, consumedAt: now } : undefined;
 }
 
 export async function createSocialPublishAttempt(attempt: Omit<InsertSocialPublishAttempt, "id" | "createdAt" | "updatedAt">) {
@@ -353,13 +368,7 @@ export async function updateSocialPublishAttempt(userId: number, attemptId: numb
 export async function getLatestSocialPublishAttemptForSlide(userId: number, socialAccountId: number, deliverableId: number, visualSlideId: number) {
   const db = await getDb();
   if (!db) return undefined;
-  const rows = await db.select().from(socialPublishAttempts).where(and(
-    eq(socialPublishAttempts.userId, userId),
-    eq(socialPublishAttempts.socialAccountId, socialAccountId),
-    eq(socialPublishAttempts.deliverableId, deliverableId),
-    eq(socialPublishAttempts.visualSlideId, visualSlideId),
-    eq(socialPublishAttempts.platform, "instagram"),
-  )).orderBy(desc(socialPublishAttempts.updatedAt)).limit(1);
+  const rows = await db.select().from(socialPublishAttempts).where(and(eq(socialPublishAttempts.userId, userId), eq(socialPublishAttempts.socialAccountId, socialAccountId), eq(socialPublishAttempts.deliverableId, deliverableId), eq(socialPublishAttempts.visualSlideId, visualSlideId), eq(socialPublishAttempts.platform, "instagram"))).orderBy(desc(socialPublishAttempts.updatedAt)).limit(1);
   return rows[0];
 }
 

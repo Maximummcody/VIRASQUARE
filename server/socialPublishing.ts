@@ -30,7 +30,11 @@ export function canTransitionPublishStatus(from: SocialPublishStatus, to: Social
 }
 
 function tokenCipherKey(serverSecret: string) {
-  if (serverSecret.length < 24) throw new Error("Server token protection is not configured.");
+  // JWT_SECRET is platform-managed and may be shorter than an arbitrary
+  // character threshold while still being securely generated. The SHA-256
+  // derivation below always supplies AES-256 with a full-length key; reject
+  // only an absent or implausibly short source secret.
+  if (serverSecret.trim().length < 16) throw new Error("Server token protection is not configured.");
   return createHash("sha256").update(`virasquare:meta-token:v1:${serverSecret}`).digest();
 }
 

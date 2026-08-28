@@ -36,6 +36,12 @@ describe("Group 4A social publishing safeguards", () => {
     expect(decryptSocialAccessToken(encrypted, secret)).toBe("test-access-token");
   });
 
+  it("accepts a securely generated platform-managed source secret that is shorter than the previous arbitrary threshold", () => {
+    const platformManagedSecret = "1234567890123456789012";
+    const encrypted = encryptSocialAccessToken("test-access-token", platformManagedSecret);
+    expect(decryptSocialAccessToken(encrypted, platformManagedSecret)).toBe("test-access-token");
+  });
+
   it("allows only safe publish status transitions", () => {
     expect(canTransitionPublishStatus("awaiting_confirmation", "publishing")).toBe(true);
     expect(canTransitionPublishStatus("publishing", "published")).toBe(true);

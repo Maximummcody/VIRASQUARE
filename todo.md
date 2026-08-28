@@ -326,3 +326,4 @@
 - [x] Diagnose and repair the reported Group 4A Instagram Login callback 502 without weakening owner-only connection, token-encryption, or no-publish safeguards.
 - [x] Implement server-side owner-confirmed Instagram Publish Now through the connected test account with remote-media validation, idempotent attempts, and no scheduling capability.
 - [x] Add an explicit final confirmation and clear retry-safe publishing status treatment to the existing finished-flyer panel without changing Download, Drafts, archive, feedback, or manual-post actions.
+- [x] Define an approval-only correction for Instagram-safe flyer composition and truthful AI-disclosure handling before enabling Instagram scheduling or changing generation behavior.

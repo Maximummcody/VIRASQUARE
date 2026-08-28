@@ -67,6 +67,9 @@ export const visualGenerationModeValues = ["standard", "stylish"] as const;
 export const visualSlideSourceValues = ["product", "ai_product", "generated", "template"] as const;
 export const productMediaRoleValues = ["primary", "gallery"] as const;
 export const productArchiveStatusValues = ["active", "archived"] as const;
+export const socialPlatformValues = ["instagram", "facebook"] as const;
+export const socialConnectionStatusValues = ["pending", "connected", "needs_reconnect", "disconnected"] as const;
+export const socialPublishStatusValues = ["awaiting_confirmation", "scheduled", "publishing", "published", "failed", "cancelled"] as const;
 
 export const contentItems = mysqlTable("content_items", {
   id: int("id").autoincrement().primaryKey(),
@@ -172,6 +175,78 @@ export const visualSlides = mysqlTable("visual_slides", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => [uniqueIndex("visual_slide_order_idx").on(table.deliverableId, table.slideNumber)]);
 
+export const socialAccounts = mysqlTable("social_accounts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  platform: mysqlEnum("platform", socialPlatformValues).notNull(),
+  externalAccountId: varchar("externalAccountId", { length: 160 }).notNull(),
+  accountName: varchar("accountName", { length: 200 }).notNull(),
+  username: varchar("username", { length: 160 }),
+  linkedPageId: varchar("linkedPageId", { length: 160 }),
+  encryptedAccessToken: text("encryptedAccessToken"),
+  tokenExpiresAt: timestamp("tokenExpiresAt"),
+  grantedScopes: text("grantedScopes"),
+  connectionStatus: mysqlEnum("connectionStatus", socialConnectionStatusValues).notNull().default("pending"),
+  lastErrorCode: varchar("lastErrorCode", { length: 120 }),
+  lastErrorMessage: varchar("lastErrorMessage", { length: 500 }),
+  connectedAt: timestamp("connectedAt"),
+  disconnectedAt: timestamp("disconnectedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("social_account_external_idx").on(table.platform, table.externalAccountId),
+  index("social_account_user_status_idx").on(table.userId, table.connectionStatus),
+]);
+
+export const socialOAuthSessions = mysqlTable("social_oauth_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  platform: mysqlEnum("platform", socialPlatformValues).notNull(),
+  state: varchar("state", { length: 128 }).notNull().unique(),
+  redirectUri: text("redirectUri").notNull(),
+  requestedScopes: text("requestedScopes").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  consumedAt: timestamp("consumedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  index("social_oauth_state_expiry_idx").on(table.state, table.expiresAt),
+  index("social_oauth_user_idx").on(table.userId, table.createdAt),
+]);
+
+export const socialPublishAttempts = mysqlTable("social_publish_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  socialAccountId: int("socialAccountId").references(() => socialAccounts.id, { onDelete: "set null" }),
+  contentItemId: int("contentItemId").references(() => contentItems.id, { onDelete: "set null" }),
+  deliverableId: int("deliverableId").references(() => visualDeliverables.id, { onDelete: "set null" }),
+  visualSlideId: int("visualSlideId").references(() => visualSlides.id, { onDelete: "set null" }),
+  platform: mysqlEnum("platform", socialPlatformValues).notNull(),
+  status: mysqlEnum("status", socialPublishStatusValues).notNull().default("awaiting_confirmation"),
+  captionSnapshot: text("captionSnapshot").notNull(),
+  assetKey: varchar("assetKey", { length: 512 }).notNull(),
+  assetUrl: text("assetUrl").notNull(),
+  isAiGenerated: boolean("isAiGenerated").notNull().default(false),
+  scheduledFor: timestamp("scheduledFor"),
+  scheduledTimeZone: varchar("scheduledTimeZone", { length: 100 }),
+  scheduleCronTaskUid: varchar("scheduleCronTaskUid", { length: 65 }),
+  idempotencyKey: varchar("idempotencyKey", { length: 96 }).notNull(),
+  providerContainerId: varchar("providerContainerId", { length: 180 }),
+  providerPostId: varchar("providerPostId", { length: 180 }),
+  providerPermalink: text("providerPermalink"),
+  failureCode: varchar("failureCode", { length: 120 }),
+  failureMessage: varchar("failureMessage", { length: 700 }),
+  requestedAt: timestamp("requestedAt"),
+  publishedAt: timestamp("publishedAt"),
+  cancelledAt: timestamp("cancelledAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("social_publish_idempotency_idx").on(table.idempotencyKey),
+  index("social_publish_user_status_idx").on(table.userId, table.status, table.createdAt),
+  index("social_publish_schedule_task_idx").on(table.scheduleCronTaskUid),
+  index("social_publish_content_idx").on(table.contentItemId, table.deliverableId),
+]);
+
 export const productSellingPackages = mysqlTable("product_selling_packages", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -199,5 +274,11 @@ export type VisualDeliverable = typeof visualDeliverables.$inferSelect;
 export type InsertVisualDeliverable = typeof visualDeliverables.$inferInsert;
 export type VisualSlide = typeof visualSlides.$inferSelect;
 export type InsertVisualSlide = typeof visualSlides.$inferInsert;
+export type SocialAccount = typeof socialAccounts.$inferSelect;
+export type InsertSocialAccount = typeof socialAccounts.$inferInsert;
+export type SocialOAuthSession = typeof socialOAuthSessions.$inferSelect;
+export type InsertSocialOAuthSession = typeof socialOAuthSessions.$inferInsert;
+export type SocialPublishAttempt = typeof socialPublishAttempts.$inferSelect;
+export type InsertSocialPublishAttempt = typeof socialPublishAttempts.$inferInsert;
 export type ProductSellingPackage = typeof productSellingPackages.$inferSelect;
 export type InsertProductSellingPackage = typeof productSellingPackages.$inferInsert;

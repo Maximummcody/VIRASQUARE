@@ -318,38 +318,8 @@
 - [x] Prepare approval-only original ViraSquare logo directions and concise brand-copy options before changing live identity assets.
 - [x] Define the Brand and Trust Foundation required for Group 4, including public-facing brand copy and future legal/support requirements.
 - [x] Prepare and deliver a concise project summary of completed ViraSquare work, active decisions, deferred work, and recommended next steps.
-- [ ] Evaluate the user-shared V-and-square logo concept, select the original geometric direction, and define an appropriate similarity-review process before any live brand change.
-- [ ] Prepare approval-only original flat-vector ViraSquare Core Mark refinements with a restrained signal square and an integrated square container.
-- [x] Prepare approval-only original flat-vector ViraSquare Core Mark refinements with a restrained signal square and an integrated square container.
-- [x] Render and deliver a clear labelled PNG comparison board for the two approval-only Core Mark refinements.
-- [ ] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
-- [x] Prepare an approval-only light Signal V refinement using electric blue and white with navy as a supporting colour.
-- [x] Complete the public landing page Navy-and-Electric-Blue theme mapping while preserving its message, layout, sign-in path, and product promise.
-- [x] Prepare and deliver an approval-only comparison of the light Signal V alongside a stronger blue-field and white-V refinement, with no live identity change.
-- [x] Create the final Light Signal V vector asset suite, including the restrained Navy-and-Electric-Blue ViraSquare wordmark and small-icon variants.
-- [x] Apply the owner-approved Light Signal V identity across public and authenticated ViraSquare logo, icon, favicon, and home-screen surfaces without changing workflows or user-generated output colours.
-- [x] Add focused branding metadata coverage, verify responsive identity treatments, checkpoint, and synchronize the approved identity rollout.
-- [ ] Verify the published Light Signal V identity on the public domain and correct any release or asset-cache mismatch without changing the approved design.
-- [x] Create an approval-only public landing-page strategy that expands ViraSquare’s value presentation, defines a sign-in-oriented footer, and specifies calm purposeful motion before any live redesign.
-- [x] Build the approved public landing-page value story, including factual product-flow demonstrations, a practical sign-in-oriented footer, and no implied analytics or invented social proof.
-- [x] Add accessible, restrained landing-page motion and responsive polish without changing the existing sign-in path or authenticated workspace workflows.
-- [x] Add focused landing-page coverage, run full verification, visually review desktop and mobile, checkpoint, and synchronize the approved public-page upgrade.
-- [x] Define an approval-only, truthful visual-demonstration layer for the public landing page so key product value is shown rather than only described, without fake outputs or clutter.
-- [x] Add a clearly labelled fictional product-to-post visual demonstration to the existing public product-value section without replacing the current selling-package explanation.
-- [x] Add compact, varied content-format visual previews to the existing Product post, Educational content, and Trust building cards without changing their copy or page order.
-- [x] Add responsive, reduced-motion-safe visual demonstration movement; test, verify, checkpoint, and synchronize the approved landing-page visual upgrade.
-- [x] Define an approval-only refinement that uses a broader practical product demonstration and an optional final-invitation graphic without narrowing or confusing ViraSquare’s offer.
-- [x] Replace the watch-specific landing demo with one labelled fictional practical beauty-product flyer and broad category cues, preserving the existing product-selling-package explanation.
-- [x] Add a compact abstract Direction-to-Visual-to-Reply graphic in the existing final invitation’s unused space without adding a new section or clutter.
-- [x] Test, visually verify, checkpoint, and synchronize the restrained landing-page visual refinement.
-- [x] Define an approval-only refinement for the landing hero, primary action, shared flow-card alignment, content-format examples, and downstream spacing based on owner feedback, without adding clutter or changing core product flows.
-- [x] Make the public hero workspace show an active illustrative Nura Oil product-post task cue without changing the real sign-in action or adding a new panel.
-- [x] Replace the thin public post-blank-page band with a stronger single-action decision bridge that preserves the existing workflow section destination.
-- [x] Align the three public content-flow rails precisely and reuse the illustrative Nura Oil across product, educational, and trust content-format cards without customer claims.
-- [x] Test, visually verify, checkpoint, and synchronize the owner-approved contained public landing-page clarity refinement.
-- [x] Remove the cramped oil illustration from the public educational-content carousel sample and replace it with restrained faded learning cues, preserving the Product Post and Trust Building sample visuals.
-- [x] Test, visually verify, checkpoint, and synchronize the contained educational-carousel cleanup.
-- [x] Apply the official ViraSquare slogan, “Know what to post. Create. Grow.”, only in the public footer, onboarding welcome, and browser/share metadata while preserving the existing hero headline and workspace UI.
-- [x] Add focused slogan-placement coverage, verify the public and onboarding treatments, checkpoint, and synchronize the approved slogan rollout.
-- [x] Assess the current Manus-based public sign-in experience and define an approval-only launch-ready customer authentication direction before changing account access.
-- [x] Prepare an approval-only Group 4 plan for secure Instagram and Facebook publishing, calendar scheduling, token protection, failure handling, and the owner’s Meta setup requirements before any implementation begins.
+- [x] Add the Group 4A secure social-account and publish-attempt data foundation, including future scheduling fields and idempotency protections, without enabling scheduled posting or Facebook publishing.
+- [x] Add an owner-confirmed Instagram Publish Now entry point to ready visual content while preserving Download, Drafts, manual Mark as posted, archive, and feedback flows.
+- [ ] Connect and test only an owner-provided Meta test Instagram Professional account; do not connect or publish to a real customer account.
+- [ ] Verify direct Instagram publishing, record clear status and failure states, then checkpoint and synchronize before discussing Instagram scheduling or Facebook Page publishing.
+- [ ] Align the preliminary Group 4A connection foundation with Meta’s Instagram Login route for test Instagram Professional accounts, while keeping Facebook Page publishing deferred and unenabled.

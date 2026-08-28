@@ -9,6 +9,7 @@ import { renderCarouselSlide, renderProductPostCard, renderProductVisual, type P
 import { generateProductSellingPackage } from "../productSellingPackage";
 import { protectedProcedure, router } from "../_core/trpc";
 import { buildOwnerLearningMemory } from "../businessMemory";
+import { buildInstagramAuthorizeUrl, createOAuthState, getInstagramLoginConfig, GROUP4A_INSTAGRAM_SCOPES, publicSocialAccount } from "../socialPublishing";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const contentFormatSchema = z.enum(["caption", "carousel", "tip", "promo", "story"]);
@@ -116,6 +117,35 @@ export const viraSquareRouter = router({
   visuals: protectedProcedure.query(({ ctx }) => db.listVisualDeliverablesByUserId(ctx.user.id)),
   library: protectedProcedure.query(({ ctx }) => db.listContentLibrary(ctx.user.id)),
   activity: protectedProcedure.query(({ ctx }) => db.listContentActivity(ctx.user.id)),
+  socialPublishing: protectedProcedure.query(async ({ ctx }) => {
+    const [accounts, attempts] = await Promise.all([db.listSocialAccountsByUserId(ctx.user.id), db.listSocialPublishAttemptsByUserId(ctx.user.id, 12)]);
+    const instagram = accounts.find(account => account.platform === "instagram");
+    return {
+      instagram: {
+        configured: getInstagramLoginConfig().configured,
+        account: instagram ? publicSocialAccount(instagram) : null,
+      },
+      recentAttempts: attempts.map(attempt => ({
+        id: attempt.id,
+        deliverableId: attempt.deliverableId,
+        status: attempt.status,
+        platform: attempt.platform,
+        scheduledFor: attempt.scheduledFor,
+        publishedAt: attempt.publishedAt,
+        failureCode: attempt.failureCode,
+        failureMessage: attempt.failureMessage,
+        providerPermalink: attempt.providerPermalink,
+      })),
+    };
+  }),
+  beginInstagramConnection: protectedProcedure.mutation(async ({ ctx }) => {
+    const config = getInstagramLoginConfig();
+    if (!config.configured) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Instagram test connection is not configured yet. Complete the secure Meta test setup first." });
+    const state = createOAuthState();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await db.createSocialOAuthSession({ userId: ctx.user.id, platform: "instagram", state, redirectUri: config.redirectUri, requestedScopes: JSON.stringify(GROUP4A_INSTAGRAM_SCOPES), expiresAt });
+    return { authorizeUrl: buildInstagramAuthorizeUrl({ appId: config.appId, redirectUri: config.redirectUri, state }) };
+  }),
   ownerLearning: protectedProcedure.query(async ({ ctx }) => buildOwnerLearningMemory(await db.listOwnerConfirmedFeedback(ctx.user.id))),
   recordPostFeedback: protectedProcedure.input(z.object({ itemId: z.number().int().positive(), outcome: z.enum(["conversations", "orders", "engagement", "profile_visits", "nothing_yet"]), note: z.string().trim().max(600).optional() })).mutation(async ({ ctx, input }) => {
     const item = await db.getContentItemById(ctx.user.id, input.itemId);

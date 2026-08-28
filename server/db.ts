@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   businessProfiles,
@@ -8,6 +8,9 @@ import {
   productMedia,
   productSellingPackages,
   products,
+  socialAccounts,
+  socialOAuthSessions,
+  socialPublishAttempts,
   visualDeliverables,
   visualSlides,
   type InsertBusinessProfile,
@@ -16,6 +19,9 @@ import {
   type InsertProductMedia,
   type InsertProductSellingPackage,
   type InsertProduct,
+  type InsertSocialAccount,
+  type InsertSocialOAuthSession,
+  type InsertSocialPublishAttempt,
   type InsertUser,
   type InsertVisualDeliverable,
   type InsertVisualSlide,
@@ -246,6 +252,102 @@ export async function listContentActivity(userId: number, limit = 80) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(contentActivityEvents).where(eq(contentActivityEvents.userId, userId)).orderBy(desc(contentActivityEvents.createdAt)).limit(limit);
+}
+
+export async function listSocialAccountsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialAccounts).where(eq(socialAccounts.userId, userId)).orderBy(desc(socialAccounts.updatedAt));
+}
+
+export async function getSocialAccountById(userId: number, accountId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(socialAccounts).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.userId, userId))).limit(1);
+  return rows[0];
+}
+
+export async function getSocialAccountByExternalId(platform: InsertSocialAccount["platform"], externalAccountId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(socialAccounts).where(and(eq(socialAccounts.platform, platform), eq(socialAccounts.externalAccountId, externalAccountId))).limit(1);
+  return rows[0];
+}
+
+export async function saveConnectedSocialAccount(account: Omit<InsertSocialAccount, "id" | "createdAt" | "updatedAt">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const existing = await getSocialAccountByExternalId(account.platform, account.externalAccountId);
+  if (existing && existing.userId !== account.userId) throw new Error("This social account is already connected to another ViraSquare workspace.");
+  if (existing) {
+    await db.update(socialAccounts).set({
+      accountName: account.accountName,
+      username: account.username ?? null,
+      linkedPageId: account.linkedPageId ?? null,
+      encryptedAccessToken: account.encryptedAccessToken ?? null,
+      tokenExpiresAt: account.tokenExpiresAt ?? null,
+      grantedScopes: account.grantedScopes ?? null,
+      connectionStatus: account.connectionStatus,
+      lastErrorCode: null,
+      lastErrorMessage: null,
+      connectedAt: account.connectedAt ?? new Date(),
+      disconnectedAt: null,
+      updatedAt: new Date(),
+    }).where(eq(socialAccounts.id, existing.id));
+    return getSocialAccountById(account.userId, existing.id);
+  }
+  const result = await db.insert(socialAccounts).values(account);
+  return getSocialAccountById(account.userId, Number(result[0].insertId));
+}
+
+export async function createSocialOAuthSession(session: Omit<InsertSocialOAuthSession, "id" | "createdAt" | "consumedAt">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.insert(socialOAuthSessions).values(session);
+  const rows = await db.select().from(socialOAuthSessions).where(eq(socialOAuthSessions.state, session.state)).limit(1);
+  const saved = rows[0];
+  if (!saved) throw new Error("The connection request could not be saved.");
+  return saved;
+}
+
+/** Marks a valid OAuth state used atomically so a callback cannot be replayed. */
+export async function consumeSocialOAuthSession(state: string, now = new Date()) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const rows = await db.select().from(socialOAuthSessions).where(and(eq(socialOAuthSessions.state, state), isNull(socialOAuthSessions.consumedAt), gt(socialOAuthSessions.expiresAt, now))).limit(1);
+  const session = rows[0];
+  if (!session) return undefined;
+  const result = await db.update(socialOAuthSessions).set({ consumedAt: now }).where(and(eq(socialOAuthSessions.id, session.id), isNull(socialOAuthSessions.consumedAt)));
+  const affectedRows = Number((result as unknown as [{ affectedRows?: number }])[0]?.affectedRows || 0);
+  if (affectedRows !== 1) return undefined;
+  return { ...session, consumedAt: now };
+}
+
+export async function createSocialPublishAttempt(attempt: Omit<InsertSocialPublishAttempt, "id" | "createdAt" | "updatedAt">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const result = await db.insert(socialPublishAttempts).values(attempt);
+  return getSocialPublishAttemptById(attempt.userId, Number(result[0].insertId));
+}
+
+export async function getSocialPublishAttemptById(userId: number, attemptId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(socialPublishAttempts).where(and(eq(socialPublishAttempts.userId, userId), eq(socialPublishAttempts.id, attemptId))).limit(1);
+  return rows[0];
+}
+
+export async function listSocialPublishAttemptsByUserId(userId: number, limit = 80) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialPublishAttempts).where(eq(socialPublishAttempts.userId, userId)).orderBy(desc(socialPublishAttempts.updatedAt)).limit(limit);
+}
+
+export async function updateSocialPublishAttempt(userId: number, attemptId: number, updates: Partial<Pick<InsertSocialPublishAttempt, "status" | "providerContainerId" | "providerPostId" | "providerPermalink" | "failureCode" | "failureMessage" | "requestedAt" | "publishedAt" | "cancelledAt" | "scheduleCronTaskUid">>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(socialPublishAttempts).set({ ...updates, updatedAt: new Date() }).where(and(eq(socialPublishAttempts.userId, userId), eq(socialPublishAttempts.id, attemptId)));
+  return getSocialPublishAttemptById(userId, attemptId);
 }
 
 export async function setContentCompletion(userId: number, itemId: number, completed: boolean) {

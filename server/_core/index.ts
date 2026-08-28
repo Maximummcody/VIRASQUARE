@@ -10,6 +10,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import * as db from "../db";
 import { expireArchivedProducts } from "../productArchiveExpiry";
+import { registerInstagramLoginRoutes } from "../instagramLoginRoutes";
 import { sdk } from "./sdk";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -39,6 +40,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  registerInstagramLoginRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

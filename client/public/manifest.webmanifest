@@ -10,13 +10,13 @@
   "theme_color": "#0B1220",
   "icons": [
     {
-      "src": "/manus-storage/virasquare-signal-v-192_ba3ee526.png",
+      "src": "/manus-storage/virasquare-icon-192_a113be22.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/manus-storage/virasquare-signal-v-512_3e42297f.png",
+      "src": "/manus-storage/virasquare-icon-512_3c0d9348.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

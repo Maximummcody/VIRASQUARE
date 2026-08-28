@@ -44,6 +44,14 @@ The proposed strict 4:5 design system is **1080 × 1350**. It reserves a minimum
 
 Instagram scheduling should stay paused until the owner selects a flyer direction and we prove that newly generated 4:5 output reads correctly in an actual Instagram test post. The successful Publish Now transport is retained and will be used only after the owner approves a new sample.
 
+## Quality-preserving default recommendation
+
+The owner prefers the visual quality and flexible polish of the existing GPT Image 2 route. Therefore, **Enhanced Flyer should remain the default**. Changing the default to a deterministic Real Photo Flyer would improve exact photo preservation but would make the first experience feel more template-led and less visually capable.
+
+The safer quality-first change is to keep GPT Image 2 as the normal route, but correct the output pipeline: request a controlled 4:5 composition, require all important content inside a protected central artboard, then prepare a final 1080 × 1350 JPEG before sending it to Instagram. The intentional protected margin absorbs the crop from the model’s taller native canvas, while the final published image preserves the polished generated composition.
+
+Real Photo Flyer remains a clearly named **optional** route for owners who want no generative image alteration. It should not replace Enhanced Flyer as the default. Stylish Flyer also remains optional and honestly disclosed.
+
 ## References
 
 [1] [Meta for Developers, *Instagram Content Publishing* (updated June 30, 2026)](https://developers.facebook.com/documentation/instagram-platform/content-publishing)

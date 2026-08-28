@@ -327,3 +327,8 @@
 - [x] Implement server-side owner-confirmed Instagram Publish Now through the connected test account with remote-media validation, idempotent attempts, and no scheduling capability.
 - [x] Add an explicit final confirmation and clear retry-safe publishing status treatment to the existing finished-flyer panel without changing Download, Drafts, archive, feedback, or manual-post actions.
 - [x] Define an approval-only correction for Instagram-safe flyer composition and truthful AI-disclosure handling before enabling Instagram scheduling or changing generation behavior.
+- [x] Define an approval-only quality-preserving default flyer choice that keeps the GPT Image 2 output the owner values while offering a truthful Real Photo alternative and correcting Instagram-safe composition.
+- [x] Make the normal product-flyer route render a professional real-photo default that preserves the owner’s original product image and verified facts without a generative image edit.
+- [x] Replace the existing Stylish option with a clearly named optional AI-enhanced flyer choice that states which visual elements may change and is truthfully disclosed when published to Instagram.
+- [x] Apply unambiguous unselected and selected option-control styling, then prepare AI-enhanced output inside a protected true 4:5 Instagram-safe crop before publishing.
+- [ ] Add focused coverage, verify default and AI-enhanced routes, run an owner-approved test post of the new format, then checkpoint and synchronize before scheduling work resumes.

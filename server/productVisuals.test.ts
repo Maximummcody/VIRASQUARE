@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import sharp from "sharp";
 
 const storage = vi.hoisted(() => ({ storageGetSignedUrl: vi.fn(), storagePut: vi.fn() }));
 const imageProvider = vi.hoisted(() => ({ createOpenAiProductVisual: vi.fn() }));
@@ -6,7 +7,7 @@ const imageProvider = vi.hoisted(() => ({ createOpenAiProductVisual: vi.fn() }))
 vi.mock("./storage", () => storage);
 vi.mock("./openaiImageProvider", () => imageProvider);
 
-import { buildFullProductFlyerPrompt, buildProductFlyerSvg, buildProductVisualPrompt, chooseProductFlyerComposition, renderProductPostCard } from "./visuals";
+import { buildFullProductFlyerPrompt, buildProductFlyerSvg, buildProductVisualPrompt, chooseProductFlyerComposition, prepareEnhancedFlyerForInstagram, renderProductPostCard } from "./visuals";
 
 const brand = { businessName: "Kora Time", businessType: "Accessories", brandVoice: "Warm and clear", primaryColor: "#263327", accentColor: "#EAF2CA", defaultCta: "Send us a message to order.", instagramHandle: "koratime" };
 const product = { name: "Everyday G-Shock", price: "45000", currency: "NGN", details: "Red resin watch", imageKey: "72/products/watch.jpg", productCategory: "accessories", bestFor: "Workdays and weekends", choiceReasons: "Durable resin strap and easy-to-read face" };
@@ -27,9 +28,9 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(prompt).toContain("normal Generate product-post card route");
   });
 
-  it("allows only restrained creative treatment in Stylish generation", () => {
+  it("allows only restrained creative treatment in the optional AI-enhanced flyer", () => {
     const prompt = buildProductVisualPrompt(product, "stylish");
-    expect(prompt).toContain("owner chose Stylish generation");
+    expect(prompt).toContain("owner chose the optional AI-enhanced flyer");
     expect(prompt).toContain("background, lighting, crop, and small visual details");
     expect(prompt).toContain("never turn the product into a different item");
     expect(prompt).toContain("crowded flyer");
@@ -74,21 +75,30 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(stylishSvg).toContain("Everyday G-Shock");
   });
 
-  it("keeps the original product photo when GPT Image 2 is unavailable", async () => {
-    imageProvider.createOpenAiProductVisual.mockRejectedValue(new Error("Unavailable"));
-
+  it("uses the original product photo by default without requesting a generative image edit", async () => {
     const visual = await renderProductPostCard({ brand, product, mode: "standard" });
 
     expect(visual.sourceMode).toBe("product");
+    expect(imageProvider.createOpenAiProductVisual).not.toHaveBeenCalled();
     expect(storage.storagePut).toHaveBeenCalledWith(expect.stringContaining("product-original-"), expect.any(Uint8Array), "image/png");
   });
 
-  it("stores an AI product visual only after the provider returns an image", async () => {
-    imageProvider.createOpenAiProductVisual.mockResolvedValue(Buffer.from("generated-image"));
+  it("prepares an AI-enhanced flyer as one strict 1080 by 1350 Instagram image", async () => {
+    const sample = await sharp({ create: { width: 1024, height: 1536, channels: 4, background: "#ffffff" } }).png().toBuffer();
+    const prepared = await prepareEnhancedFlyerForInstagram(sample);
+    const metadata = await sharp(prepared).metadata();
+    expect(metadata.width).toBe(1080);
+    expect(metadata.height).toBe(1350);
+  });
+
+  it("stores an AI-enhanced product visual only after the provider returns a usable image", async () => {
+    const sample = await sharp({ create: { width: 1024, height: 1536, channels: 4, background: "#ffffff" } }).png().toBuffer();
+    imageProvider.createOpenAiProductVisual.mockResolvedValue(sample);
 
     const visual = await renderProductPostCard({ brand, product, mode: "stylish" });
 
     expect(visual.sourceMode).toBe("ai_product");
-    expect(imageProvider.createOpenAiProductVisual).toHaveBeenCalledWith(expect.objectContaining({ prompt: expect.stringContaining("owner chose Stylish generation") }));
+    expect(imageProvider.createOpenAiProductVisual).toHaveBeenCalledWith(expect.objectContaining({ prompt: expect.stringContaining("optional AI-enhanced flyer") }));
+    expect(storage.storagePut).toHaveBeenCalledWith(expect.stringContaining("product-full-flyer-"), expect.any(Uint8Array), "image/png");
   });
 });

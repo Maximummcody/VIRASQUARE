@@ -1,5 +1,6 @@
 import { storageGetSignedUrl, storagePut } from "./storage";
 import { Resvg } from "@resvg/resvg-js";
+import sharp from "sharp";
 import { assertRichCardFits, resolvedTemplateFamily } from "./richCardQuality";
 import { createOpenAiProductVisual } from "./openaiImageProvider";
 
@@ -267,26 +268,51 @@ export function buildFullProductFlyerPrompt({ brand, product, mode, correction }
     ? `\n\nThe owner asked to correct this specific issue: "${short(correction.trim(), 360)}". Apply that correction only if it does not conflict with the required saved facts below. Rebuild the entire flyer cleanly; never replace, omit, misspell, or contradict the required text.`
     : "";
   const visualRule = mode === "stylish"
-    ? "The owner chose Stylish generation. Use a more expressive but restrained campaign mood: you may alter the background, lighting, crop, and small visual details. Keep the product recognisable and never create a fantasy scene, an unrelated prop, a fake product feature, or an obvious AI-art effect."
+    ? "The owner chose the optional AI-enhanced flyer. Use a more expressive but restrained campaign mood: you may alter the background, lighting, crop, and small visual details. Keep the product recognisable and never create a fantasy scene, an unrelated prop, a fake product feature, or an obvious AI-art effect."
     : "This is the normal Generate product-post card route. Keep the uploaded product as real, recognisable, and believable as possible. You may clean the background, improve presentation, and create the flyer composition, but do not redesign, replace, add, remove, simplify, or invent product features, labels, packaging, colour, texture, material, quantity, or claims.";
   return `Create ONE complete vertical 4:5 social-media product flyer for a small business. This is a final ready-to-post flyer, not a blank template, a collage, a story, a screenshot, or a mockup. Use the uploaded product image as the product source of truth.\n\nDesign direction: ${flyerDirectionBrief(direction)}.\nBrand mood: ${short(brand.brandVoice || "warm, clear, and credible", 120)}. Use the brand palette as a guide: primary ${brand.primaryColor || "#263327"}, accent ${brand.accentColor || "#EAF2CA"}. The composition must feel like a polished professional flyer someone would willingly post, with one dominant product visual, clear hierarchy, breathing room, and no random filler circles, fake badges, unnecessary decorative objects, or generic AI-flyer clutter.\n\n${visualRule}\n\nRender this exact visible text once, with correct spelling, punctuation, numbers, and hierarchy:\n- Brand name: ${brand.businessName}\n- Product name: ${product.name}\n- Supporting fact: ${productFlyerFact(product)}\n- Price or buying line: ${flyerPrice(product)}\n- Call to action: ${compactCta(brand)}\n${handle ? `- Instagram: ${handle}\n` : ""}\nUse the product name as saved. Do not replace it with generic wording such as "Fashion Handbag for Women." Do not invent a different price, product claim, feature, brand, social handle, or ordering instruction. If a logo asset is not available in the reference image, use a refined brand-name wordmark rather than inventing a fake logo.\n\nThe product must be the main visual focus. Do not add people, hands, extra products, boxes, jewellery, clothing, ingredients, results, props, or text that the owner did not supply.${correctionRule}`;
 }
 export function buildProductVisualPrompt(product: ProductSource, mode: ProductVisualMode) {
   const facts = [product.productCategory && `Category: ${product.productCategory}.`, product.bestFor && `Best for: ${product.bestFor}.`, product.choiceReasons && `Verified reasons to choose it: ${product.choiceReasons}.`, product.details && `Other verified details: ${product.details}.`].filter(Boolean).join("\n");
   const shared = `Use the uploaded image as the product source of truth. The product is ${product.name}. Preserve the exact product shown: its colour, shape, material, texture, pattern, size, quantity, labels, visible markings, and important details must remain real, recognisable, and believable. Do not replace, redesign, remove, add, simplify, or invent any product feature, claim, packaging, accessory, person, hand, or extra product.\n\nSaved facts for context only. Do not render these as text in the image and do not invent beyond them:\n${facts || "No extra facts were supplied."}\n\nCreate a vertical 4:5 product visual with clean breathing room around the product. Do not add words, price, logo, Instagram handle, labels, or call-to-action text. ViraSquare adds exact brand details separately.`;
-  if (mode === "stylish") return `${shared}\n\nThe owner chose Stylish generation. Use restrained campaign-style lighting, a refined setting, and a stronger but believable composition. You may creatively improve the background, lighting, crop, and small visual details, but never turn the product into a different item or an obvious AI illustration, 3D render, fantasy scene, or crowded flyer.`;
+  if (mode === "stylish") return `${shared}\n\nThe owner chose the optional AI-enhanced flyer. Use restrained campaign-style lighting, a refined setting, and a stronger but believable composition. You may creatively improve the background, lighting, crop, and small visual details, but never turn the product into a different item or an obvious AI illustration, 3D render, fantasy scene, or crowded flyer.`;
   return `${shared}\n\nThis is the normal Generate product-post card route. Improve presentation only: clean a distracting background, use natural professional product lighting and realistic shadows, and keep the result like a believable well-shot product photograph. Do not make the product look obviously AI-generated or overly stylised.`;
+}
+
+/**
+ * GPT Image 2 returns a tall 2:3 canvas. Crop only its protected outer working
+ * margin to create the final 4:5 Instagram artboard before the visual is saved.
+ */
+export async function prepareEnhancedFlyerForInstagram(source: Buffer) {
+  const image = sharp(source, { failOn: "error" }).rotate();
+  const metadata = await image.metadata();
+  const width = metadata.width;
+  const height = metadata.height;
+  if (!width || !height) throw new Error("The AI-enhanced flyer did not return a usable image size.");
+
+  const targetRatio = 4 / 5;
+  const sourceRatio = width / height;
+  const cropWidth = sourceRatio > targetRatio ? Math.round(height * targetRatio) : width;
+  const cropHeight = sourceRatio > targetRatio ? height : Math.round(width / targetRatio);
+  const left = Math.max(0, Math.floor((width - cropWidth) / 2));
+  const top = Math.max(0, Math.floor((height - cropHeight) / 2));
+
+  return image
+    .extract({ left, top, width: Math.min(cropWidth, width), height: Math.min(cropHeight, height) })
+    .resize({ width: 1080, height: 1350, fit: "fill" })
+    .png()
+    .toBuffer();
 }
 
 export async function renderProductPostCard({ brand, product, mode, correction }: { brand: Brand; product: ProductSource; mode: ProductVisualMode; correction?: string }) {
   const [sourceImage, renderedBrand] = await Promise.all([imageFromKey(product.imageKey), withBrandLogo(brand)]);
-  try {
-    const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt: buildFullProductFlyerPrompt({ brand: renderedBrand, product, mode, correction }) });
-    const { key: assetKey, url: assetUrl } = await storagePut(`visuals/product-full-flyer-${Date.now()}.png`, generated, "image/png");
-    return { assetKey, assetUrl, sourceMode: "ai_product" as const };
-  } catch {
-    return renderSvg(buildProductFlyerSvg(renderedBrand, product, sourceImage.dataUri, "standard"), `product-original-${Date.now()}`, "product");
-  }
+  if (mode === "standard") return renderSvg(buildProductFlyerSvg(renderedBrand, product, sourceImage.dataUri, "standard"), `product-original-${Date.now()}`, "product");
+
+  const prompt = `${buildFullProductFlyerPrompt({ brand: renderedBrand, product, mode, correction })}\n\nIMPORTANT INSTAGRAM DELIVERY FRAME: GPT Image 2 works on a tall canvas, but ViraSquare will crop the final flyer to 4:5. Keep every essential brand name, product, supporting fact, price, call to action, and Instagram handle inside a centred 4:5 protected artboard. Leave clear, non-essential breathing room above and below that protected area. Keep the brand lockup at least 12% below the top edge and keep the price panel no taller than the lower 18% of the protected artboard.`;
+  const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt });
+  const enhancedFlyer = await prepareEnhancedFlyerForInstagram(generated);
+  const { key: assetKey, url: assetUrl } = await storagePut(`visuals/product-full-flyer-${Date.now()}.png`, enhancedFlyer, "image/png");
+  return { assetKey, assetUrl, sourceMode: "ai_product" as const };
 }
 
 async function withBrandLogo(brand: Brand) { if (!brand.brandLogoKey) return brand; try { return { ...brand, brandLogoDataUri: await dataUriFromKey(brand.brandLogoKey) }; } catch { return brand; } }

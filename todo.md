@@ -337,3 +337,4 @@
 - [x] Add an owner-editable saved publish caption with Save, Cancel, and Reset to the original ViraSquare version; support 3–5 optional removable hashtags based only on saved business and product context.
 - [x] Add an exact final Instagram confirmation review containing the final image, connected account, saved caption, and truthful AI disclosure before an owner-confirmed post.
 - [ ] Verify and checkpoint the recovered source, then confirm the live version serves the approved flyer and caption-review changes before another owner comparison or publish test.
+- [x] Trace and recover the broader approved landing page, Light Signal V identity, favicon, and interface work that the owner reports is absent from the live site, before further feature testing.

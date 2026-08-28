@@ -343,11 +343,24 @@ export async function listSocialPublishAttemptsByUserId(userId: number, limit = 
   return db.select().from(socialPublishAttempts).where(eq(socialPublishAttempts.userId, userId)).orderBy(desc(socialPublishAttempts.updatedAt)).limit(limit);
 }
 
-export async function updateSocialPublishAttempt(userId: number, attemptId: number, updates: Partial<Pick<InsertSocialPublishAttempt, "status" | "providerContainerId" | "providerPostId" | "providerPermalink" | "failureCode" | "failureMessage" | "requestedAt" | "publishedAt" | "cancelledAt" | "scheduleCronTaskUid">>) {
+export async function updateSocialPublishAttempt(userId: number, attemptId: number, updates: Partial<Pick<InsertSocialPublishAttempt, "status" | "assetKey" | "assetUrl" | "providerContainerId" | "providerPostId" | "providerPermalink" | "failureCode" | "failureMessage" | "requestedAt" | "publishedAt" | "cancelledAt" | "scheduleCronTaskUid">>) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
   await db.update(socialPublishAttempts).set({ ...updates, updatedAt: new Date() }).where(and(eq(socialPublishAttempts.userId, userId), eq(socialPublishAttempts.id, attemptId)));
   return getSocialPublishAttemptById(userId, attemptId);
+}
+
+export async function getLatestSocialPublishAttemptForSlide(userId: number, socialAccountId: number, deliverableId: number, visualSlideId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(socialPublishAttempts).where(and(
+    eq(socialPublishAttempts.userId, userId),
+    eq(socialPublishAttempts.socialAccountId, socialAccountId),
+    eq(socialPublishAttempts.deliverableId, deliverableId),
+    eq(socialPublishAttempts.visualSlideId, visualSlideId),
+    eq(socialPublishAttempts.platform, "instagram"),
+  )).orderBy(desc(socialPublishAttempts.updatedAt)).limit(1);
+  return rows[0];
 }
 
 export async function setContentCompletion(userId: number, itemId: number, completed: boolean) {

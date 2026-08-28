@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { trpc } from "@/lib/trpc";
-import { CheckCircle2, Instagram, Loader2, LockKeyhole } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Instagram, Loader2, LockKeyhole, RotateCcw, Send } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 type ReadyVisual = {
@@ -15,6 +17,8 @@ type ReadyVisual = {
  * connected and the server-side Meta request has been verified.
  */
 export function InstagramPublishingPanel({ visual }: { visual: ReadyVisual }) {
+  const utils = trpc.useUtils();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const publishing = trpc.virasquare.socialPublishing.useQuery();
   const beginConnection = trpc.virasquare.beginInstagramConnection.useMutation({
     onSuccess: ({ authorizeUrl }) => window.location.assign(authorizeUrl),
@@ -26,6 +30,18 @@ export function InstagramPublishingPanel({ visual }: { visual: ReadyVisual }) {
   const instagram = publishing.data?.instagram;
   const account = instagram?.account;
   const isConnected = account?.connectionStatus === "connected";
+  const latestAttempt = publishing.data?.recentAttempts.find(attempt => attempt.platform === "instagram" && attempt.deliverableId === visual.id);
+  const publishNow = trpc.virasquare.publishInstagramNow.useMutation({
+    onSuccess: async (result) => {
+      setConfirmOpen(false);
+      await Promise.all([utils.virasquare.socialPublishing.invalidate(), utils.virasquare.activity.invalidate(), utils.virasquare.workspace.invalidate(), utils.virasquare.library.invalidate()]);
+      toast.success(result.alreadyPublished ? "This flyer is already published on Instagram." : "Your flyer has been published on Instagram.");
+    },
+    onError: error => {
+      setConfirmOpen(false);
+      toast.error(error.message);
+    },
+  });
 
   return <section className="mt-4 rounded-2xl border border-[#bfdbfe] bg-[#f5f9ff] p-4">
     <div className="flex items-start gap-3">
@@ -39,7 +55,7 @@ export function InstagramPublishingPanel({ visual }: { visual: ReadyVisual }) {
 
     {publishing.isLoading ? <div className="mt-4 flex items-center gap-2 text-xs text-[#526174]"><Loader2 className="h-4 w-4 animate-spin" />Checking your connection…</div> : isConnected ? <div className="mt-4 rounded-xl border border-[#c8dcf7] bg-white p-3">
       <p className="flex items-center gap-2 text-sm font-semibold text-[#1e3a5f]"><CheckCircle2 className="h-4 w-4 text-[#2563eb]" />Connected as {account?.username ? `@${account.username}` : account?.accountName}</p>
-      <p className="mt-1 text-xs leading-5 text-[#526174]">The final Publish now confirmation becomes available once this test connection has been verified with Meta.</p>
+      {latestAttempt?.status === "published" ? <div className="mt-3 rounded-lg bg-[#eff6ff] p-3"><p className="flex items-center gap-2 text-xs font-semibold text-[#1e3a5f]"><CheckCircle2 className="h-4 w-4 text-[#2563eb]" />Published on Instagram</p>{latestAttempt.providerPermalink && <a className="mt-1 inline-block text-xs font-semibold text-[#2563eb] underline underline-offset-2" href={latestAttempt.providerPermalink} target="_blank" rel="noreferrer">View published post</a>}</div> : latestAttempt?.status === "publishing" ? <div className="mt-3 flex items-center gap-2 rounded-lg bg-[#eff6ff] p-3 text-xs font-semibold text-[#1e3a5f]"><Loader2 className="h-4 w-4 animate-spin text-[#2563eb]" />Instagram is preparing your flyer. Do not submit it again.</div> : <><p className="mt-1 text-xs leading-5 text-[#526174]">Review the final flyer and saved caption above. Publish now sends this exact version to your connected test account.</p>{latestAttempt?.status === "failed" && <div role="alert" className="mt-3 rounded-lg border border-[#f4d4cb] bg-[#fff7f5] p-3 text-xs leading-5 text-[#8a3f2c]"><p className="flex items-center gap-1 font-semibold"><AlertTriangle className="h-3.5 w-3.5" />Instagram did not publish this flyer.</p><p className="mt-1">{latestAttempt.failureMessage || "Nothing was marked as posted. You can review the flyer and try again when ready."}</p></div>}<Button type="button" onClick={() => setConfirmOpen(true)} disabled={publishNow.isPending} className="mt-3 w-full rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] sm:w-auto">{publishNow.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : latestAttempt?.status === "failed" ? <RotateCcw className="mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}{latestAttempt?.status === "failed" ? "Try Publish now again" : "Publish now"}</Button></>}
     </div> : <div className="mt-4 rounded-xl border border-[#c8dcf7] bg-white p-3">
       <p className="text-sm font-semibold text-[#1e3a5f]">Connect an Instagram Professional account</p>
       <p className="mt-1 text-xs leading-5 text-[#526174]">Business or Creator account required. ViraSquare opens Instagram’s secure approval screen and stores the connection on the server, never in your browser.</p>
@@ -50,5 +66,18 @@ export function InstagramPublishingPanel({ visual }: { visual: ReadyVisual }) {
     </div>}
 
     <p className="mt-3 flex items-start gap-2 text-[11px] leading-5 text-[#607187]"><LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#2563eb]" />Test connection only. Scheduled publishing and Facebook Page publishing are intentionally not active yet.</p>
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#2563eb]">FINAL PUBLISH CONFIRMATION</p>
+          <AlertDialogTitle>Publish this flyer to {account?.username ? `@${account.username}` : "Instagram"} now?</AlertDialogTitle>
+          <AlertDialogDescription>This sends the finished flyer and saved ViraSquare caption above to your connected test Instagram Professional account now. It cannot be unsent by ViraSquare. Nothing will be scheduled.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={publishNow.isPending}>Keep reviewing</AlertDialogCancel>
+          <AlertDialogAction disabled={publishNow.isPending} onClick={event => { event.preventDefault(); publishNow.mutate({ deliverableId: visual.id, confirmed: true }); }} className="bg-[#2563eb] hover:bg-[#1d4ed8]">{publishNow.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Instagram className="mr-2 h-4 w-4" />}Publish now</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </section>;
 }

@@ -320,7 +320,9 @@
 - [x] Prepare and deliver a concise project summary of completed ViraSquare work, active decisions, deferred work, and recommended next steps.
 - [x] Add the Group 4A secure social-account and publish-attempt data foundation, including future scheduling fields and idempotency protections, without enabling scheduled posting or Facebook publishing.
 - [x] Add an owner-confirmed Instagram Publish Now entry point to ready visual content while preserving Download, Drafts, manual Mark as posted, archive, and feedback flows.
-- [ ] Connect and test only an owner-provided Meta test Instagram Professional account; do not connect or publish to a real customer account.
+- [x] Connect and test only an owner-provided Meta test Instagram Professional account; do not connect or publish to a real customer account.
 - [ ] Verify direct Instagram publishing, record clear status and failure states, then checkpoint and synchronize before discussing Instagram scheduling or Facebook Page publishing.
 - [x] Align the preliminary Group 4A connection foundation with Meta’s Instagram Login route for test Instagram Professional accounts, while keeping Facebook Page publishing deferred and unenabled.
 - [x] Diagnose and repair the reported Group 4A Instagram Login callback 502 without weakening owner-only connection, token-encryption, or no-publish safeguards.
+- [ ] Implement server-side owner-confirmed Instagram Publish Now through the connected test account with remote-media validation, idempotent attempts, and no scheduling capability.
+- [ ] Add an explicit final confirmation and clear retry-safe publishing status treatment to the existing finished-flyer panel without changing Download, Drafts, archive, feedback, or manual-post actions.

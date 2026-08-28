@@ -9,7 +9,8 @@ import { renderCarouselSlide, renderProductPostCard, renderProductVisual, type P
 import { generateProductSellingPackage } from "../productSellingPackage";
 import { protectedProcedure, router } from "../_core/trpc";
 import { buildOwnerLearningMemory } from "../businessMemory";
-import { buildInstagramAuthorizeUrl, createOAuthState, getInstagramLoginConfig, GROUP4A_INSTAGRAM_SCOPES, publicSocialAccount } from "../socialPublishing";
+import { buildInstagramAuthorizeUrl, createOAuthState, createPublishIdempotencyKey, decryptSocialAccessToken, getInstagramLoginConfig, GROUP4A_INSTAGRAM_SCOPES, publicSocialAccount } from "../socialPublishing";
+import { InstagramPublishError, prepareInstagramJpeg, publishInstagramSingleImage, shouldDiscloseInstagramAiGeneration } from "../instagramPublishing";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const contentFormatSchema = z.enum(["caption", "carousel", "tip", "promo", "story"]);
@@ -145,6 +146,38 @@ export const viraSquareRouter = router({
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await db.createSocialOAuthSession({ userId: ctx.user.id, platform: "instagram", state, redirectUri: config.redirectUri, requestedScopes: JSON.stringify(GROUP4A_INSTAGRAM_SCOPES), expiresAt });
     return { authorizeUrl: buildInstagramAuthorizeUrl({ appId: config.appId, redirectUri: config.redirectUri, state }) };
+  }),
+  publishInstagramNow: protectedProcedure.input(z.object({ deliverableId: z.number().int().positive(), confirmed: z.literal(true) })).mutation(async ({ ctx, input }) => {
+    const [deliverable, accounts] = await Promise.all([db.getVisualDeliverableById(ctx.user.id, input.deliverableId), db.listSocialAccountsByUserId(ctx.user.id)]);
+    if (!deliverable || deliverable.status !== "ready" || deliverable.type !== "single_post") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Open a finished single product flyer before publishing to Instagram." });
+    const slide = deliverable.slides.find(candidate => candidate.slideNumber === 1 && candidate.assetKey && candidate.assetUrl);
+    if (!slide?.assetKey || !slide.assetUrl) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "This finished flyer has no publishable image yet." });
+    const account = accounts.find(candidate => candidate.platform === "instagram" && candidate.connectionStatus === "connected" && candidate.encryptedAccessToken);
+    if (!account?.encryptedAccessToken) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Connect your Instagram Professional account before publishing." });
+    const content = deliverable.contentItemId ? await db.getContentItemById(ctx.user.id, deliverable.contentItemId) : undefined;
+    if (!content?.caption) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "This flyer needs its saved ViraSquare caption before it can be published." });
+
+    const previous = await db.getLatestSocialPublishAttemptForSlide(ctx.user.id, account.id, deliverable.id, slide.id);
+    if (previous?.status === "published") return { attempt: previous, alreadyPublished: true };
+    if (previous?.status === "publishing") throw new TRPCError({ code: "CONFLICT", message: "This flyer is already being sent to Instagram. Refresh in a moment instead of publishing it twice." });
+
+    const idempotencyKey = createPublishIdempotencyKey();
+    const attempt = await db.createSocialPublishAttempt({ userId: ctx.user.id, socialAccountId: account.id, contentItemId: content.id, deliverableId: deliverable.id, visualSlideId: slide.id, platform: "instagram", status: "awaiting_confirmation", captionSnapshot: content.caption, assetKey: slide.assetKey, assetUrl: slide.assetUrl, isAiGenerated: shouldDiscloseInstagramAiGeneration({ sourceMode: slide.sourceMode, generationMode: deliverable.generationMode }), idempotencyKey, scheduledFor: null, scheduledTimeZone: null, scheduleCronTaskUid: null, providerContainerId: null, providerPostId: null, providerPermalink: null, failureCode: null, failureMessage: null, requestedAt: null, publishedAt: null, cancelledAt: null });
+    if (!attempt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "ViraSquare could not prepare the publishing request. Nothing was sent to Instagram." });
+    try {
+      await db.updateSocialPublishAttempt(ctx.user.id, attempt.id, { status: "publishing", requestedAt: new Date() });
+      const prepared = await prepareInstagramJpeg({ userId: ctx.user.id, deliverableId: deliverable.id, sourceAssetKey: slide.assetKey, idempotencyKey });
+      await db.updateSocialPublishAttempt(ctx.user.id, attempt.id, { assetKey: prepared.assetKey, assetUrl: prepared.assetUrl });
+      const provider = await publishInstagramSingleImage({ accountId: account.externalAccountId, accessToken: decryptSocialAccessToken(account.encryptedAccessToken, process.env.JWT_SECRET || ""), publicImageUrl: prepared.publicUrl, caption: content.caption, isAiGenerated: shouldDiscloseInstagramAiGeneration({ sourceMode: slide.sourceMode, generationMode: deliverable.generationMode }) });
+      const saved = await db.updateSocialPublishAttempt(ctx.user.id, attempt.id, { status: "published", providerContainerId: provider.containerId, providerPostId: provider.postId, providerPermalink: provider.permalink, publishedAt: new Date() });
+      await db.updateContentLifecycle(ctx.user.id, content.id, "posted");
+      await db.recordContentActivity({ userId: ctx.user.id, contentItemId: content.id, deliverableId: deliverable.id, eventType: "posted", metadata: JSON.stringify({ source: "instagram_api", socialPublishAttemptId: attempt.id, instagramMediaId: provider.postId, ownerConfirmed: true }) });
+      return { attempt: saved, alreadyPublished: false };
+    } catch (error) {
+      const detail = error instanceof InstagramPublishError ? error : new InstagramPublishError("Instagram could not publish this flyer. Nothing was marked as posted; review the message and try again when ready.", "publish_unavailable");
+      await db.updateSocialPublishAttempt(ctx.user.id, attempt.id, { status: "failed", failureCode: detail.code, failureMessage: detail.message });
+      throw new TRPCError({ code: "BAD_GATEWAY", message: detail.message });
+    }
   }),
   ownerLearning: protectedProcedure.query(async ({ ctx }) => buildOwnerLearningMemory(await db.listOwnerConfirmedFeedback(ctx.user.id))),
   recordPostFeedback: protectedProcedure.input(z.object({ itemId: z.number().int().positive(), outcome: z.enum(["conversations", "orders", "engagement", "profile_visits", "nothing_yet"]), note: z.string().trim().max(600).optional() })).mutation(async ({ ctx, input }) => {

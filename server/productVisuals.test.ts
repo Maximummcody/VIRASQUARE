@@ -56,10 +56,10 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(prompt).toContain("Do not invent a different price");
   });
 
-  it("selects a controlled practical flyer for Default and reserves Campaign for Stylish", () => {
-    expect(chooseProductFlyerComposition(product, "standard")).toBe("detail_led");
+  it("selects the product-first real-photo flyer for Default and reserves Campaign for AI-enhanced", () => {
+    expect(chooseProductFlyerComposition(product, "standard")).toBe("photo_feature");
     expect(chooseProductFlyerComposition(product, "stylish")).toBe("campaign");
-    expect(chooseProductFlyerComposition({ ...product, details: null, bestFor: null, choiceReasons: null, price: null, productCategory: "other" }, "standard")).toBe("spotlight");
+    expect(chooseProductFlyerComposition({ ...product, details: null, bestFor: null, choiceReasons: null, price: null, productCategory: "other" }, "standard")).toBe("photo_feature");
   });
 
   it("keeps exact saved product and brand facts inside controlled flyer layouts", () => {
@@ -70,7 +70,7 @@ describe("approved Group 1 product-visual safeguards", () => {
     expect(defaultSvg).toContain("Everyday G-Shock");
     expect(defaultSvg).toContain("₦45,000");
     expect(defaultSvg).toContain("@koratime");
-    expect(defaultSvg).toContain("WHY CHOOSE IT");
+    expect(defaultSvg).toContain("REAL PRODUCT");
     expect(stylishSvg).toContain("STYLED PRODUCT VISUAL");
     expect(stylishSvg).toContain("Everyday G-Shock");
   });
@@ -89,6 +89,19 @@ describe("approved Group 1 product-visual safeguards", () => {
     const metadata = await sharp(prepared).metadata();
     expect(metadata.width).toBe(1080);
     expect(metadata.height).toBe(1350);
+  });
+
+  it("keeps visual information from both ends of a tall AI-enhanced source", async () => {
+    const source = await sharp({ create: { width: 120, height: 180, channels: 3, background: "#0000ff" } })
+      .composite([{ input: await sharp({ create: { width: 120, height: 90, channels: 3, background: "#ff0000" } }).png().toBuffer(), top: 90, left: 0 }])
+      .png()
+      .toBuffer();
+    const prepared = await prepareEnhancedFlyerForInstagram(source);
+    const pixels = await sharp(prepared).raw().toBuffer({ resolveWithObject: true });
+    const channel = pixels.info.channels;
+    const at = (x: number, y: number, colorChannel: number) => pixels.data[(y * pixels.info.width + x) * channel + colorChannel];
+    expect(at(540, 40, 2)).toBeGreaterThan(170);
+    expect(at(540, 1310, 0)).toBeGreaterThan(170);
   });
 
   it("stores an AI-enhanced product visual only after the provider returns a usable image", async () => {

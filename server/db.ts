@@ -235,6 +235,13 @@ export async function updateContentLifecycle(userId: number, itemId: number, lif
   return getContentItemById(userId, itemId);
 }
 
+export async function updateProductPostPublishCaption(userId: number, itemId: number, caption: string, hashtags: string[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(contentItems).set({ caption, hashtags: JSON.stringify(hashtags), publishCaptionReviewedAt: new Date(), updatedAt: new Date() }).where(and(eq(contentItems.id, itemId), eq(contentItems.userId, userId)));
+  return getContentItemById(userId, itemId);
+}
+
 export async function attachProductToContent(userId: number, itemId: number, productId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");

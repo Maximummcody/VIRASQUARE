@@ -332,3 +332,8 @@
 - [x] Replace the existing Stylish option with a clearly named optional AI-enhanced flyer choice that states which visual elements may change and is truthfully disclosed when published to Instagram.
 - [x] Apply unambiguous unselected and selected option-control styling, then prepare AI-enhanced output inside a protected true 4:5 Instagram-safe crop before publishing.
 - [ ] Add focused coverage, verify default and AI-enhanced routes, run an owner-approved test post of the new format, then checkpoint and synchronize before scheduling work resumes.
+- [x] Refine the Real Photo Flyer into the approved product-first professional layout, retain the stable action below the choices, and use plain positive real-photo and AI-enhanced descriptions.
+- [x] Preserve the complete tall AI-enhanced flyer inside a controlled 4:5 Instagram-ready image without destructive centre-cropping.
+- [x] Add an owner-editable saved publish caption with Save, Cancel, and Reset to the original ViraSquare version; support 3–5 optional removable hashtags based only on saved business and product context.
+- [x] Add an exact final Instagram confirmation review containing the final image, connected account, saved caption, and truthful AI disclosure before an owner-confirmed post.
+- [ ] Verify and checkpoint the recovered source, then confirm the live version serves the approved flyer and caption-review changes before another owner comparison or publish test.

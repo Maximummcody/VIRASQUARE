@@ -7,7 +7,7 @@ import { createOpenAiProductVisual } from "./openaiImageProvider";
 type Brand = { businessName: string; businessType: string; brandVoice: string; primaryColor?: string; accentColor?: string; defaultCta?: string; brandLogoKey?: string | null; brandLogoDataUri?: string; instagramHandle?: string | null; closingSignature?: string | null };
 type ProductSource = { name: string; price: string | null; currency: string; details: string | null; imageKey: string; productCategory?: string | null; bestFor?: string | null; choiceReasons?: string | null; buyerNote?: string | null; categoryDetails?: string | null };
 export type ProductVisualMode = "standard" | "stylish";
-export type ProductFlyerComposition = "spotlight" | "editorial_split" | "detail_led" | "price_led" | "campaign";
+export type ProductFlyerComposition = "photo_feature" | "spotlight" | "editorial_split" | "detail_led" | "price_led" | "campaign";
 export type ProductFlyerDirection = "clean_retail" | "price_spotlight" | "editorial_feature" | "fashion_campaign" | "beauty_story" | "gift_occasion";
 type TemplateFamily = "editorial" | "action" | "comparison" | "explainer" | "conversation";
 type GraphicCue = "care" | "warning" | "choice" | "fit" | "budget" | "process" | "confidence" | "quality" | "style" | "question" | "none";
@@ -197,12 +197,12 @@ function productMeta(brand: Brand, colors: ReturnType<typeof palette>, y: number
 
 export function chooseProductFlyerComposition(product: ProductSource, mode: ProductVisualMode): ProductFlyerComposition {
   if (mode === "stylish") return "campaign";
-  const category = (product.productCategory || "").toLowerCase();
-  const hasDetail = Boolean(product.choiceReasons || product.details || product.categoryDetails);
-  if (/(fashion|clothing|hair|wig|beauty)/.test(category)) return "editorial_split";
-  if (hasDetail) return "detail_led";
-  if (product.price) return "price_led";
-  return "spotlight";
+  return "photo_feature";
+}
+
+function productPhotoFeatureFlyer(brand: Brand, product: ProductSource, image: string) {
+  const colors = palette(brand); const title = wrappedLines(product.name, 27).slice(0, 2); const support = wrappedLines(productSupport(product), 58).slice(0, 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="${colors.soft}"/><rect x="48" y="42" width="984" height="1266" rx="54" fill="${colors.paper}"/>${productBrandLockup(brand, colors)}<rect x="84" y="158" width="912" height="614" rx="42" fill="${colors.accent}" opacity=".4"/>${imageBlock(image, 108, 182, 864, 566, 38)}<rect x="84" y="820" width="912" height="356" rx="38" fill="#F2F5EF"/><text x="130" y="886" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2.2" fill="${colors.sage}">REAL PRODUCT • READY TO POST</text>${textRows(title, 130, 966, 56, colors.ink, 700, 1.05)}${textRows(support, 130, 1084, 25, colors.body, 400, 1.34, "Arial, sans-serif")}<rect x="130" y="1100" width="310" height="68" rx="28" fill="${colors.ink}"/><text x="158" y="1148" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="${colors.accent}">${escapeXml(productPrice(product))}</text>${productMeta(brand, colors, 1262)}</svg>`;
 }
 
 function productSpotlightFlyer(brand: Brand, product: ProductSource, image: string) {
@@ -227,6 +227,7 @@ function productCampaignFlyer(brand: Brand, product: ProductSource, image: strin
 }
 function productSvg({ brand, product, image, mode }: { brand: Brand; product: ProductSource; image: string; mode: ProductVisualMode }) {
   const composition = chooseProductFlyerComposition(product, mode);
+  if (composition === "photo_feature") return productPhotoFeatureFlyer(brand, product, image);
   if (composition === "editorial_split") return productEditorialSplitFlyer(brand, product, image);
   if (composition === "detail_led") return productDetailLedFlyer(brand, product, image);
   if (composition === "price_led") return productPriceLedFlyer(brand, product, image);
@@ -280,35 +281,23 @@ export function buildProductVisualPrompt(product: ProductSource, mode: ProductVi
 }
 
 /**
- * GPT Image 2 returns a tall 2:3 canvas. Crop only its protected outer working
- * margin to create the final 4:5 Instagram artboard before the visual is saved.
+ * Preserve the full tall AI output in a 4:5 Instagram image. A softened
+ * background fills the side area, avoiding a destructive centre crop.
  */
 export async function prepareEnhancedFlyerForInstagram(source: Buffer) {
-  const image = sharp(source, { failOn: "error" }).rotate();
-  const metadata = await image.metadata();
-  const width = metadata.width;
-  const height = metadata.height;
-  if (!width || !height) throw new Error("The AI-enhanced flyer did not return a usable image size.");
-
-  const targetRatio = 4 / 5;
-  const sourceRatio = width / height;
-  const cropWidth = sourceRatio > targetRatio ? Math.round(height * targetRatio) : width;
-  const cropHeight = sourceRatio > targetRatio ? height : Math.round(width / targetRatio);
-  const left = Math.max(0, Math.floor((width - cropWidth) / 2));
-  const top = Math.max(0, Math.floor((height - cropHeight) / 2));
-
-  return image
-    .extract({ left, top, width: Math.min(cropWidth, width), height: Math.min(cropHeight, height) })
-    .resize({ width: 1080, height: 1350, fit: "fill" })
-    .png()
-    .toBuffer();
+  const normalized = await sharp(source, { failOn: "error" }).rotate().png().toBuffer();
+  const metadata = await sharp(normalized).metadata();
+  if (!metadata.width || !metadata.height) throw new Error("The AI-enhanced flyer did not return a usable image size.");
+  const background = await sharp(normalized).resize(1080, 1350, { fit: "cover", position: "centre" }).blur(36).modulate({ brightness: 0.72, saturation: 0.78 }).jpeg({ quality: 88 }).toBuffer();
+  const foreground = await sharp(normalized).resize(1080, 1350, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
+  return sharp(background).composite([{ input: foreground, blend: "over" }]).jpeg({ quality: 92, chromaSubsampling: "4:4:4" }).toBuffer();
 }
 
 export async function renderProductPostCard({ brand, product, mode, correction }: { brand: Brand; product: ProductSource; mode: ProductVisualMode; correction?: string }) {
   const [sourceImage, renderedBrand] = await Promise.all([imageFromKey(product.imageKey), withBrandLogo(brand)]);
   if (mode === "standard") return renderSvg(buildProductFlyerSvg(renderedBrand, product, sourceImage.dataUri, "standard"), `product-original-${Date.now()}`, "product");
 
-  const prompt = `${buildFullProductFlyerPrompt({ brand: renderedBrand, product, mode, correction })}\n\nIMPORTANT INSTAGRAM DELIVERY FRAME: GPT Image 2 works on a tall canvas, but ViraSquare will crop the final flyer to 4:5. Keep every essential brand name, product, supporting fact, price, call to action, and Instagram handle inside a centred 4:5 protected artboard. Leave clear, non-essential breathing room above and below that protected area. Keep the brand lockup at least 12% below the top edge and keep the price panel no taller than the lower 18% of the protected artboard.`;
+  const prompt = `${buildFullProductFlyerPrompt({ brand: renderedBrand, product, mode, correction })}\n\nIMPORTANT INSTAGRAM DELIVERY FRAME: GPT Image 2 works on a tall canvas. ViraSquare will preserve the complete result inside a 4:5 Instagram image without cropping essential content. Keep every essential brand name, product, supporting fact, price, call to action, and Instagram handle comfortably within the central safe area, with calm non-essential breathing room above and below.`;
   const generated = await createOpenAiProductVisual({ image: { bytes: sourceImage.buffer, mimeType: sourceImage.mime, fileName: "product-reference" }, prompt });
   const enhancedFlyer = await prepareEnhancedFlyerForInstagram(generated);
   const { key: assetKey, url: assetUrl } = await storagePut(`visuals/product-full-flyer-${Date.now()}.png`, enhancedFlyer, "image/png");

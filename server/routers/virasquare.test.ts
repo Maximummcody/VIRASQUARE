@@ -22,20 +22,29 @@ const database = vi.hoisted(() => ({
   getVisualDeliverableById: vi.fn(),
   getProductSellingPackage: vi.fn(),
   upsertProductSellingPackage: vi.fn(),
+  updateProductPostPublishCaption: vi.fn(),
   updateProductInviteStatus: vi.fn(),
   getContentItemForDate: vi.fn(),
   updateContentLifecycle: vi.fn(),
   recordContentActivity: vi.fn(),
   attachProductToContent: vi.fn(),
+  listSocialAccountsByUserId: vi.fn(),
+  getLatestSocialPublishAttemptForSlide: vi.fn(),
+  createSocialPublishAttempt: vi.fn(),
+  updateSocialPublishAttempt: vi.fn(),
 }));
 const ai = vi.hoisted(() => ({ generateDailyDraft: vi.fn(), generateIdeas: vi.fn(), generateWeeklyPlan: vi.fn() }));
 const storage = vi.hoisted(() => ({ storagePut: vi.fn() }));
 const sellingPackage = vi.hoisted(() => ({ generateProductSellingPackage: vi.fn() }));
+const social = vi.hoisted(() => ({ buildInstagramAuthorizeUrl: vi.fn(), createOAuthState: vi.fn(), createPublishIdempotencyKey: vi.fn(() => "publish-key"), decryptSocialAccessToken: vi.fn(() => "decrypted-token"), getInstagramLoginConfig: vi.fn(), GROUP4A_INSTAGRAM_SCOPES: [], publicSocialAccount: vi.fn() }));
+const instagram = vi.hoisted(() => ({ InstagramPublishError: class extends Error { constructor(message: string, public code: string) { super(message); } }, prepareInstagramJpeg: vi.fn(), publishInstagramSingleImage: vi.fn(), shouldDiscloseInstagramAiGeneration: vi.fn(() => false) }));
 
 vi.mock("../db", () => database);
 vi.mock("../contentAi", () => ai);
 vi.mock("../storage", () => storage);
 vi.mock("../productSellingPackage", () => sellingPackage);
+vi.mock("../socialPublishing", () => social);
+vi.mock("../instagramPublishing", () => instagram);
 
 import { viraSquareRouter } from "./virasquare";
 
@@ -278,6 +287,48 @@ describe("ViraSquare protected procedures", () => {
 
     await expect(viraSquareRouter.createCaller(context(72)).generateProductSellingPackage({ deliverableId: 502 })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
     expect(sellingPackage.generateProductSellingPackage).not.toHaveBeenCalled();
+  });
+
+  it("saves a reviewed caption and optional hashtags only for the owner’s ready product flyer", async () => {
+    const deliverable = { id: 501, userId: 72, contentItemId: 84, productId: 19, type: "single_post", status: "ready", slides: [] };
+    const content = { id: 84, userId: 72, lifecycleStatus: "generated", caption: "Original caption", hashtags: "[]", publishCaptionReviewedAt: null };
+    database.getVisualDeliverableById.mockResolvedValue(deliverable);
+    database.getContentItemById.mockResolvedValue(content);
+    database.updateProductPostPublishCaption.mockResolvedValue({ ...content, caption: "A saved owner caption.", hashtags: JSON.stringify(["#MirrorBag"]), publishCaptionReviewedAt: new Date() });
+
+    const result = await viraSquareRouter.createCaller(context(72)).updateProductPostCaption({ deliverableId: 501, caption: "A saved owner caption.", hashtags: ["#MirrorBag"] });
+
+    expect(database.updateProductPostPublishCaption).toHaveBeenCalledWith(72, 84, "A saved owner caption.", ["#MirrorBag"]);
+    expect(result.finalCaption).toBe("A saved owner caption.\n\n#MirrorBag");
+  });
+
+  it("refuses a caption update for a non-ready or non-product visual", async () => {
+    database.getVisualDeliverableById.mockResolvedValue({ id: 502, userId: 72, productId: null, type: "carousel", status: "ready", slides: [] });
+
+    await expect(viraSquareRouter.createCaller(context(72)).updateProductPostCaption({ deliverableId: 502, caption: "This should never save.", hashtags: [] })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    expect(database.updateProductPostPublishCaption).not.toHaveBeenCalled();
+  });
+
+  it("snapshots and sends the exact owner-saved caption including selected hashtags", async () => {
+    const deliverable = { id: 501, userId: 72, contentItemId: 84, productId: 19, type: "single_post", status: "ready", title: "Mirror handbag", generationMode: "standard", slides: [{ id: 900, slideNumber: 1, assetKey: "visuals/source.png", assetUrl: "https://storage.example/source.png", sourceMode: "product" }] };
+    const content = { id: 84, userId: 72, requiresProduct: true, lifecycleStatus: "generated", caption: "Mirror handbag for a clean finish. Price: ₦35,000.", hashtags: JSON.stringify(["#MirrorBag", "#AdesCloset"]), publishCaptionReviewedAt: new Date() };
+    const account = { id: 77, userId: 72, platform: "instagram", connectionStatus: "connected", encryptedAccessToken: "encrypted-token", externalAccountId: "instagram-77" };
+    database.getVisualDeliverableById.mockResolvedValue(deliverable);
+    database.listSocialAccountsByUserId.mockResolvedValue([account]);
+    database.getContentItemById.mockResolvedValue(content);
+    database.getProductSellingPackage.mockResolvedValue({ id: 2, caption: "Original ViraSquare caption." });
+    database.getLatestSocialPublishAttemptForSlide.mockResolvedValue(undefined);
+    database.createSocialPublishAttempt.mockResolvedValue({ id: 71, status: "awaiting_confirmation" });
+    database.updateSocialPublishAttempt.mockResolvedValue({ id: 71, status: "published" });
+    instagram.prepareInstagramJpeg.mockResolvedValue({ assetKey: "visuals/instagram.jpg", assetUrl: "https://storage.example/instagram.jpg", publicUrl: "https://storage.example/instagram.jpg" });
+    instagram.publishInstagramSingleImage.mockResolvedValue({ containerId: "container-1", postId: "post-1", permalink: "https://www.instagram.com/p/example/" });
+
+    await viraSquareRouter.createCaller(context(72)).publishInstagramNow({ deliverableId: 501, confirmed: true });
+
+    const exactCaption = `${content.caption}\n\n#MirrorBag #AdesCloset`;
+    expect(database.createSocialPublishAttempt).toHaveBeenCalledWith(expect.objectContaining({ captionSnapshot: exactCaption }));
+    expect(instagram.publishInstagramSingleImage).toHaveBeenCalledWith(expect.objectContaining({ caption: exactCaption }));
+    expect(database.updateContentLifecycle).toHaveBeenCalledWith(72, 84, "posted");
   });
 
   it("creates a separate non-calendar educational carousel linked to the owner’s product post", async () => {

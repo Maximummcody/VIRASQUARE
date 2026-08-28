@@ -318,13 +318,17 @@
 - [x] Prepare approval-only original ViraSquare logo directions and concise brand-copy options before changing live identity assets.
 - [x] Define the Brand and Trust Foundation required for Group 4, including public-facing brand copy and future legal/support requirements.
 - [x] Prepare and deliver a concise project summary of completed ViraSquare work, active decisions, deferred work, and recommended next steps.
-- [ ] Add the Group 4A secure social-account and publish-attempt data foundation, including future scheduling fields and idempotency protections, without enabling scheduled posting or Facebook publishing.
-- [ ] Add an owner-confirmed Instagram Publish Now entry point to ready visual content while preserving Download, Drafts, manual Mark as posted, archive, and feedback flows.
-- [ ] Connect and test only an owner-provided Meta test Instagram Professional account; do not connect or publish to a real customer account.
-- [ ] Verify direct Instagram publishing, record clear status and failure states, then checkpoint and synchronize before discussing Instagram scheduling or Facebook Page publishing.
-- [x] Restore the accepted owner-confirmed Instagram Professional account Publish Now safeguards in the active source, with encrypted server-only tokens, one-time OAuth state, idempotency, explicit confirmation, and no scheduling or Facebook publishing.
-- [x] Replace the rejected narrow real-photo default with a product-first professional flyer, move the stable action below the choices, clarify the optional AI-enhanced choice, and keep review previews uncropped.
-- [x] Preserve every essential part of the tall AI-enhanced result inside a 4:5 Instagram-ready frame without destructive centre-cropping.
-- [x] Add owner-editable saved publish captions with Save, Cancel, Reset to the ViraSquare version, 3–5 optional removable context-only hashtags, and visible full-caption character count.
-- [x] Add an exact final Instagram review showing the finished image, connected account, exact saved caption, and truthful AI disclosure before the owner can publish.
-- [x] Verify the recovered flyer and caption-review changes with focused safeguards, full tests, type check, production build, and desktop/mobile review before requesting an owner comparison test.
+- [x] Add the Group 4A secure social-account and publish-attempt data foundation, including future scheduling fields and idempotency protections, without enabling scheduled posting or Facebook publishing.
+- [x] Add an owner-confirmed Instagram Publish Now entry point to ready visual content while preserving Download, Drafts, manual Mark as posted, archive, and feedback flows.
+- [x] Connect and test only an owner-provided Meta test Instagram Professional account; do not connect or publish to a real customer account.
+- [x] Verify direct Instagram publishing, record clear status and failure states, then checkpoint and synchronize before discussing Instagram scheduling or Facebook Page publishing.
+- [x] Align the preliminary Group 4A connection foundation with Meta’s Instagram Login route for test Instagram Professional accounts, while keeping Facebook Page publishing deferred and unenabled.
+- [x] Diagnose and repair the reported Group 4A Instagram Login callback 502 without weakening owner-only connection, token-encryption, or no-publish safeguards.
+- [x] Implement server-side owner-confirmed Instagram Publish Now through the connected test account with remote-media validation, idempotent attempts, and no scheduling capability.
+- [x] Add an explicit final confirmation and clear retry-safe publishing status treatment to the existing finished-flyer panel without changing Download, Drafts, archive, feedback, or manual-post actions.
+- [x] Define an approval-only correction for Instagram-safe flyer composition and truthful AI-disclosure handling before enabling Instagram scheduling or changing generation behavior.
+- [x] Define an approval-only quality-preserving default flyer choice that keeps the GPT Image 2 output the owner values while offering a truthful Real Photo alternative and correcting Instagram-safe composition.
+- [x] Make the normal product-flyer route render a professional real-photo default that preserves the owner’s original product image and verified facts without a generative image edit.
+- [x] Replace the existing Stylish option with a clearly named optional AI-enhanced flyer choice that states which visual elements may change and is truthfully disclosed when published to Instagram.
+- [x] Apply unambiguous unselected and selected option-control styling, then prepare AI-enhanced output inside a protected true 4:5 Instagram-safe crop before publishing.
+- [ ] Add focused coverage, verify default and AI-enhanced routes, run an owner-approved test post of the new format, then checkpoint and synchronize before scheduling work resumes.
